@@ -4,6 +4,8 @@ import (
     "fmt"
     "math"
     "encoding/json"
+
+    // "reflect"
 )
 
 /*
@@ -26,7 +28,9 @@ type Network struct {
 }
 
 func (n *Node) update() {
-
+    // figure out how to do this
+    // two approaches - all connect all, or a random X number of connections
+    // random would probably be a little less predictable, so probably better to do random
 }
 
 func (n Node) String() string {
@@ -45,9 +49,9 @@ func (net *Network) cycle() {
     net.CurCycle++
 }
 
-func (net Network) print() {
+func (net Network) String() string {
     jsonRep, _ := json.MarshalIndent(net, "", "    ")
-    fmt.Println(string(jsonRep))
+    return string(jsonRep)
 }
 
 func MakeNetwork(input, processing, output, cycles, perLevel int) *Network {
@@ -90,6 +94,6 @@ func main() {
     // input, processing, output, cycles, perLevel
     myNet := MakeNetwork(1, 5, 1, 25, 2)
     myNet.connect()
-    // myNet.cycle()
-    myNet.print()
+    myNet.cycle()
+    fmt.Println(myNet)
 }
