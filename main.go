@@ -47,13 +47,33 @@ func (n Node) String() string {
 
 func (net *Network) connect() {
     // do things?
-    // first connect all "body" nodes to "input"
-    for _, bodyNode := range net.Nodes {
-        bodyNode.Connections = append(bodyNode.Connections, &Connection{
-            Strength: 0.5,
-        })
+    // first connect all "body" level 1 nodes to "input" - DONE
+    // for _, bodyNode := range net.Nodes {
+    //     if bodyNode.Level == 1 {
+    //         for _, inputNode := range net.InputNodes {
+    //             bodyNode.Connections = append(bodyNode.Connections, &Connection{
+    //                 Strength: 0.5,
+    //                 From: inputNode,
+    //             })
+    //         }
+    //     }
+    // }
+    // then connect all "body" nodes to the ones on the same level - WORKING ON
+    for i := 1; i <= net.MaxLevel; i++ {
+        for _, bodyNode := range net.Nodes {
+            if bodyNode.Level == i {
+                for _, otherNode := range net.Nodes {
+                    if otherNode.Level == i && otherNode != bodyNode {
+                        bodyNode.Connections = append(bodyNode.Connections, &Connection{
+                            Strength: 0.5,
+                            From: otherNode,
+                        })
+                    }
+                }
+            }
+        }
     }
-    // then connect all "body" nodes to the ones on the same level
+    // then connect all "body" nodes to level below them
 
     // then connect all "output" nodes to "body"
 
@@ -76,7 +96,7 @@ func MakeNetwork(input, processing, output, cyclesPerLevel, perLevel int) *Netwo
     inputNodes := []*Node{}
     outputNodes := []*Node{}
     for i := 0; i < input; i++ {
-        inputNodes = append(nodes, &Node{
+        inputNodes = append(inputNodes, &Node{
             Value: 0,
             Level: 0,
         })
@@ -109,7 +129,7 @@ func MakeNetwork(input, processing, output, cyclesPerLevel, perLevel int) *Netwo
 
 func main() {
     // input, processing, output, cyclesPerLevel, perLevel
-    myNet := MakeNetwork(1, 5, 1, 25, 2)
+    myNet := MakeNetwork(2, 5, 1, 25, 2)
     myNet.connect()
     // myNet.cycle()
     fmt.Println(myNet)
