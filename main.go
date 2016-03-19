@@ -14,16 +14,16 @@ import (
 */
 
 type Connection struct {
-    Strength float64 `json:"strength"`
-    From *Node       `json:"-"`
-    // To *Node         `json:"-"`
+    Strength float64   `json:"strength"`
+    From *Node         `json:"-"`
+    // To *Node           `json:"-"`
+    HoldingVal float64 `json:"holding"`
 }
 
 type Node struct {
-    Value float64               `json:"value"`  // should this be float32?  idk
+    Value float64                      `json:"value"`  // should this be float32?  idk
     IncomingConnections []*Connection  `json:"connections"`  //which nodes to read from
-    // Level int                   `json:"level"`  // for 
-    Position [3]int             `json:"position"`
+    Position [3]int                    `json:"position"`
 }
 
 type Network struct {
@@ -45,9 +45,39 @@ func (s Stimulus) String() string {
     return string(jsonRep)
 }
 
+func (c Connection) String() string {
+    jsonRep, _ := json.MarshalIndent(c, "", "    ")
+    return string(jsonRep)
+}
+
 func (n *Node) Update() {
-    // figure out how to do this
-    // synapses should strengthen when used and weaken when not - maybe multiply by .9 and 1.1 or something?
+    // fmt.Println("should update")
+    // figure out how to do this?
+    // maybe multiply by avg. of incoming signals?
+    var final float64
+    for _, conn := range n.IncomingConnections {
+        final = final + conn.HoldingVal
+    }
+    final = final / float64(len(n.IncomingConnections))
+    fmt.Println(final)
+}
+
+func (net *Network) Cycle() {
+    // fake concurrency
+    // first, set all the connections based on their nodes
+    for _, node := range net.Nodes {
+        for _, conn := range node.IncomingConnections {
+            conn.HoldingVal = conn.From.Value
+            conn.Strength = conn.Strength * conn.From.Value
+            if conn.Strength < 0.1 {
+                conn.Strength = 0.1
+            }
+        }
+    }
+    // then set all the nodes based on connections
+    for _, node := range net.Nodes {
+        node.Update()
+    }
 }
 
 func (n Node) String() string {
@@ -81,18 +111,11 @@ func (net *Network) Connect() {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
                 node.IncomingConnections = append(node.IncomingConnections, &Connection {
                     From: potConNode,
-                    Strength: 0.5,
+                    Strength: 1,
                 })
             }
         }
     }
-}
-
-func (net *Network) Cycle() {
-    for _, node := range net.Nodes {
-        fmt.Println(node)
-    }
-    net.CurCycle++
 }
 
 func (net Network) String() string {
@@ -107,7 +130,7 @@ func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network
         for j := 1; j <= dimensions[1]; j++ {
             for k := 1; k <= dimensions[2]; k++ {
                 nodes = append(nodes, &Node {
-                    Value: 0,
+                    Value: 1,
                     Position: [3]int{i, j, k},
                 })
             }
@@ -122,15 +145,15 @@ func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network
 
 func main() {
     // input, processing, output, cycles, width, depth, height, perZone
-    myNet := MakeNetwork(2, 2, 1, 25, [3]int{2, 1, 1})
+    myNet := MakeNetwork(2, 2, 1, 25, [3]int{2, 2, 2})
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
-            Position: [3]int{2,1,1},
-            Strength: 0.2,
+            Position: [3]int{1,1,1},
+            Strength: 0.5,
         },
     })
-    // myNet.Cycle()
-    fmt.Println(myNet)
+    myNet.Cycle()
+    // fmt.Println(myNet)
     // fmt.Println(len(myNet.Nodes[13].IncomingConnections))
 }
