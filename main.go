@@ -36,14 +36,18 @@ type Network struct {
 }
 
 type Stimulus struct {
-    Position [3]int
-    Strength float64
+    Position [3]int   `json:"position"`
+    Strength float64  `json:"strength"`
+}
+
+func (s Stimulus) String() string {
+    jsonRep, _ := json.MarshalIndent(s, "", "    ")
+    return string(jsonRep)
 }
 
 func (n *Node) Update() {
     // figure out how to do this
     // synapses should strengthen when used and weaken when not - maybe multiply by .9 and 1.1 or something?
-    // go by levels - so it can kinda radiate outwards
 }
 
 func (n Node) String() string {
@@ -51,14 +55,25 @@ func (n Node) String() string {
     return string(jsonRep)
 }
 
-func (net *Network) Stimulate([]Stimulus) {
-
+func (net *Network) Stimulate(stimuli []Stimulus) {
+    for _, stim := range stimuli {
+        // fmt.Println(stim)
+        var applyTo *Node;
+        for _, node := range net.Nodes {
+            if node.Position == stim.Position {
+                applyTo = node
+                break
+            }
+        }
+        applyTo.Value = stim.Strength
+    }
 }
 
 func ThreeDimDist(p1, p2 [3]int) float64 {
     ans := (p1[0]-p2[0])*(p1[0]-p2[0]) + (p1[1]-p2[1])*(p1[1]-p2[1]) + (p1[2]-p2[2])*(p1[2]-p2[2])
     return math.Sqrt(float64(ans))
 }
+
 func (net *Network) Connect() {
     for _, node := range net.Nodes {
         // get the closest nodes and connect
@@ -71,36 +86,6 @@ func (net *Network) Connect() {
             }
         }
     }
-    // // first connect all "body" level 1 nodes to "input"
-    // for _, bodyNode := range net.Nodes {
-    //     if bodyNode.Level == 1 {
-    //         for _, inputNode := range net.InputNodes {
-    //             bodyNode.Connections = append(bodyNode.Connections, &Connection{
-    //                 Strength: 0.5,
-    //                 From: inputNode,
-    //             })
-    //         }
-    //     }
-    // }
-    // // then connect all "body" nodes to ones close to them
-    // for i := 1; i <= net.MaxLevel; i++ {
-    //     for _, bodyNode := range net.Nodes {
-    //         if bodyNode.Level == i {
-    //             for _, otherNode := range net.Nodes {
-    //                 if otherNode.Level == i && otherNode != bodyNode {
-    //                     bodyNode.Connections = append(bodyNode.Connections, &Connection{
-    //                         Strength: 0.5,
-    //                         From: otherNode,
-    //                     })
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // then connect all "body" nodes to level below them
-
-    // then connect all "output" nodes to "body"
-
 }
 
 func (net *Network) Cycle() {
@@ -117,14 +102,6 @@ func (net Network) String() string {
 
 func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network {
     nodes := []*Node{}
-    // inputNodes := []*Node{}
-    // outputNodes := []*Node{}
-    // for i := 0; i < input; i++ {
-    //     inputNodes = append(inputNodes, &Node{
-    //         Value: 0,
-    //         // Level: 0,
-    //     })
-    // }
     math.Mod(5, 5)
     for i := 1; i <= dimensions[0]; i++ {
         for j := 1; j <= dimensions[1]; j++ {
@@ -136,18 +113,8 @@ func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network
             }
         }
     }
-
-    // for i := 0; i < output; i++ {
-    //     outputNodes = append(outputNodes, &Node{
-    //         Value: 0,
-    //         // Level: curLevel + 1, // change this based on above comment w/leveling
-    //     })
-    // }
     return &Network {
         Nodes: nodes,
-        // InputNodes: inputNodes,
-        // OutputNodes: outputNodes,
-        // MaxLevel: curLevel,
         CurCycle: 0,
         MaxCycles: cycles,
     }
@@ -155,9 +122,15 @@ func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network
 
 func main() {
     // input, processing, output, cycles, width, depth, height, perZone
-    myNet := MakeNetwork(2, 2, 1, 25, [3]int{3, 3, 3})
+    myNet := MakeNetwork(2, 2, 1, 25, [3]int{2, 1, 1})
     myNet.Connect()
+    myNet.Stimulate([]Stimulus{
+        Stimulus{
+            Position: [3]int{2,1,1},
+            Strength: 0.2,
+        },
+    })
     // myNet.Cycle()
-    // fmt.Println(myNet)
+    fmt.Println(myNet)
     // fmt.Println(len(myNet.Nodes[13].IncomingConnections))
 }
