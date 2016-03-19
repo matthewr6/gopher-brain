@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "math"
     "encoding/json"
 )
 
@@ -53,25 +54,27 @@ func MakeNetwork(input, processing, output, cycles, perLevel int) *Network {
     nodes := []*Node{}
     inputNodes := []*Node{}
     outputNodes := []*Node{}
-    for i := 0; i < processing; i++ {
-        nodes = append(nodes, &Node{
+    for i := 0; i < input; i++ {
+        inputNodes = append(nodes, &Node{
             Value: 0,
             Level: 0,
         })
     }
-    baseLevel := 1
-    for i := 0; i < input; i++ {
-        inputNodes = append(inputNodes, &Node{
-            Value: 1,
+    curLevel := 1
+    for i := 1; i <= processing; i++ {
+        nodes = append(nodes, &Node{
+            Value: 0,
             Connections: []*Node{},
-            Level: baseLevel,
+            Level: curLevel,
         })
-        // if i mod perlevel is 0, increase baselevel?
+        if math.Mod(float64(i), float64(perLevel)) == 0 {
+            curLevel++
+        }
     }
     for i := 0; i < output; i++ {
         outputNodes = append(outputNodes, &Node{
             Value: 0,
-            Level: input + 1, // change this based on above comment w/leveling
+            Level: curLevel + 1, // change this based on above comment w/leveling
         })
     }
     return &Network {
@@ -84,8 +87,9 @@ func MakeNetwork(input, processing, output, cycles, perLevel int) *Network {
 }
 
 func main() {
-    myNet := MakeNetwork(5,2,6, 25, 5)
+    // input, processing, output, cycles, perLevel
+    myNet := MakeNetwork(1, 5, 1, 25, 2)
     myNet.connect()
-    myNet.cycle()
-    // myNet.print()
+    // myNet.cycle()
+    myNet.print()
 }
