@@ -144,13 +144,13 @@ func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network
 }
 
 func main() {
-    // input, processing, output, cycles, width, depth, height, perZone
-    myNet := MakeNetwork(2, 2, 1, 25, [3]int{2, 2, 2})
+    // idk, idk, idk, cycles, [width, depth, height]
+    myNet := MakeNetwork(2, 2, 1, 25, [3]int{3, 3, 3})
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
-            Position: [3]int{1,1,1},
-            Strength: 0.5,
+            Position: [3]int{2,2,2},
+            Strength: 5.5,
         },
     })
     myNet.Cycle()
