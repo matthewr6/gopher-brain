@@ -61,9 +61,8 @@ func (n *Node) Update() {
     // or do additive?
     var final float64
     for _, conn := range n.IncomingConnections {
-        final = final + conn.HoldingVal
+        final = final + conn.HoldingVal*conn.Strength
     }
-    final = final / float64(len(n.IncomingConnections))
     n.Value = final
     // fmt.Println(final)
 }
@@ -76,10 +75,13 @@ func (net *Network) Cycle() {
             // figure out a good formula for this
             conn.HoldingVal = conn.From.Value
             conn.Strength = conn.Strength * conn.From.Value
+            // don't let it fizzle out?
             if conn.Strength < 0.1 {
                 conn.Strength = 0.1
             }
         }
+        node.Value = 0
+        // node.Value = node.Value * 0.25 // do this instead?
     }
     // then set all the nodes based on connections
     for _, node := range net.Nodes {
@@ -94,7 +96,6 @@ func (n Node) String() string {
 
 func (net *Network) Stimulate(stimuli []Stimulus) {
     for _, stim := range stimuli {
-        // fmt.Println(stim)
         var applyTo *Node;
         for _, node := range net.Nodes {
             if node.Position == stim.Position {
@@ -119,6 +120,7 @@ func (net *Network) Connect() {
                 node.IncomingConnections = append(node.IncomingConnections, &Connection {
                     From: potConNode,
                     Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
+                    // Strength: rand.Float64()*2, // do random strength - from 0 to 2 or something?
                 })
             }
         }
@@ -165,17 +167,13 @@ func main() {
     start := time.Now()
 
     // [width, depth, height]
-    NETWORK_SIZE := [3]int{25, 25, 25}
+    NETWORK_SIZE := [3]int{3, 3, 3}
     myNet := MakeNetwork(NETWORK_SIZE)
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
             Position: [3]int{1,1,1},
             Strength: 2,
-        },
-        Stimulus{
-            Position: [3]int{18,1,5},
-            Strength: 0.1,
         },
     })
     frames, err := strconv.Atoi(os.Args[1])
