@@ -5,6 +5,7 @@ import (
     "math"
     "math/rand"
     "os"
+    "time"
     "strconv"
     "encoding/json"
 )
@@ -31,9 +32,9 @@ type Network struct {
     // InputNodes []*Node   `json:"inputNodes"`
     Nodes []*Node        `json:"nodes"`
     // OutputNodes []*Node  `json:"outputNodes"`
-    MaxLevel int         `json:"maxLevel"`
-    MaxCycles int        `json:"maxCycles"`
-    CurCycle int         `json:"curCycle"`
+    // MaxLevel int         `json:"maxLevel"`
+    // MaxCycles int        `json:"maxCycles"`
+    // CurCycle int         `json:"curCycle"`
 }
 
 type Stimulus struct {
@@ -135,7 +136,7 @@ func (net Network) DumpJSON(name string) {
     f.Close()
 }
 
-func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network {
+func MakeNetwork(dimensions [3]int) *Network {
     nodes := []*Node{}
     math.Mod(5, 5)
     for i := 1; i <= dimensions[0]; i++ {
@@ -150,8 +151,6 @@ func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network
     }
     return &Network {
         Nodes: nodes,
-        CurCycle: 0,
-        MaxCycles: cycles,
     }
 }
 
@@ -163,9 +162,11 @@ func (net *Network) GenerateAnim(frames int) {
 }
 
 func main() {
-    // idk, idk, idk, cycles, [width, depth, height]
+    start := time.Now()
+
+    // [width, depth, height]
     NETWORK_SIZE := [3]int{25, 25, 25}
-    myNet := MakeNetwork(2, 2, 1, 25, NETWORK_SIZE)
+    myNet := MakeNetwork(NETWORK_SIZE)
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
@@ -177,12 +178,13 @@ func main() {
             Strength: 0.1,
         },
     })
-    myNet.GenerateAnim(10)
-    // myNet.Cycle()
-    // myNet.Cycle()
-    // myNet.Cycle()
-    // myNet.Cycle()
-    // myNet.Cycle()
-    // myNet.Cycle()
-    // myNet.Cycle()
+    frames, err := strconv.Atoi(os.Args[1])
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    myNet.GenerateAnim(frames)
+
+    elapsed := time.Since(start)
+    fmt.Printf("Took %s\n", elapsed)
 }

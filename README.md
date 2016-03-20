@@ -1,5 +1,5 @@
 ### to produce an animation
 
-- `go run main.go`
-- `python display_net.py X`, X being however many cycles/frames
+- `go run main.go X`, X being however many cycles/frames
+- `python display_net.py X`
 - `ffmpeg -framerate Y -i net_%01d.png anim.gif`, Y being fps
