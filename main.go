@@ -1,12 +1,12 @@
 package main
 
 import (
-    // "fmt"
+    "fmt"
     "math"
+    "math/rand"
     "os"
+    "strconv"
     "encoding/json"
-
-    // "reflect"
 )
 
 /*
@@ -57,11 +57,13 @@ func (n *Node) Update() {
     // maybe multiply by avg. of incoming signals?
 
     // do weighted avg based on signal strength?
+    // or do additive?
     var final float64
     for _, conn := range n.IncomingConnections {
         final = final + conn.HoldingVal
     }
     final = final / float64(len(n.IncomingConnections))
+    n.Value = final
     // fmt.Println(final)
 }
 
@@ -70,6 +72,7 @@ func (net *Network) Cycle() {
     // first, set all the connections based on their nodes
     for _, node := range net.Nodes {
         for _, conn := range node.IncomingConnections {
+            // figure out a good formula for this
             conn.HoldingVal = conn.From.Value
             conn.Strength = conn.Strength * conn.From.Value
             if conn.Strength < 0.1 {
@@ -114,7 +117,7 @@ func (net *Network) Connect() {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
                 node.IncomingConnections = append(node.IncomingConnections, &Connection {
                     From: potConNode,
-                    Strength: 1,
+                    Strength: rand.Float64(), // do random strength
                 })
             }
         }
@@ -126,8 +129,8 @@ func (net Network) String() string {
     return string(jsonRep)
 }
 
-func (net Network) DumpJSON() {
-    f, _ := os.Create("./net.json")
+func (net Network) DumpJSON(name string) {
+    f, _ := os.Create(fmt.Sprintf("./net_%v.json", name))
     f.WriteString(net.String())
     f.Close()
 }
@@ -152,6 +155,13 @@ func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network
     }
 }
 
+func (net *Network) GenerateAnim(frames int) {
+    for frame := 0; frame < frames; frame++ {
+        net.DumpJSON(strconv.Itoa(frame))
+        net.Cycle()
+    }
+}
+
 func main() {
     // idk, idk, idk, cycles, [width, depth, height]
     NETWORK_SIZE := [3]int{25, 25, 25}
@@ -159,17 +169,20 @@ func main() {
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
-            Position: [3]int{2,2,2},
-            Strength: 5.5,
+            Position: [3]int{1,1,1},
+            Strength: 2,
+        },
+        Stimulus{
+            Position: [3]int{18,1,5},
+            Strength: 0.1,
         },
     })
-    myNet.Cycle()
-    myNet.Cycle()
-    myNet.Cycle()
-    myNet.Cycle()
-    myNet.Cycle()
-    myNet.Cycle()
-    myNet.Cycle()
-
-    myNet.DumpJSON()
+    myNet.GenerateAnim(10)
+    // myNet.Cycle()
+    // myNet.Cycle()
+    // myNet.Cycle()
+    // myNet.Cycle()
+    // myNet.Cycle()
+    // myNet.Cycle()
+    // myNet.Cycle()
 }

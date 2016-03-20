@@ -1,3 +1,2 @@
 *.exe
-net.json
-net.png
+net_*
