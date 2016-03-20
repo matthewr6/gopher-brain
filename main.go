@@ -117,7 +117,7 @@ func (net *Network) Connect() {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
                 node.IncomingConnections = append(node.IncomingConnections, &Connection {
                     From: potConNode,
-                    Strength: rand.Float64(), // do random strength
+                    Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
                 })
             }
         }
