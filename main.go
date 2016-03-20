@@ -1,8 +1,9 @@
 package main
 
 import (
-    "fmt"
+    // "fmt"
     "math"
+    "os"
     "encoding/json"
 
     // "reflect"
@@ -54,12 +55,14 @@ func (n *Node) Update() {
     // fmt.Println("should update")
     // figure out how to do this?
     // maybe multiply by avg. of incoming signals?
+
+    // do weighted avg based on signal strength?
     var final float64
     for _, conn := range n.IncomingConnections {
         final = final + conn.HoldingVal
     }
     final = final / float64(len(n.IncomingConnections))
-    fmt.Println(final)
+    // fmt.Println(final)
 }
 
 func (net *Network) Cycle() {
@@ -123,6 +126,12 @@ func (net Network) String() string {
     return string(jsonRep)
 }
 
+func (net Network) DumpJSON() {
+    f, _ := os.Create("./net.json")
+    f.WriteString(net.String())
+    f.Close()
+}
+
 func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network {
     nodes := []*Node{}
     math.Mod(5, 5)
@@ -145,7 +154,8 @@ func MakeNetwork(input, perZone, output, cycles int, dimensions [3]int) *Network
 
 func main() {
     // idk, idk, idk, cycles, [width, depth, height]
-    myNet := MakeNetwork(2, 2, 1, 25, [3]int{3, 3, 3})
+    NETWORK_SIZE := [3]int{25, 25, 25}
+    myNet := MakeNetwork(2, 2, 1, 25, NETWORK_SIZE)
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
@@ -154,6 +164,12 @@ func main() {
         },
     })
     myNet.Cycle()
-    // fmt.Println(myNet)
-    // fmt.Println(len(myNet.Nodes[13].IncomingConnections))
+    myNet.Cycle()
+    myNet.Cycle()
+    myNet.Cycle()
+    myNet.Cycle()
+    myNet.Cycle()
+    myNet.Cycle()
+
+    myNet.DumpJSON()
 }
