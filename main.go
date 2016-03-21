@@ -75,8 +75,8 @@ func (net *Network) Cycle() {
             // figure out a good formula for this
             conn.HoldingVal = conn.From.Value
             conn.Strength = conn.Strength * conn.From.Value
-            // don't let it fizzle out?
-            if conn.Strength < 0.1 {
+            // don't let it fizzle out or get too powerful
+            if conn.Strength < 0.1 || conn.Strength > 2 {
                 conn.Strength = 0.1
             }
         }
@@ -119,7 +119,8 @@ func (net *Network) Connect() {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
                 node.IncomingConnections = append(node.IncomingConnections, &Connection {
                     From: potConNode,
-                    Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
+                    // Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
+                    Strength: rand.Float64(), // do random strength - from 0 to 2 or something?
                     // Strength: rand.Float64()*2, // do random strength - from 0 to 2 or something?
                 })
             }
@@ -167,7 +168,7 @@ func main() {
     start := time.Now()
 
     // [width, depth, height]
-    NETWORK_SIZE := [3]int{3, 3, 3}
+    NETWORK_SIZE := [3]int{25, 25, 25}
     myNet := MakeNetwork(NETWORK_SIZE)
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
