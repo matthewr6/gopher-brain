@@ -17,14 +17,15 @@ import (
 
 type Connection struct {
     Strength float64   `json:"strength"`
-    From *Node         `json:"-"`
+    To *Node         `json:"-"`
     // To *Node           `json:"-"`
     HoldingVal float64 `json:"holding"`
 }
 
 type Node struct {
     Value float64                      `json:"value"`  // should this be float32?  idk
-    IncomingConnections []*Connection  `json:"connections"`  //which nodes to read from
+    OutgoingConnections []*Connection  `json:"outgoingConnections"`  //which nodes to read from
+    IncomingConnections []*Connection  `json:"incomingConnections"`  //which nodes to read from
     Position [3]int                    `json:"position"`
 }
 
@@ -53,37 +54,31 @@ func (c Connection) String() string {
 }
 
 func (n *Node) Update() {
-    // fmt.Println("should update")
-    // figure out how to do this?
-    // maybe multiply by avg. of incoming signals?
-
-    // do weighted avg based on signal strength?
-    // or do additive?
+    // TODO - REWORK
     var final float64
     for _, conn := range n.IncomingConnections {
         final = final + conn.HoldingVal*conn.Strength
     }
     n.Value = final
-    // fmt.Println(final)
 }
 
 func (net *Network) Cycle() {
     // fake concurrency
     // first, set all the connections based on their nodes
+
     for _, node := range net.Nodes {
-        for _, conn := range node.IncomingConnections {
-            // figure out a good formula for this
-            conn.HoldingVal = conn.From.Value
-            conn.Strength = conn.Strength * conn.From.Value
-            // don't let it fizzle out or get too powerful
-            if conn.Strength < 0.1 || conn.Strength > 2 {
+        for _, conn := range node.OutgoingConnections {
+            conn.HoldingVal = node.Value
+            conn.Strength = conn.Strength * node.Value
+            if conn.Strength < 0.1 || conn.Strength > 10 { // TWEAK THIS MAX STRENGTH!
                 conn.Strength = 0.1
             }
         }
         node.Value = 0
-        // node.Value = node.Value * 0.25 // do this instead?
     }
+
     // then set all the nodes based on connections
+
     for _, node := range net.Nodes {
         node.Update()
     }
@@ -117,12 +112,15 @@ func (net *Network) Connect() {
         // get the closest nodes and connect
         for _, potConNode := range net.Nodes {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
-                node.IncomingConnections = append(node.IncomingConnections, &Connection {
-                    From: potConNode,
+                newConn := &Connection{
+                    To: potConNode,
                     // Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
                     Strength: rand.Float64(), // do random strength - from 0 to 2 or something?
+                    // Strength: 1,
                     // Strength: rand.Float64()*2, // do random strength - from 0 to 2 or something?
-                })
+                }
+                node.OutgoingConnections = append(node.OutgoingConnections, newConn)
+                potConNode.IncomingConnections = append(potConNode.IncomingConnections, newConn)
             }
         }
     }
@@ -146,7 +144,7 @@ func MakeNetwork(dimensions [3]int) *Network {
         for j := 1; j <= dimensions[1]; j++ {
             for k := 1; k <= dimensions[2]; k++ {
                 nodes = append(nodes, &Node {
-                    Value: 1,
+                    Value: 0,
                     Position: [3]int{i, j, k},
                 })
             }
@@ -168,13 +166,13 @@ func main() {
     start := time.Now()
 
     // [width, depth, height]
-    NETWORK_SIZE := [3]int{25, 25, 25}
+    NETWORK_SIZE := [3]int{15, 15, 15}
     myNet := MakeNetwork(NETWORK_SIZE)
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
             Position: [3]int{1,1,1},
-            Strength: 2,
+            Strength: 5,
         },
     })
     frames, err := strconv.Atoi(os.Args[1])

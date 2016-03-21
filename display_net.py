@@ -48,3 +48,4 @@ for num in range(0, int(sys.argv[1])):
 
 
     plt.savefig('net_{num}.png'.format(num=num))
+    # plt.close()
