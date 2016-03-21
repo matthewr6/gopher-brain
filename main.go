@@ -24,8 +24,8 @@ type Connection struct {
 
 type Node struct {
     Value float64                      `json:"value"`  // should this be float32?  idk
-    OutgoingConnections []*Connection  `json:"outgoingConnections"`  //which nodes to read from
-    IncomingConnections []*Connection  `json:"incomingConnections"`  //which nodes to read from
+    OutgoingConnections []*Connection  `json:"-"`  //which nodes to read from
+    IncomingConnections []*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                    `json:"position"`
 }
 
@@ -59,6 +59,7 @@ func (n *Node) Update() {
     for _, conn := range n.IncomingConnections {
         final = final + conn.HoldingVal*conn.Strength
     }
+    final = final / float64(len(n.IncomingConnections))
     n.Value = final
 }
 
@@ -115,7 +116,7 @@ func (net *Network) Connect() {
                 newConn := &Connection{
                     To: potConNode,
                     // Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
-                    Strength: rand.Float64(), // do random strength - from 0 to 2 or something?
+                    Strength: rand.Float64(), // do random strength
                     // Strength: 1,
                     // Strength: rand.Float64()*2, // do random strength - from 0 to 2 or something?
                 }
@@ -166,7 +167,7 @@ func main() {
     start := time.Now()
 
     // [width, depth, height]
-    NETWORK_SIZE := [3]int{15, 15, 15}
+    NETWORK_SIZE := [3]int{25, 25, 25}
     myNet := MakeNetwork(NETWORK_SIZE)
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
