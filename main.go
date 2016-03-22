@@ -108,12 +108,12 @@ func (net *Network) Cycle() {
     }
 
     // then clear the connections
-    // DO I WANT TO KEEP THIS?
-    // for _, node := range net.Nodes {
-    //     for _, conn := range node.OutgoingConnections {
-    //         conn.HoldingVal = 0
-    //     }
-    // }
+    for _, node := range net.Nodes {
+        for _, conn := range node.OutgoingConnections {
+            // conn.HoldingVal = conn.HoldingVal * 0.25 // what number to use
+            conn.HoldingVal = 0 // use this or the one above?
+        }
+    }
 }
 
 func (n Node) String() string {
