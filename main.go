@@ -56,12 +56,11 @@ func (c Connection) String() string {
 }
 
 func (n *Node) Update() {
-    // TODO - REWORK
+    // TODO - REWORK?
     var final float64
     for _, conn := range n.IncomingConnections {
         final = final + conn.HoldingVal*conn.Strength
     }
-    // final = final / float64(len(n.IncomingConnections))
     n.Value = final
 }
 
@@ -99,7 +98,7 @@ func (net *Network) Cycle() {
         if outputConn.Strength < 0.1 || outputConn.Strength > 10 { // TWEAK THIS MAX STRENGTH!
             outputConn.Strength = 0.1
         }
-        node.Value = 0// change to node.Value * 0.25 or something?
+        node.Value = 0 // change to node.Value * 0.25 or something?
     }
 
     // then set all the nodes based on connections
@@ -107,6 +106,14 @@ func (net *Network) Cycle() {
     for _, node := range net.Nodes {
         node.Update()
     }
+
+    // then clear the connections
+    // DO I WANT TO KEEP THIS?
+    // for _, node := range net.Nodes {
+    //     for _, conn := range node.OutgoingConnections {
+    //         conn.HoldingVal = 0
+    //     }
+    // }
 }
 
 func (n Node) String() string {
@@ -139,10 +146,8 @@ func (net *Network) Connect() {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
                 newConn := &Connection{
                     To: potConNode,
-                    // Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
-                    Strength: rand.Float64(), // do random strength
-                    // Strength: 1,
-                    // Strength: rand.Float64()*2, // do random strength - from 0 to 2 or something?
+                    Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
+                    // Strength: rand.Float64(), // do random strength
                 }
                 node.OutgoingConnections = append(node.OutgoingConnections, newConn)
                 potConNode.IncomingConnections = append(potConNode.IncomingConnections, newConn)
@@ -196,7 +201,11 @@ func main() {
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
-            Position: [3]int{1,1,1},
+            Position: [3]int{1,3,1},
+            Strength: 5,
+        },
+        Stimulus{
+            Position: [3]int{3,1,4},
             Strength: 5,
         },
     })
