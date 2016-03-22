@@ -8,6 +8,8 @@ import (
     "time"
     "strconv"
     "encoding/json"
+
+    // "github.com/jmcvetta/randutil" // TODO - DECIDE IF I SHOULD USE THIS OR JUST MODEL FROM IT
 )
 
 /*
@@ -59,8 +61,31 @@ func (n *Node) Update() {
     for _, conn := range n.IncomingConnections {
         final = final + conn.HoldingVal*conn.Strength
     }
-    final = final / float64(len(n.IncomingConnections))
+    // final = final / float64(len(n.IncomingConnections))
     n.Value = final
+}
+
+func RandFloat(min, max float64) float64 {
+    randFloat := rand.Float64()
+    diff := max - min
+    r := randFloat * diff
+    return min + r
+}
+
+func (n Node) RandOutConn() *Connection {
+    var ret *Connection
+    sum := 0.0
+    for _, conn := range n.OutgoingConnections {
+        sum += conn.Strength
+    }
+    r := RandFloat(0.0, sum)
+    for _, conn := range n.OutgoingConnections {
+        r -= conn.Strength
+        if r < 0 {
+            return conn
+        }
+    }
+    return ret
 }
 
 func (net *Network) Cycle() {
@@ -68,14 +93,13 @@ func (net *Network) Cycle() {
     // first, set all the connections based on their nodes
 
     for _, node := range net.Nodes {
-        for _, conn := range node.OutgoingConnections {
-            conn.HoldingVal = node.Value
-            conn.Strength = conn.Strength * node.Value
-            if conn.Strength < 0.1 || conn.Strength > 10 { // TWEAK THIS MAX STRENGTH!
-                conn.Strength = 0.1
-            }
+        outputConn := node.RandOutConn()
+        outputConn.HoldingVal = node.Value
+        outputConn.Strength = outputConn.Strength * node.Value // change?
+        if outputConn.Strength < 0.1 || outputConn.Strength > 10 { // TWEAK THIS MAX STRENGTH!
+            outputConn.Strength = 0.1
         }
-        node.Value = 0
+        node.Value = 0// change to node.Value * 0.25 or something?
     }
 
     // then set all the nodes based on connections
