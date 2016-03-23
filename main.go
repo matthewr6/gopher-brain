@@ -208,6 +208,10 @@ func main() {
             Position: [3]int{3,1,4},
             Strength: 5,
         },
+        Stimulus{
+            Position: [3]int{8,1,1},
+            Strength: 5,
+        },
     })
     frames, err := strconv.Atoi(os.Args[1])
     if err != nil {
