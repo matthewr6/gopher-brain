@@ -201,15 +201,35 @@ func main() {
     myNet.Connect()
     myNet.Stimulate([]Stimulus{
         Stimulus{
-            Position: [3]int{1,3,1},
+            Position: [3]int{25,1,1},
             Strength: 5,
         },
         Stimulus{
-            Position: [3]int{3,1,4},
+            Position: [3]int{24,1,1},
             Strength: 5,
         },
         Stimulus{
-            Position: [3]int{8,1,1},
+            Position: [3]int{25,2,1},
+            Strength: 5,
+        },
+        Stimulus{
+            Position: [3]int{25,1,2},
+            Strength: 5,
+        },
+        Stimulus{
+            Position: [3]int{25,2,2},
+            Strength: 5,
+        },
+        Stimulus{
+            Position: [3]int{24,1,2},
+            Strength: 5,
+        },
+        Stimulus{
+            Position: [3]int{24,2,1},
+            Strength: 5,
+        },
+        Stimulus{
+            Position: [3]int{24,2,2},
             Strength: 5,
         },
     })
