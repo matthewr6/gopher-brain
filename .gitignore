@@ -1,3 +1,4 @@
 *.exe
 net_*
 anim.gif
+*_state.json
