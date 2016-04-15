@@ -125,6 +125,12 @@ func (net *Network) Stimulate(stimuli []Stimulus) {
     }
 }
 
+func (net *Network) RandomizeValues() {
+    for _, node := range net.Nodes {
+        node.Value = rand.Float64()
+    }
+}
+
 func ThreeDimDist(p1, p2 [3]int) float64 {
     ans := (p1[0]-p2[0])*(p1[0]-p2[0]) + (p1[1]-p2[1])*(p1[1]-p2[1]) + (p1[2]-p2[2])*(p1[2]-p2[2])
     return math.Sqrt(float64(ans))
@@ -158,14 +164,18 @@ func (net Network) DumpJSON(name string) {
     f.Close()
 }
 
-func MakeNetwork(dimensions [3]int) *Network {
+func MakeNetwork(dimensions [3]int, blank bool) *Network {
     nodes := []*Node{}
     math.Mod(5, 5)
     for i := 1; i <= dimensions[0]; i++ {
         for j := 1; j <= dimensions[1]; j++ {
             for k := 1; k <= dimensions[2]; k++ {
+                var newValue float64
+                if !blank {
+                    newValue = rand.Float64()
+                }
                 nodes = append(nodes, &Node {
-                    Value: 0,
+                    Value: newValue,
                     Position: [3]int{i, j, k},
                 })
             }
