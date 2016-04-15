@@ -5,7 +5,7 @@ import (
     "os"
     "time"
     "strconv"
-    "reflect"
+    // "reflect"
 )
 
 /*
@@ -17,9 +17,11 @@ func main() {
     start := time.Now()
 
     // [width, depth, height]
-    NETWORK_SIZE := [3]int{25, 25, 25}
-    myNet := MakeNetwork(NETWORK_SIZE)
-    myNet.Connect()
+    // NETWORK_SIZE := [3]int{25, 25, 25}
+    // myNet := MakeNetwork(NETWORK_SIZE, false)
+    // myNet.Connect()
+
+    myNet := LoadState("test")
     myNet.Stimulate([]Stimulus{
         Stimulus{
             Position: [3]int{25,1,1},
@@ -62,14 +64,15 @@ func main() {
             Strength: 5,
         },
     })
+    // myNet.RandomizeValues()
     frames, err := strconv.Atoi(os.Args[1])
     if err != nil {
         fmt.Println(err)
         return
     }
     myNet.GenerateAnim(frames)
-    myNet.SaveState("test")
-    fmt.Println(reflect.DeepEqual(myNet, LoadState("test")))
+    myNet.SaveState("test2")
+    // fmt.Println(reflect.DeepEqual(myNet, LoadState("test")))
 
     elapsed := time.Since(start)
     fmt.Printf("Took %s\n", elapsed)
