@@ -15,14 +15,15 @@ import (
 */
 
 type Connection struct {
-    Strength float64   `json:"strength"`
     To *Node           `json:"-"`
-    HoldingVal float64 `json:"holding"`
+    HoldingVal int     `json:"holding"`
+    Terminals int      `json:"terminals"` // like strenth - ADD THIS TO STATE.GO
+    Excitatory bool    `json:"excitatory"` // TODO - ADD THIS TO STATE.GO
 }
 
 type Node struct {
-    Value float64                      `json:"value"`
-    OutgoingConnections []*Connection  `json:"-"`  //which nodes to send to
+    Value int                          `json:"value"`
+    OutgoingConnection *Connection     `json:"-"`  //which node to send to
     IncomingConnections []*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                    `json:"position"`
 }
@@ -33,7 +34,7 @@ type Network struct {
 
 type Stimulus struct {
     Position [3]int   `json:"position"`
-    Strength float64  `json:"strength"`
+    Strength int      `json:"strength"`
 }
 
 func (s Stimulus) String() string {
@@ -47,12 +48,30 @@ func (c Connection) String() string {
 }
 
 func (n *Node) Update() {
-    // TODO - REWORK?
-    var final float64
+    // calculate if it's going to fire or not - calculate sum and then set to 1, 0
+    // base sum on excitatory/inhibiting
+    sum := 0
+
     for _, conn := range n.IncomingConnections {
-        final = final + conn.HoldingVal*conn.Strength
+        if conn.Excitatory {
+            sum = sum + (conn.HoldingVal*conn.Terminals)
+        } else {
+            sum = sum - (conn.HoldingVal*conn.Terminals)
+        }
     }
-    n.Value = final
+
+    if sum >= 1 { // do 1 for threshold?
+        //things
+        //accept the value
+        //or else just stay at 0
+        n.Value = 1
+    }
+
+    // var final float64
+    // for _, conn := range n.IncomingConnections {
+    //     final = final + conn.HoldingVal*conn.Strength
+    // }
+    // n.Value = final
 }
 
 func RandFloat(min, max float64) float64 {
@@ -62,34 +81,14 @@ func RandFloat(min, max float64) float64 {
     return min + r
 }
 
-func (n Node) RandOutConn() *Connection {
-    var ret *Connection
-    sum := 0.0
-    for _, conn := range n.OutgoingConnections {
-        sum += conn.Strength
-    }
-    r := RandFloat(0.0, sum)
-    for _, conn := range n.OutgoingConnections {
-        r -= conn.Strength
-        if r < 0 {
-            return conn
-        }
-    }
-    return ret
-}
-
 func (net *Network) Cycle() {
     // fake concurrency
     // first, set all the connections based on their nodes
 
     for _, node := range net.Nodes {
-        outputConn := node.RandOutConn()
-        outputConn.HoldingVal = node.Value
-        outputConn.Strength = outputConn.Strength * node.Value // change?
-        if outputConn.Strength < 0.1 || outputConn.Strength > 10 { // TWEAK THIS MAX STRENGTH!
-            outputConn.Strength = 0.1
-        }
-        node.Value = 0 // change to node.Value * 0.25 or something?
+        node.OutgoingConnection.HoldingVal = node.Value
+        // bother with strengths?
+        node.Value = 0
     }
 
     // then set all the nodes based on connections
@@ -99,11 +98,9 @@ func (net *Network) Cycle() {
     }
 
     // then clear the connections
+    // do I still need this? doubtful
     for _, node := range net.Nodes {
-        for _, conn := range node.OutgoingConnections {
-            // conn.HoldingVal = conn.HoldingVal * 0.25 // what number to use
-            conn.HoldingVal = 0 // use this or the one above?
-        }
+        node.OutgoingConnection.HoldingVal = 0
     }
 }
 
@@ -112,22 +109,33 @@ func (n Node) String() string {
     return string(jsonRep)
 }
 
-func (net *Network) Stimulate(stimuli []Stimulus) {
-    for _, stim := range stimuli {
-        var applyTo *Node;
-        for _, node := range net.Nodes {
-            if node.Position == stim.Position {
-                applyTo = node
-                break
-            }
-        }
-        applyTo.Value = stim.Strength
-    }
-}
 
+//rework - stimulate certain neurons, but don't bother with strength - just 1 or 0
+// please optimize
+// also still in need of rework
+// func (net *Network) Stimulate(stimuli []Stimulus) {
+//     for _, stim := range stimuli {
+//         var applyTo *Node;
+//         for _, node := range net.Nodes {
+//             if node.Position == stim.Position {
+//                 applyTo = node
+//                 break
+//             }
+//         }
+//         applyTo.Value = stim.Strength
+//     }
+// }
+
+// is this still needed?
+// for cool viz, sure
 func (net *Network) RandomizeValues() {
     for _, node := range net.Nodes {
-        node.Value = rand.Float64()
+        temp := rand.Float32()
+        if temp < 0.5 {
+            node.Value = 0
+        } else {
+            node.Value = 1
+        }
     }
 }
 
@@ -138,18 +146,28 @@ func ThreeDimDist(p1, p2 [3]int) float64 {
 
 func (net *Network) Connect() {
     for _, node := range net.Nodes {
-        // get the closest nodes and connect
+        // get the closest nodes and select one randomly to connect to
+        possibleConnections := []*Node{}
         for _, potConNode := range net.Nodes {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
-                newConn := &Connection{
-                    To: potConNode,
-                    Strength: rand.Float64() + 0.5, // do random strength - from 0.5 to 1.5?
-                    // Strength: rand.Float64(), // do random strength
-                }
-                node.OutgoingConnections = append(node.OutgoingConnections, newConn)
-                potConNode.IncomingConnections = append(potConNode.IncomingConnections, newConn)
+                possibleConnections = append(possibleConnections, potConNode)
             }
         }
+        // select the one connection here
+        nodeToConnect := possibleConnections[rand.Intn(len(possibleConnections))]
+        numTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
+        var excitatory bool
+        randTest := rand.Float32()
+        if randTest < 0.5 {
+            excitatory = true
+        }
+        newConn := &Connection{
+            To: nodeToConnect,
+            Terminals: numTerminals,
+            Excitatory: excitatory,
+        }
+        node.OutgoingConnection = newConn
+        nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
     }
 }
 
@@ -170,9 +188,15 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
     for i := 1; i <= dimensions[0]; i++ {
         for j := 1; j <= dimensions[1]; j++ {
             for k := 1; k <= dimensions[2]; k++ {
-                var newValue float64
+                var newValue int
+                var randTest float32
                 if !blank {
-                    newValue = rand.Float64()
+                    randTest = rand.Float32()
+                    if randTest < 0.5 {
+                        newValue = 0
+                    } else {
+                        newValue = 1
+                    }
                 }
                 nodes = append(nodes, &Node {
                     Value: newValue,
