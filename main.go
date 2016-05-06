@@ -5,7 +5,7 @@ import (
     // "os"
     "time"
     // "strconv"
-    // "reflect"
+    "reflect"
 )
 
 /*
@@ -75,7 +75,7 @@ func main() {
     
     // myNet.SaveState("test2")
     myNet.SaveState("test")
-    // fmt.Println(reflect.DeepEqual(myNet, LoadState("test")))
+    fmt.Println(reflect.DeepEqual(myNet, LoadState("test")))
 
     elapsed := time.Since(start)
     fmt.Printf("Took %s\n", elapsed)

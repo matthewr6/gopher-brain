@@ -36,6 +36,7 @@ func (d DisplayNetwork) String() string {
     return string(jsonRep)
 }
 
+// oh sweet jesus MORE INEFFICIENCY
 func FindNode(position [3]int, potentialNodes []*Node) *Node {
     for _, potNode := range potentialNodes {
         if potNode.Position == position {
@@ -76,22 +77,25 @@ func LoadState(name string) *Network {
     // todo
     // set connections
     // this part is super inefficient
-    // for _, node := range net.Nodes {
-    //     for _, potCon := range importedNet.Connections {
-    //         if potCon.From == node.Position {
-    //             node.OutgoingConnection = &Connection{
-    //                 To: FindNode(potCon.To, net.Nodes),
-    //                 HoldingVal: potCon.HoldingVal,
-    //             }
-    //         }
-    //         if potCon.To == node.Position {
-    //             node.IncomingConnections = append(node.IncomingConnections, &Connection{
-    //                 To: node,
-    //                 HoldingVal: potCon.HoldingVal,
-    //             })
-    //         }
-    //     }
-    // }
+    // still should optimize
+
+    // two options:
+    //     - iterate through all nodes and through all nodes inside that
+    //         - bleh, NODE_AMOUNT * NODE_AMOUNT
+    //     - iterate through all nodes and iterate through all possible connections - what the old LoadState func did
+    //         - bleh, NODE_AMOUNT * CONNECTION_AMOUNT
+    // one outgoing connection per node
+    // therefore NODE_AMOUNT = CONNECTION_AMOUNT
+    // both approaches should then be the same speed
+    // must determine speed
+    for _, node := range net.Nodes {
+        for _, potConNode := range net.Nodes {
+            // crap we don't have the position yet...
+            if node.OutgoingConnection.To.Position == potConNode.Position {
+                potConNode.IncomingConnections = append(potConNode.IncomingConnections, node.OutgoingConnection)
+            }
+        }
+    }
     return net
 }
 
