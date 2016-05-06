@@ -17,7 +17,7 @@ func main() {
     start := time.Now()
 
     // [width, depth, height]
-    NETWORK_SIZE := [3]int{5, 5, 5}
+    NETWORK_SIZE := [3]int{2, 2, 2}
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
 

@@ -26,6 +26,7 @@ type DisplayNode struct {
 
 type DisplayConnection struct {
     To [3]int             `json:"to"`
+    From [3]int           `json:"from"`
     HoldingVal int        `json:"holdingVal"`
     Terminals int         `json:"terminals"`
     Excitatory bool       `json:"excitatory"`
@@ -61,15 +62,15 @@ func LoadState(name string) *Network {
     }
     // set nodes
     for _, importedNode := range importedNet.Nodes {
-        newConn := &Connection{
-            HoldingVal: importedNode.OutgoingConnection.HoldingVal,
-            Terminals: importedNode.OutgoingConnection.Terminals,
-            Excitatory: importedNode.OutgoingConnection.Excitatory,
-        }
+        // newConn := &Connection{
+        //     HoldingVal: importedNode.OutgoingConnection.HoldingVal,
+        //     Terminals: importedNode.OutgoingConnection.Terminals,
+        //     Excitatory: importedNode.OutgoingConnection.Excitatory,
+        // }
         newNode := &Node{
             Value: importedNode.Value,
             Position: importedNode.Position,
-            OutgoingConnection: newConn,
+            // OutgoingConnection: newConn,
             IncomingConnections: []*Connection{},
         }
         net.Nodes = append(net.Nodes, newNode)
@@ -82,19 +83,26 @@ func LoadState(name string) *Network {
     // two options:
     //     - iterate through all nodes and through all nodes inside that
     //         - bleh, NODE_AMOUNT * NODE_AMOUNT
+    //         - may be harder than the latter
     //     - iterate through all nodes and iterate through all possible connections - what the old LoadState func did
     //         - bleh, NODE_AMOUNT * CONNECTION_AMOUNT
     // one outgoing connection per node
     // therefore NODE_AMOUNT = CONNECTION_AMOUNT
     // both approaches should then be the same speed
     // must determine speed
-    for _, node := range net.Nodes {
-        for _, potConNode := range net.Nodes {
-            // crap we don't have the position yet...
-            if node.OutgoingConnection.To.Position == potConNode.Position {
-                potConNode.IncomingConnections = append(potConNode.IncomingConnections, node.OutgoingConnection)
-            }
+    // maybe have IDs to tag nodes?
+    //     would require more complexity on the SaveState though
+    for _,  importedNode := range importedNet.Nodes {
+        fromNode := FindNode(importedNode.Position, net.Nodes)
+        toNode := FindNode(importedNode.OutgoingConnection.To, net.Nodes)
+        newConn := &Connection{
+            HoldingVal: importedNode.OutgoingConnection.HoldingVal,
+            Terminals: importedNode.OutgoingConnection.Terminals,
+            Excitatory: importedNode.OutgoingConnection.Excitatory,
+            To: toNode,
         }
+        fromNode.OutgoingConnection = newConn
+        toNode.IncomingConnections = append(fromNode.IncomingConnections, newConn)
     }
     return net
 }
@@ -108,6 +116,7 @@ func (net Network) SaveState(name string) {
     for _, node := range net.Nodes {
         dispConn := &DisplayConnection{
             To: node.OutgoingConnection.To.Position,
+            From: node.Position,
             HoldingVal: node.OutgoingConnection.HoldingVal,
             Terminals: node.OutgoingConnection.Terminals,
             Excitatory: node.OutgoingConnection.Excitatory,
