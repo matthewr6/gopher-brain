@@ -45,51 +45,56 @@ func FindNode(position [3]int, potentialNodes []*Node) *Node {
     return &Node{}
 }
 
-//only once saving state is done
-// func LoadState(name string) *Network {
-//     fmt.Println("loading")
-//     datafile, err := os.Open(fmt.Sprintf("./%v_state.json", name))
-//     if err != nil {
-//         fmt.Println(err)
-//     }
-//     decoder := json.NewDecoder(datafile)
-//     importedNet := &DisplayNetwork{}
-//     decoder.Decode(&importedNet)
-//     datafile.Close()
-//     // manipulate network
-//     net := &Network{
-//         Nodes: []*Node{},
-//     }
-//     // set nodes
-//     for _, importedNode := range importedNet.Nodes {
-//         newNode := &Node{
-//             Value: importedNode.Value,
-//             Position: importedNode.Position,
-//             IncomingConnections: []*Connection{},
-//         }
-//         net.Nodes = append(net.Nodes, newNode)
-//     }
-//     // set connections
-//     for _, node := range net.Nodes {
-//         for _, potCon := range importedNet.Connections {
-//             if potCon.From == node.Position {
-//                 node.OutgoingConnection = &Connection{
-//                     To: FindNode(potCon.To, net.Nodes),
-//                     HoldingVal: potCon.HoldingVal,
-//                 }
-//             }
-//             if potCon.To == node.Position {
-//                 node.IncomingConnections = append(node.IncomingConnections, &Connection{
-//                     To: node,
-//                     HoldingVal: potCon.HoldingVal,
-//                 })
-//             }
-//         }
-//     }
-//     return net
-// }
+func LoadState(name string) *Network {
+    fmt.Println("loading")
+    datafile, err := os.Open(fmt.Sprintf("./%v_state.json", name))
+    if err != nil {
+        fmt.Println(err)
+    }
+    decoder := json.NewDecoder(datafile)
+    importedNet := &DisplayNetwork{}
+    decoder.Decode(&importedNet)
+    datafile.Close()
+    net := &Network{
+        Nodes: []*Node{},
+    }
+    // set nodes
+    for _, importedNode := range importedNet.Nodes {
+        newConn := &Connection{
+            HoldingVal: importedNode.OutgoingConnection.HoldingVal,
+            Terminals: importedNode.OutgoingConnection.Terminals,
+            Excitatory: importedNode.OutgoingConnection.Excitatory,
+        }
+        newNode := &Node{
+            Value: importedNode.Value,
+            Position: importedNode.Position,
+            OutgoingConnection: newConn,
+            IncomingConnections: []*Connection{},
+        }
+        net.Nodes = append(net.Nodes, newNode)
+    }
+    // todo
+    // set connections
+    // this part is super inefficient
+    // for _, node := range net.Nodes {
+    //     for _, potCon := range importedNet.Connections {
+    //         if potCon.From == node.Position {
+    //             node.OutgoingConnection = &Connection{
+    //                 To: FindNode(potCon.To, net.Nodes),
+    //                 HoldingVal: potCon.HoldingVal,
+    //             }
+    //         }
+    //         if potCon.To == node.Position {
+    //             node.IncomingConnections = append(node.IncomingConnections, &Connection{
+    //                 To: node,
+    //                 HoldingVal: potCon.HoldingVal,
+    //             })
+    //         }
+    //     }
+    // }
+    return net
+}
 
-//todo
 func (net Network) SaveState(name string) {
     fmt.Println("saving")
     dispNet := DisplayNetwork{
