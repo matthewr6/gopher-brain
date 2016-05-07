@@ -174,7 +174,7 @@ func (net Network) String() string {
 }
 
 func (net Network) DumpJSON(name string) {
-    f, _ := os.Create(fmt.Sprintf("./net_%v.json", name))
+    f, _ := os.Create(fmt.Sprintf("./frames/net_%v.json", name))
     f.WriteString(net.String())
     f.Close()
 }

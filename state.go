@@ -48,7 +48,7 @@ func FindNode(position [3]int, potentialNodes []*Node) *Node {
 
 func LoadState(name string) *Network {
     fmt.Println("loading")
-    datafile, err := os.Open(fmt.Sprintf("./%v_state.json", name))
+    datafile, err := os.Open(fmt.Sprintf("./state/%v_state.json", name))
     if err != nil {
         fmt.Println(err)
     }
@@ -108,7 +108,7 @@ func (net Network) SaveState(name string) {
         }
         dispNet.Nodes = append(dispNet.Nodes, dispNode)
     }
-    f, _ := os.Create(fmt.Sprintf("./%v_state.json", name))
+    f, _ := os.Create(fmt.Sprintf("./state/%v_state.json", name))
     f.WriteString(dispNet.String())
     f.Close()
 }
