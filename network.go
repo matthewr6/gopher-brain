@@ -23,7 +23,7 @@ type Connection struct {
 
 type Node struct {
     Value int                          `json:"value"`
-    OutgoingConnection *Connection     `json:"-"`  //which node to send to
+    OutgoingConnection *Connection     `json:"axon"`  //which node to send to
     IncomingConnections []*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                    `json:"position"`
 }
@@ -110,8 +110,7 @@ func (n Node) String() string {
 }
 
 
-//rework - stimulate certain neurons, but don't bother with strength - just 1 or 0
-// please optimize
+//rework - stimulate certain neurons, but don't bother with strength - just 1
 // also still in need of rework
 // func (net *Network) Stimulate(stimuli []Stimulus) {
 //     for _, stim := range stimuli {
@@ -201,6 +200,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                 nodes = append(nodes, &Node{
                     Value: newValue,
                     Position: [3]int{i, j, k},
+                    IncomingConnections: []*Connection{},
                 })
             }
         }

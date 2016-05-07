@@ -56,6 +56,7 @@ func LoadState(name string) *Network {
     importedNet := &DisplayNetwork{}
     decoder.Decode(&importedNet)
     datafile.Close()
+
     net := &Network{
         Nodes: []*Node{},
     }

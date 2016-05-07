@@ -64,12 +64,12 @@ func main() {
     // myNet.GenerateAnim(frames)
     
     // myNet.SaveState("test2")
+    // it could be that some data is missing when it's saved vs when it's created
+    // could it be that incoming connections aren't getting set?
+    // that's the only invisible thing, so possibly...
     myNet.SaveState("test")
-    fmt.Println(reflect.DeepEqual(LoadState("test"), myNet))
-
-    // why does this work then? 
-    LoadState("test").SaveState("test2")
-    fmt.Println(reflect.DeepEqual(LoadState("test"), LoadState("test2")))
+    loadedNet := LoadState("test")
+    fmt.Println(reflect.DeepEqual(loadedNet, myNet))
 
     elapsed := time.Since(start)
     fmt.Printf("Took %s\n", elapsed)
