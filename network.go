@@ -34,7 +34,6 @@ type Network struct {
 
 type Stimulus struct {
     Position [3]int   `json:"position"`
-    Strength int      `json:"strength"`
 }
 
 func (s Stimulus) String() string {
@@ -111,19 +110,18 @@ func (n Node) String() string {
 
 
 //rework - stimulate certain neurons, but don't bother with strength - just 1
-// also still in need of rework
-// func (net *Network) Stimulate(stimuli []Stimulus) {
-//     for _, stim := range stimuli {
-//         var applyTo *Node;
-//         for _, node := range net.Nodes {
-//             if node.Position == stim.Position {
-//                 applyTo = node
-//                 break
-//             }
-//         }
-//         applyTo.Value = stim.Strength
-//     }
-// }
+func (net *Network) Stimulate(stimuli []Stimulus) {
+    for _, stim := range stimuli {
+        var applyTo *Node;
+        for _, node := range net.Nodes {
+            if node.Position == stim.Position {
+                applyTo = node
+                break
+            }
+        }
+        applyTo.Value = 1
+    }
+}
 
 // is this still needed?
 // for cool viz, sure
