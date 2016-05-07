@@ -6,6 +6,7 @@ import (
     "time"
     "strconv"
     // "reflect"
+    "math/rand"
 )
 
 /*
@@ -15,6 +16,7 @@ import (
 
 func main() {
     start := time.Now()
+    rand.Seed(time.Now().UTC().UnixNano())
 
     // [width, depth, height]
     // NETWORK_SIZE := [3]int{25, 25, 25}
@@ -24,55 +26,44 @@ func main() {
     myNet := LoadState("test")
     myNet.Stimulate([]Stimulus{
         Stimulus{
-            Position: [3]int{25,1,1},
-            Strength: 5,
+            Position: [3]int{1,1,1},
         },
         Stimulus{
-            Position: [3]int{24,1,1},
-            Strength: 5,
+            Position: [3]int{1,1,2},
         },
         Stimulus{
-            Position: [3]int{25,2,1},
-            Strength: 5,
+            Position: [3]int{1,2,1},
         },
         Stimulus{
-            Position: [3]int{25,1,2},
-            Strength: 5,
+            Position: [3]int{2,1,1},
         },
         Stimulus{
-            Position: [3]int{25,2,2},
-            Strength: 5,
+            Position: [3]int{1,2,2},
         },
         Stimulus{
-            Position: [3]int{24,1,2},
-            Strength: 5,
+            Position: [3]int{2,1,2},
         },
         Stimulus{
-            Position: [3]int{24,2,1},
-            Strength: 5,
+            Position: [3]int{2,2,1},
         },
         Stimulus{
-            Position: [3]int{24,2,2},
-            Strength: 5,
-        },
-        Stimulus{
-            Position: [3]int{23, 1, 1},
-            Strength: 5,
-        },
-        Stimulus{
-            Position: [3]int{21, 1, 1},
-            Strength: 5,
+            Position: [3]int{2,2,2},
         },
     })
     // myNet.RandomizeValues()
+
     frames, err := strconv.Atoi(os.Args[1])
     if err != nil {
         fmt.Println(err)
         return
     }
     myNet.GenerateAnim(frames)
-    myNet.SaveState("test2")
-    // fmt.Println(reflect.DeepEqual(myNet, LoadState("test")))
+    
+    myNet.SaveState("test")
+    
+    // myNet.SaveState("test")
+    // loadedNet := LoadState("test")
+    // fmt.Println(reflect.DeepEqual(loadedNet, myNet))
 
     elapsed := time.Since(start)
     fmt.Printf("Took %s\n", elapsed)

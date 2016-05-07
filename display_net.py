@@ -8,6 +8,8 @@ from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
+COLOR_MAP = cm.plasma
+
 for num in range(0, int(sys.argv[1])):
     with open('net_{num}.json'.format(num=num)) as data_file:   
         nodes = json.load(data_file)['nodes']
@@ -20,10 +22,6 @@ for num in range(0, int(sys.argv[1])):
     ax = fig.add_subplot(111,projection='3d')
     n = 100
 
-    # xs = randrange(n, 0, 100)
-    # ys = randrange(n, 0, 100)
-    # zs = randrange(n, 0, 100)
-    # the_fourth_dimension = randrange(n,0,100)
     xs = np.array([])
     ys = np.array([])
     zs = np.array([])
@@ -34,9 +32,9 @@ for num in range(0, int(sys.argv[1])):
         zs = np.append(zs, node['position'][2])
         values = np.append(values, node['value'])
 
-    colors = cm.hsv(values/max(values))
+    colors = COLOR_MAP(values/max(values))
 
-    colmap = cm.ScalarMappable(cmap=cm.hsv)
+    colmap = cm.ScalarMappable(cmap=COLOR_MAP)
     colmap.set_array(values)
 
     yg = ax.scatter(xs, ys, zs, c=colors, alpha=0.5, marker='.') # or set marker to "o"
