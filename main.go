@@ -17,7 +17,7 @@ func main() {
     start := time.Now()
 
     // [width, depth, height]
-    NETWORK_SIZE := [3]int{2, 2, 2}
+    NETWORK_SIZE := [3]int{2, 2, 1}
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
 
@@ -25,43 +25,33 @@ func main() {
     // myNet.Stimulate([]Stimulus{
     //     Stimulus{
     //         Position: [3]int{25,1,1},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{24,1,1},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{25,2,1},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{25,1,2},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{25,2,2},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{24,1,2},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{24,2,1},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{24,2,2},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{23, 1, 1},
-    //         Strength: 5,
     //     },
     //     Stimulus{
     //         Position: [3]int{21, 1, 1},
-    //         Strength: 5,
     //     },
     // })
     // myNet.RandomizeValues()
@@ -75,7 +65,11 @@ func main() {
     
     // myNet.SaveState("test2")
     myNet.SaveState("test")
-    fmt.Println(reflect.DeepEqual(myNet, LoadState("test")))
+    fmt.Println(reflect.DeepEqual(LoadState("test"), myNet))
+
+    // why does this work then? 
+    LoadState("test").SaveState("test2")
+    fmt.Println(reflect.DeepEqual(LoadState("test"), LoadState("test2")))
 
     elapsed := time.Since(start)
     fmt.Printf("Took %s\n", elapsed)

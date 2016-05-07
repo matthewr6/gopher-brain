@@ -198,7 +198,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                         newValue = 1
                     }
                 }
-                nodes = append(nodes, &Node {
+                nodes = append(nodes, &Node{
                     Value: newValue,
                     Position: [3]int{i, j, k},
                 })

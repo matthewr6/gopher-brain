@@ -26,7 +26,6 @@ type DisplayNode struct {
 
 type DisplayConnection struct {
     To [3]int             `json:"to"`
-    From [3]int           `json:"from"`
     HoldingVal int        `json:"holdingVal"`
     Terminals int         `json:"terminals"`
     Excitatory bool       `json:"excitatory"`
@@ -61,48 +60,29 @@ func LoadState(name string) *Network {
         Nodes: []*Node{},
     }
     // set nodes
+    // this looks good
     for _, importedNode := range importedNet.Nodes {
-        // newConn := &Connection{
-        //     HoldingVal: importedNode.OutgoingConnection.HoldingVal,
-        //     Terminals: importedNode.OutgoingConnection.Terminals,
-        //     Excitatory: importedNode.OutgoingConnection.Excitatory,
-        // }
         newNode := &Node{
             Value: importedNode.Value,
             Position: importedNode.Position,
-            // OutgoingConnection: newConn,
             IncomingConnections: []*Connection{},
         }
         net.Nodes = append(net.Nodes, newNode)
     }
-    // todo
     // set connections
     // this part is super inefficient
     // still should optimize
-
-    // two options:
-    //     - iterate through all nodes and through all nodes inside that
-    //         - bleh, NODE_AMOUNT * NODE_AMOUNT
-    //         - may be harder than the latter
-    //     - iterate through all nodes and iterate through all possible connections - what the old LoadState func did
-    //         - bleh, NODE_AMOUNT * CONNECTION_AMOUNT
-    // one outgoing connection per node
-    // therefore NODE_AMOUNT = CONNECTION_AMOUNT
-    // both approaches should then be the same speed
-    // must determine speed
-    // maybe have IDs to tag nodes?
-    //     would require more complexity on the SaveState though
     for _,  importedNode := range importedNet.Nodes {
-        fromNode := FindNode(importedNode.Position, net.Nodes)
-        toNode := FindNode(importedNode.OutgoingConnection.To, net.Nodes)
+        node := FindNode(importedNode.Position, net.Nodes)
+        nodeToConnect := FindNode(importedNode.OutgoingConnection.To, net.Nodes)
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
             Terminals: importedNode.OutgoingConnection.Terminals,
             Excitatory: importedNode.OutgoingConnection.Excitatory,
-            To: toNode,
+            To: nodeToConnect,
         }
-        fromNode.OutgoingConnection = newConn
-        toNode.IncomingConnections = append(fromNode.IncomingConnections, newConn)
+        node.OutgoingConnection = newConn
+        nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
     }
     return net
 }
@@ -111,12 +91,10 @@ func (net Network) SaveState(name string) {
     fmt.Println("saving")
     dispNet := DisplayNetwork{
         Nodes: []*DisplayNode{},
-        // Connections: []*DisplayConnection{},
     }
     for _, node := range net.Nodes {
         dispConn := &DisplayConnection{
             To: node.OutgoingConnection.To.Position,
-            From: node.Position,
             HoldingVal: node.OutgoingConnection.HoldingVal,
             Terminals: node.OutgoingConnection.Terminals,
             Excitatory: node.OutgoingConnection.Excitatory,
