@@ -6,6 +6,8 @@ import (
 )
 
 // TODO - decide name (i.e. should it be "receiver" or not)
+// TODO - some sort of equation fitted on each to determine the response
+// TODO - some sort of responder struct - should it be a many-to-many relationship?
 type Receiver struct {
     Radius int    `json:"radius"`
     NodeCount int `json:"nodeCount"`
