@@ -29,7 +29,8 @@ type Node struct {
 }
 
 type Network struct {
-    Nodes []*Node `json:"nodes"`
+    Nodes []*Node           `json:"nodes"`
+    Receivers []*Receiver   `json:"receivers"`
 }
 
 type Stimulus struct {

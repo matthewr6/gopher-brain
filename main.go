@@ -2,9 +2,9 @@ package main
 
 import (
     "fmt"
-    "os"
     "time"
-    "strconv"
+    // "os"
+    // "strconv"
     // "reflect"
     "math/rand"
 )
@@ -22,44 +22,45 @@ func main() {
     NETWORK_SIZE := [3]int{25, 25, 25}
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
+    fmt.Println(myNet.CreateReceiver(3, 5, [3]int{1, 1, 1}))
 
     // myNet := LoadState("test")
-    myNet.Stimulate([]Stimulus{
-        Stimulus{
-            Position: [3]int{1,1,1},
-        },
-        Stimulus{
-            Position: [3]int{1,1,2},
-        },
-        Stimulus{
-            Position: [3]int{1,2,1},
-        },
-        Stimulus{
-            Position: [3]int{2,1,1},
-        },
-        Stimulus{
-            Position: [3]int{1,2,2},
-        },
-        Stimulus{
-            Position: [3]int{2,1,2},
-        },
-        Stimulus{
-            Position: [3]int{2,2,1},
-        },
-        Stimulus{
-            Position: [3]int{2,2,2},
-        },
-    })
+    // myNet.Stimulate([]Stimulus{
+    //     Stimulus{
+    //         Position: [3]int{1,1,1},
+    //     },
+    //     Stimulus{
+    //         Position: [3]int{1,1,2},
+    //     },
+    //     Stimulus{
+    //         Position: [3]int{1,2,1},
+    //     },
+    //     Stimulus{
+    //         Position: [3]int{2,1,1},
+    //     },
+    //     Stimulus{
+    //         Position: [3]int{1,2,2},
+    //     },
+    //     Stimulus{
+    //         Position: [3]int{2,1,2},
+    //     },
+    //     Stimulus{
+    //         Position: [3]int{2,2,1},
+    //     },
+    //     Stimulus{
+    //         Position: [3]int{2,2,2},
+    //     },
+    // })
     // myNet.RandomizeValues()
 
-    frames, err := strconv.Atoi(os.Args[1])
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    myNet.GenerateAnim(frames)
+    // frames, err := strconv.Atoi(os.Args[1])
+    // if err != nil {
+    //     fmt.Println(err)
+    //     return
+    // }
+    // myNet.GenerateAnim(frames)
     
-    myNet.SaveState("test")
+    // myNet.SaveState("test")
     
     // myNet.SaveState("test")
     // loadedNet := LoadState("test")
