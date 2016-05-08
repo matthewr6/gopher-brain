@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 COLOR_MAP = cm.plasma
 
 for num in range(0, int(sys.argv[1])):
-    with open('net_{num}.json'.format(num=num)) as data_file:   
+    with open('frames/net_{num}.json'.format(num=num)) as data_file:   
         nodes = json.load(data_file)['nodes']
 
     def randrange(n, vmin, vmax):
@@ -45,5 +45,5 @@ for num in range(0, int(sys.argv[1])):
     ax.set_zlabel('Z')
 
 
-    plt.savefig('net_{num}.png'.format(num=num))
+    plt.savefig('frames/net_{num}.png'.format(num=num))
     # plt.close()
