@@ -19,11 +19,11 @@ func main() {
     rand.Seed(time.Now().UTC().UnixNano())
 
     // [width, depth, height]
-    // NETWORK_SIZE := [3]int{25, 25, 25}
-    // myNet := MakeNetwork(NETWORK_SIZE, false)
-    // myNet.Connect()
+    NETWORK_SIZE := [3]int{25, 25, 25}
+    myNet := MakeNetwork(NETWORK_SIZE, false)
+    myNet.Connect()
 
-    myNet := LoadState("test")
+    // myNet := LoadState("test")
     myNet.Stimulate([]Stimulus{
         Stimulus{
             Position: [3]int{1,1,1},

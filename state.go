@@ -90,6 +90,7 @@ func LoadState(name string) *Network {
 
 func (net Network) SaveState(name string) {
     fmt.Println("saving")
+    os.Mkdir("state", 755)
     dispNet := DisplayNetwork{
         Nodes: []*DisplayNode{},
     }

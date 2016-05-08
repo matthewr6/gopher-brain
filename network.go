@@ -209,6 +209,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
 }
 
 func (net *Network) GenerateAnim(frames int) {
+    os.Mkdir("frames", 755)
     for frame := 0; frame < frames; frame++ {
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
