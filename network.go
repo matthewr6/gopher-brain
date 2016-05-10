@@ -17,20 +17,20 @@ import (
 type Connection struct {
     To *Node           `json:"-"`
     HoldingVal int     `json:"holding"`
-    Terminals int      `json:"terminals"` // like strenth - ADD THIS TO STATE.GO
-    Excitatory bool    `json:"excitatory"` // TODO - ADD THIS TO STATE.GO
+    Terminals int      `json:"terminals"`
+    Excitatory bool    `json:"excitatory"`
 }
 
 type Node struct {
     Value int                          `json:"value"`
-    OutgoingConnection *Connection     `json:"axon"`  //which node to send to
+    OutgoingConnection *Connection     `json:"-"`  //which node to send to
     IncomingConnections []*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                    `json:"position"`
 }
 
 type Network struct {
     Nodes []*Node           `json:"nodes"`
-    Sensors []*Sensor       `json:"sensors"`
+    Sensors []*Sensor       `json:"sensors"` // todo - add to state.go
 }
 
 type Stimulus struct {
@@ -81,6 +81,7 @@ func RandFloat(min, max float64) float64 {
     return min + r
 }
 
+// todo - somewhere in here update the sensors... probably right after all the nodes update
 func (net *Network) Cycle() {
     // fake concurrency
     // first, set all the connections based on their nodes
@@ -92,16 +93,20 @@ func (net *Network) Cycle() {
     }
 
     // then set all the nodes based on connections
-
     for _, node := range net.Nodes {
         node.Update()
     }
 
+    // also update nodes that receive sensory information
+    for _, sensor := range net.Sensors {
+        sensor.Update()
+    }
+
     // then clear the connections
     // do I still need this? doubtful
-    for _, node := range net.Nodes {
-        node.OutgoingConnection.HoldingVal = 0
-    }
+    // for _, node := range net.Nodes {
+    //     node.OutgoingConnection.HoldingVal = 0
+    // }
 }
 
 func (n Node) String() string {
@@ -148,6 +153,7 @@ func (net *Network) Connect() {
         possibleConnections := []*Node{}
         for _, potConNode := range net.Nodes {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
+                // todo - if the node already has more than X incoming connections, don't append?
                 possibleConnections = append(possibleConnections, potConNode)
             }
         }

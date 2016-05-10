@@ -3,8 +3,8 @@ package main
 import (
     "fmt"
     "time"
-    // "os"
-    // "strconv"
+    "os"
+    "strconv"
     // "reflect"
     "math/rand"
 )
@@ -22,7 +22,7 @@ func main() {
     NETWORK_SIZE := [3]int{25, 25, 25}
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
-    myNet.CreateSensor(1, 20, "x", [3]int{1, 5, 5})
+    myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1})
 
     // myNet := LoadState("test")
     // myNet.Stimulate([]Stimulus{
@@ -53,12 +53,12 @@ func main() {
     // })
     // myNet.RandomizeValues()
 
-    // frames, err := strconv.Atoi(os.Args[1])
-    // if err != nil {
-    //     fmt.Println(err)
-    //     return
-    // }
-    // myNet.GenerateAnim(frames)
+    frames, err := strconv.Atoi(os.Args[1])
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    myNet.GenerateAnim(frames)
     
     // myNet.SaveState("test")
     

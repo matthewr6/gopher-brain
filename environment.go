@@ -33,9 +33,12 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
     return false
 }
 
-// func (sensor *Sensor) Update() {
-
-// }
+func (sensor *Sensor) Update() {
+    // for now let's just continuously stimulate every node
+    for _, node := range sensor.Nodes {
+        node.Value = 1
+    }
+}
 
 // do I even need the plane stuff
 // seems bloated
@@ -48,12 +51,12 @@ func (net *Network) CreateSensor(r int, count int, plane string, center [3]int) 
         Center: center,
     }
     // todo - determine correct coefficient
-    stDev := float64(r * 2)
+    stDev := float64(r)
     // plane is which dimension should stay the same - name the variable in a better way?
     if (plane != "") {
         if (plane == "x" || plane == "y" || plane == "z") {
             // todo - also this coefficient
-            stDev = float64(r * 4)
+            stDev = float64(r * 2)
         }
         if (plane == "x") {
             potX := center[0]
