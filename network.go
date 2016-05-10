@@ -30,7 +30,7 @@ type Node struct {
 
 type Network struct {
     Nodes []*Node           `json:"nodes"`
-    Receivers []*Receiver   `json:"receivers"`
+    Sensors []*Sensor       `json:"sensors"`
 }
 
 type Stimulus struct {

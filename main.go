@@ -22,7 +22,7 @@ func main() {
     NETWORK_SIZE := [3]int{25, 25, 25}
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
-    fmt.Println(myNet.CreateReceiver(1, 10, [3]int{1, 1, 1}))
+    myNet.CreateSensor(1, 20, "x", [3]int{1, 5, 5})
 
     // myNet := LoadState("test")
     // myNet.Stimulate([]Stimulus{
