@@ -35,8 +35,11 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
 
 func (sensor *Sensor) Update() {
     // for now let's just continuously stimulate every node
+    // maybe try randomly lighting up the node, a 50/50 chance?
     for _, node := range sensor.Nodes {
-        node.Value = 1
+        if (rand.Intn(2) == 1) {
+            node.Value = 1
+        }
     }
 }
 

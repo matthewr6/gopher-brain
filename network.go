@@ -14,6 +14,9 @@ import (
     * is "value at address"
 */
 
+// should one axon/connection connect to multiple neurons that are close by?
+// http://changingminds.org/explanations/brain/parts_brain/neuron.htm
+// how would this work with terminals then?
 type Connection struct {
     To *Node           `json:"-"`
     HoldingVal int     `json:"holding"`
@@ -66,12 +69,6 @@ func (n *Node) Update() {
         //or else just stay at 0
         n.Value = 1
     }
-
-    // var final float64
-    // for _, conn := range n.IncomingConnections {
-    //     final = final + conn.HoldingVal*conn.Strength
-    // }
-    // n.Value = final
 }
 
 func RandFloat(min, max float64) float64 {
@@ -88,7 +85,6 @@ func (net *Network) Cycle() {
 
     for _, node := range net.Nodes {
         node.OutgoingConnection.HoldingVal = node.Value
-        // bother with strengths?
         node.Value = 0
     }
 
@@ -161,8 +157,8 @@ func (net *Network) Connect() {
         nodeToConnect := possibleConnections[rand.Intn(len(possibleConnections))]
         numTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
         var excitatory bool
-        randTest := rand.Float32()
-        if randTest < 0.5 {
+        // should this have a higher probability of being excitatory?
+        if rand.Intn(3) != 0 {
             excitatory = true
         }
         newConn := &Connection{
