@@ -74,16 +74,21 @@ func LoadState(name string) *Network {
     // this part is super inefficient
     // still should optimize
     for _,  importedNode := range importedNet.Nodes {
-        node := FindNode(importedNode.Position, net.Nodes)
-        nodeToConnect := FindNode(importedNode.OutgoingConnection.To, net.Nodes)
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
             Terminals: importedNode.OutgoingConnection.Terminals,
             Excitatory: importedNode.OutgoingConnection.Excitatory,
-            To: nodeToConnect,
+        }
+        node := FindNode(importedNode.Position, net.Nodes)
+        nodesToConnect := []*Node{}
+        for _, nodePos := range importedNode.OutgoingConnection.To {
+            // these similar names are gonna kill me
+            nodeToConnect := FindNode(nodePos, net.Nodes)
+            nodesToConnect = append(nodesToConnect, nodeToConnect)
+            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
         }
         node.OutgoingConnection = newConn
-        nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
+        newConn.To = nodesToConnect
     }
     return net
 }
