@@ -15,6 +15,7 @@ import (
 
 type DisplayNetwork struct {
     Nodes []*DisplayNode `json:"nodes"`
+    Dimensions [3]int    `json:"dimensions"`
     // Connections []*DisplayConnection `json:"connections"`
 }
 
@@ -59,6 +60,7 @@ func LoadState(name string) *Network {
 
     net := &Network{
         Nodes: []*Node{},
+        Dimensions: importedNet.Dimensions,
     }
     // set nodes
     // this looks good
@@ -98,6 +100,7 @@ func (net Network) SaveState(name string) {
     os.Mkdir("state", 755)
     dispNet := DisplayNetwork{
         Nodes: []*DisplayNode{},
+        Dimensions: net.Dimensions,
     }
     for _, node := range net.Nodes {
         toPositions := [][3]int{}

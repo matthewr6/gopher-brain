@@ -27,6 +27,7 @@ func main() {
     // myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15})
 
     // myNet := LoadState("test")
+    // todo - just make this an array of 3-length int arrays
     // myNet.Stimulate([]Stimulus{
     //     Stimulus{
     //         Position: [3]int{1,1,1},

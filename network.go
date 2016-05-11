@@ -16,6 +16,7 @@ import (
 
 // should one axon/connection connect to multiple neurons that are close by?
 // http://changingminds.org/explanations/brain/parts_brain/neuron.htm
+//http://cogsci.stackexchange.com/questions/9144/how-many-dendrite-connections-vs-axon-terminals-does-a-multipolar-cerebral-neuro
 // how would this work with terminals then?
 type Connection struct {
     To []*Node         `json:"-"`
@@ -33,6 +34,7 @@ type Node struct {
 
 type Network struct {
     Nodes []*Node           `json:"nodes"`
+    Dimensions [3]int       `json:"dimensions"`
     // Sensors []*Sensor       `json:"sensors"` // todo - add to state.go
 }
 
@@ -78,7 +80,6 @@ func RandFloat(min, max float64) float64 {
     return min + r
 }
 
-// todo - somewhere in here update the sensors... probably right after all the nodes update
 func (net *Network) Cycle() {
     // fake concurrency
     // first, set all the connections based on their nodes
@@ -110,8 +111,6 @@ func (n Node) String() string {
     return string(jsonRep)
 }
 
-
-//rework - stimulate certain neurons, but don't bother with strength - just 1
 func (net *Network) Stimulate(stimuli []Stimulus) {
     for _, stim := range stimuli {
         var applyTo *Node;
@@ -155,31 +154,50 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
 func (net *Network) Connect() {
     for _, node := range net.Nodes {
         // get the closest nodes and select one randomly to connect to
-
-        // TODO - PRIORITY - rework - get a single possible node and then find areas around it,
-        // similar to the way a sensor "sphere" is set up
-        // TODO - add to state.go
-
-        possibleConnections := []*Node{}
-        for _, potConNode := range net.Nodes {
-            if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
-                // todo - if the node already has more than X incoming connections, don't append?
-                possibleConnections = append(possibleConnections, potConNode)
+        stDev := 3.0 // what should it be?
+        center := node.Position
+        for center == node.Position {
+            potX := int(rand.NormFloat64() * stDev) + node.Position[0]
+            potY := int(rand.NormFloat64() * stDev) + node.Position[1]
+            potZ := int(rand.NormFloat64() * stDev) + node.Position[2]
+            for potX <= 0 || potX > net.Dimensions[0] {
+                potX = int(rand.NormFloat64() * stDev) + node.Position[0]
             }
+            for potY <= 0 || potY > net.Dimensions[0] {
+                potY = int(rand.NormFloat64() * stDev) + node.Position[1]
+            }
+            for potZ <= 0 || potZ > net.Dimensions[0] {
+                potZ = int(rand.NormFloat64() * stDev) + node.Position[2]
+            }
+            center = [3]int{potX, potY, potZ}
         }
+        centralConnNode := FindNode(center, net.Nodes)
+
         // select the X connections here
-        numAxonTerminals := rand.Intn(4) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS
-        nodesToConnect := []*Node{}
+        numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS?
+        nodesToConnect := []*Node{
+            centralConnNode,
+        }
+        stDev = 1.5
         for i := 0; i < numAxonTerminals; i++ {
-            potNode := possibleConnections[rand.Intn(len(possibleConnections))]
-            if !NodeExistsIn(potNode, nodesToConnect) {
+            potPos := [3]int{
+                int(rand.NormFloat64() * stDev) + centralConnNode.Position[0],
+                int(rand.NormFloat64() * stDev) + centralConnNode.Position[1],
+                int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
+            }
+            potNode := FindNode(potPos, net.Nodes)
+            // potNode := possibleConnections[rand.Intn(len(possibleConnections))]
+            if !NodeExistsIn(potNode, nodesToConnect) && potNode != node {
                 nodesToConnect = append(nodesToConnect, potNode)
             }
         }
-        numTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
+
+        // do I even want this now?
+        numTerminals := rand.Intn(2) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
+
         var excitatory bool
         // should this have a higher probability of being excitatory?
-        if rand.Intn(3) != 0 {
+        if rand.Intn(2) != 0 {
             excitatory = true
         }
         newConn := &Connection{
@@ -229,7 +247,9 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
             }
         }
     }
+
     return &Network {
+        Dimensions: dimensions,
         Nodes: nodes,
     }
 }
