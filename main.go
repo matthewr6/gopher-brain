@@ -3,9 +3,9 @@ package main
 import (
     "fmt"
     "time"
-    // "os"
-    // "strconv"
-    "reflect"
+    "os"
+    "strconv"
+    // "reflect"
     "math/rand"
 )
 
@@ -55,18 +55,18 @@ func main() {
     // })
     // myNet.RandomizeValues()
 
-    // frames, err := strconv.Atoi(os.Args[1])
-    // if err != nil {
-    //     fmt.Println(err)
-    //     return
-    // }
-    // myNet.GenerateAnim(frames)
+    frames, err := strconv.Atoi(os.Args[1])
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    myNet.GenerateAnim(frames)
     
     // myNet.SaveState("test")
     
-    myNet.SaveState("test")
-    loadedNet := LoadState("test")
-    fmt.Println(reflect.DeepEqual(loadedNet, myNet))
+    // myNet.SaveState("test")
+    // loadedNet := LoadState("test")
+    // fmt.Println(reflect.DeepEqual(loadedNet, myNet))
 
     elapsed := time.Since(start)
     fmt.Printf("Took %s\n", elapsed)
