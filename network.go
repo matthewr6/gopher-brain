@@ -18,7 +18,7 @@ import (
 // http://changingminds.org/explanations/brain/parts_brain/neuron.htm
 // how would this work with terminals then?
 type Connection struct {
-    To *Node           `json:"-"`
+    To []*Node         `json:"-"`
     HoldingVal int     `json:"holding"`
     Terminals int      `json:"terminals"`
     Excitatory bool    `json:"excitatory"`
@@ -33,7 +33,7 @@ type Node struct {
 
 type Network struct {
     Nodes []*Node           `json:"nodes"`
-    Sensors []*Sensor       `json:"sensors"` // todo - add to state.go
+    // Sensors []*Sensor       `json:"sensors"` // todo - add to state.go
 }
 
 type Stimulus struct {
@@ -94,9 +94,9 @@ func (net *Network) Cycle() {
     }
 
     // also update nodes that receive sensory information
-    for _, sensor := range net.Sensors {
-        sensor.Update()
-    }
+    // for _, sensor := range net.Sensors {
+    //     sensor.Update()
+    // }
 
     // then clear the connections
     // do I still need this? doubtful
@@ -143,9 +143,23 @@ func ThreeDimDist(p1, p2 [3]int) float64 {
     return math.Sqrt(float64(ans))
 }
 
+func NodeExistsIn(node *Node, nodes []*Node) bool {
+    for _, potNode := range nodes {
+        if (node == potNode) {
+            return true
+        }
+    }
+    return false
+}
+
 func (net *Network) Connect() {
     for _, node := range net.Nodes {
         // get the closest nodes and select one randomly to connect to
+
+        // TODO - PRIORITY - rework - get a single possible node and then find areas around it,
+        // similar to the way a sensor "sphere" is set up
+        // TODO - add to state.go
+
         possibleConnections := []*Node{}
         for _, potConNode := range net.Nodes {
             if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
@@ -153,8 +167,15 @@ func (net *Network) Connect() {
                 possibleConnections = append(possibleConnections, potConNode)
             }
         }
-        // select the one connection here
-        nodeToConnect := possibleConnections[rand.Intn(len(possibleConnections))]
+        // select the X connections here
+        numAxonTerminals := rand.Intn(4) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS
+        nodesToConnect := []*Node{}
+        for i := 0; i < numAxonTerminals; i++ {
+            potNode := possibleConnections[rand.Intn(len(possibleConnections))]
+            if !NodeExistsIn(potNode, nodesToConnect) {
+                nodesToConnect = append(nodesToConnect, potNode)
+            }
+        }
         numTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
         var excitatory bool
         // should this have a higher probability of being excitatory?
@@ -162,12 +183,14 @@ func (net *Network) Connect() {
             excitatory = true
         }
         newConn := &Connection{
-            To: nodeToConnect,
+            To: nodesToConnect,
             Terminals: numTerminals,
             Excitatory: excitatory,
         }
         node.OutgoingConnection = newConn
-        nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
+        for _, nodeToConnect := range nodesToConnect {
+            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
+        }
     }
 }
 

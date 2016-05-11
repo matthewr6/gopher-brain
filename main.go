@@ -22,9 +22,9 @@ func main() {
     NETWORK_SIZE := [3]int{25, 25, 25}
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
-    myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1})
-    myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1})
-    myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15})
+    // myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1})
+    // myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1})
+    // myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15})
 
     // myNet := LoadState("test")
     // myNet.Stimulate([]Stimulus{

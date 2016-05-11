@@ -25,7 +25,7 @@ type DisplayNode struct {
 }
 
 type DisplayConnection struct {
-    To [3]int             `json:"to"`
+    To [][3]int           `json:"to"`
     HoldingVal int        `json:"holdingVal"`
     Terminals int         `json:"terminals"`
     Excitatory bool       `json:"excitatory"`
@@ -95,8 +95,12 @@ func (net Network) SaveState(name string) {
         Nodes: []*DisplayNode{},
     }
     for _, node := range net.Nodes {
+        toPositions := [][3]int{}
+        for _, outNode := range node.OutgoingConnection.To {
+            toPositions = append(toPositions, outNode.Position)
+        }
         dispConn := &DisplayConnection{
-            To: node.OutgoingConnection.To.Position,
+            To: toPositions,
             HoldingVal: node.OutgoingConnection.HoldingVal,
             Terminals: node.OutgoingConnection.Terminals,
             Excitatory: node.OutgoingConnection.Excitatory,
