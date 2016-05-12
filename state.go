@@ -14,8 +14,9 @@ import (
 // still have to reconcile the updated network.go stuff
 
 type DisplayNetwork struct {
-    Nodes []*DisplayNode `json:"nodes"`
-    Dimensions [3]int    `json:"dimensions"`
+    Nodes []*DisplayNode     `json:"nodes"`
+    Dimensions [3]int        `json:"dimensions"`
+    Sensors []*DisplaySensor `json:"sensors"`
     // Connections []*DisplayConnection `json:"connections"`
 }
 
@@ -30,6 +31,10 @@ type DisplayConnection struct {
     HoldingVal int        `json:"holdingVal"`
     Terminals int         `json:"terminals"`
     Excitatory bool       `json:"excitatory"`
+}
+
+type DisplaySensor struct {
+    Nodes[][3]int     `json:"nodes"`
 }
 
 func (d DisplayNetwork) String() string {
@@ -92,6 +97,18 @@ func LoadState(name string) *Network {
         node.OutgoingConnection = newConn
         newConn.To = nodesToConnect
     }
+
+    // set sensors
+    // this is also inefficient
+    for _, importedSensor := range importedNet.Sensors {
+        nodes := []*Node{}
+        for _, nodePos := range importedSensor.Nodes {
+            nodes = append(nodes, FindNode(nodePos, net.Nodes))
+        }
+        net.Sensors = append(net.Sensors, &Sensor{
+            Nodes: nodes,
+        })
+    }
     return net
 }
 
@@ -100,7 +117,17 @@ func (net Network) SaveState(name string) {
     os.Mkdir("state", 755)
     dispNet := DisplayNetwork{
         Nodes: []*DisplayNode{},
+        Sensors: []*DisplaySensor{},
         Dimensions: net.Dimensions,
+    }
+    for _, sensor := range net.Sensors {
+        positions := [][3]int{}
+        for _, sensoryNode := range sensor.Nodes {
+            positions = append(positions, sensoryNode.Position)
+        }
+        dispNet.Sensors = append(dispNet.Sensors, &DisplaySensor{
+            Nodes: positions,
+        })
     }
     for _, node := range net.Nodes {
         toPositions := [][3]int{}

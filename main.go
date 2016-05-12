@@ -3,9 +3,9 @@ package main
 import (
     "fmt"
     "time"
-    "os"
-    "strconv"
-    // "reflect"
+    // "os"
+    // "strconv"
+    "reflect"
     "math/rand"
 )
 
@@ -22,9 +22,9 @@ func main() {
     NETWORK_SIZE := [3]int{25, 25, 25}
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
-    // myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1})
-    // myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1})
-    // myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15})
+    myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1})
+    myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1})
+    myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15})
 
     // myNet := LoadState("test")
     // todo - just make this an array of 3-length int arrays
@@ -56,18 +56,18 @@ func main() {
     // })
     // myNet.RandomizeValues()
 
-    frames, err := strconv.Atoi(os.Args[1])
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    myNet.GenerateAnim(frames)
+    // frames, err := strconv.Atoi(os.Args[1])
+    // if err != nil {
+    //     fmt.Println(err)
+    //     return
+    // }
+    // myNet.GenerateAnim(frames)
     
     // myNet.SaveState("test")
     
-    // myNet.SaveState("test")
-    // loadedNet := LoadState("test")
-    // fmt.Println(reflect.DeepEqual(loadedNet, myNet))
+    myNet.SaveState("test")
+    loadedNet := LoadState("test")
+    fmt.Println(reflect.DeepEqual(loadedNet, myNet))
 
     elapsed := time.Since(start)
     fmt.Printf("Took %s\n", elapsed)

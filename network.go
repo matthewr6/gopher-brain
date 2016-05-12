@@ -35,7 +35,7 @@ type Node struct {
 type Network struct {
     Nodes []*Node           `json:"nodes"`
     Dimensions [3]int       `json:"dimensions"`
-    // Sensors []*Sensor       `json:"sensors"` // todo - add to state.go
+    Sensors []*Sensor       `json:"sensors"` // todo - add to state.go
 }
 
 type Stimulus struct {
