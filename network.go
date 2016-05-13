@@ -7,6 +7,9 @@ import (
     "os"
     "strconv"
     "encoding/json"
+
+    "github.com/jteeuwen/keyboard"
+    term "github.com/nsf/termbox-go"
 )
 
 /*
@@ -35,7 +38,7 @@ type Node struct {
 type Network struct {
     Nodes []*Node           `json:"nodes"`
     Dimensions [3]int       `json:"dimensions"`
-    Sensors []*Sensor       `json:"sensors"` // todo - add to state.go
+    Sensors []*Sensor       `json:"sensors"`
 }
 
 type Stimulus struct {
@@ -95,9 +98,9 @@ func (net *Network) Cycle() {
     }
 
     // also update nodes that receive sensory information
-    // for _, sensor := range net.Sensors {
-    //     sensor.Update()
-    // }
+    for _, sensor := range net.Sensors {
+        sensor.Update()
+    }
 
     // then clear the connections
     // do I still need this? doubtful
@@ -259,5 +262,20 @@ func (net *Network) GenerateAnim(frames int) {
     for frame := 0; frame < frames; frame++ {
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
+    }
+}
+
+func (net *Network) AnimateUntilDone() {
+    os.Mkdir("frames", 755)
+    frame := 0
+    for running {
+        net.DumpJSON(strconv.Itoa(frame))
+        net.Cycle()
+    }
+}
+
+func KeyboardPoll(kb keyboard.Keyboard) {
+    for running {
+        kb.Poll(term.PollEvent())
     }
 }

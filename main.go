@@ -5,8 +5,11 @@ import (
     "time"
     // "os"
     // "strconv"
-    "reflect"
+    // "reflect"
     "math/rand"
+
+    "github.com/jteeuwen/keyboard/termbox"
+    term "github.com/nsf/termbox-go"
 )
 
 /*
@@ -14,6 +17,9 @@ import (
     * is "value at address"
 */
 
+var running = true
+
+// todo - clean up goroutines and whatnot
 func main() {
     start := time.Now()
     rand.Seed(time.Now().UTC().UnixNano())
@@ -22,9 +28,19 @@ func main() {
     NETWORK_SIZE := [3]int{25, 25, 25}
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
-    myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1})
-    myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1})
-    myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15})
+    // myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1}, true)
+    myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1}, true, "a")
+    // myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15}, true)
+
+    // this is the keyboard sensing stuff
+    term.Init()
+    kb := termbox.New()
+    kb.Bind(func() {
+        running = false
+    }, "space")
+    go KeyboardPoll(kb)
+    
+    myNet.AnimateUntilDone()
 
     // myNet := LoadState("test")
     // todo - just make this an array of 3-length int arrays
@@ -56,6 +72,7 @@ func main() {
     // })
     // myNet.RandomizeValues()
 
+
     // frames, err := strconv.Atoi(os.Args[1])
     // if err != nil {
     //     fmt.Println(err)
@@ -63,12 +80,13 @@ func main() {
     // }
     // myNet.GenerateAnim(frames)
     
-    // myNet.SaveState("test")
+    // myNet.SaveState("environ")
     
-    myNet.SaveState("test")
-    loadedNet := LoadState("test")
-    fmt.Println(reflect.DeepEqual(loadedNet, myNet))
+    // myNet.SaveState("test")
+    // loadedNet := LoadState("test")
+    // fmt.Println(reflect.DeepEqual(loadedNet, myNet))
 
     elapsed := time.Since(start)
+    term.Close()
     fmt.Printf("Took %s\n", elapsed)
 }

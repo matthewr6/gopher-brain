@@ -16,6 +16,8 @@ type Sensor struct {
     // Radius int          `json:"radius"`
     // NodeCount int       `json:"nodeCount"`
     Nodes []*Node       `json:"nodes"`
+    Excitatory bool     `json:"excitatory"`
+    Trigger string      `json:"trigger"`
     // Center [3]int       `json:"center"`
     // FlatPlane string    `json:"plane"` // make it a flat plane
 }
@@ -29,20 +31,25 @@ func (sensor *Sensor) Update() {
     // for now let's just continuously stimulate every node
     // maybe try randomly lighting up the node, a 50/50 chance?
     for _, node := range sensor.Nodes {
-        if (rand.Intn(2) == 1) {
+        if (sensor.Excitatory) {
             node.Value = 1
+        } else {
+            node.Value = 0
         }
     }
 }
 
 // do I even need the plane stuff
 // seems bloated
-func (net *Network) CreateSensor(r int, count int, plane string, center [3]int) *Sensor {
+// todo reorder these args
+func (net *Network) CreateSensor(r int, count int, plane string, center [3]int, excitatory bool, trigger string) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         // Radius: r,
         // NodeCount: count,
         Nodes: []*Node{},
+        Excitatory: excitatory,
+        Trigger: trigger,
         // Center: center,
     }
     // todo - determine correct coefficient

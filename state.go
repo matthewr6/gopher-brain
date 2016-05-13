@@ -35,6 +35,8 @@ type DisplayConnection struct {
 
 type DisplaySensor struct {
     Nodes[][3]int     `json:"nodes"`
+    Excitatory bool   `json:"excitatory"`
+    Trigger string    `json:"trigger"`
 }
 
 func (d DisplayNetwork) String() string {
@@ -107,6 +109,8 @@ func LoadState(name string) *Network {
         }
         net.Sensors = append(net.Sensors, &Sensor{
             Nodes: nodes,
+            Excitatory: importedSensor.Excitatory,
+            Trigger: importedSensor.Trigger,
         })
     }
     return net
@@ -127,6 +131,8 @@ func (net Network) SaveState(name string) {
         }
         dispNet.Sensors = append(dispNet.Sensors, &DisplaySensor{
             Nodes: positions,
+            Excitatory: sensor.Excitatory,
+            Trigger: sensor.Trigger,
         })
     }
     for _, node := range net.Nodes {
