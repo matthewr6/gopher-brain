@@ -3,6 +3,8 @@ package main
 import (
     "math/rand"
     "encoding/json"
+    "fmt"
+    "github.com/jteeuwen/keyboard"
 )
 
 // TODO - some sort of equation fitted on each to determine the response
@@ -18,6 +20,7 @@ type Sensor struct {
     Nodes []*Node       `json:"nodes"`
     Excitatory bool     `json:"excitatory"`
     Trigger string      `json:"trigger"`
+    Stimulated bool     `json:"-"`
     // Center [3]int       `json:"center"`
     // FlatPlane string    `json:"plane"` // make it a flat plane
 }
@@ -29,9 +32,14 @@ func (s Sensor) String() string {
 
 func (sensor *Sensor) Update() {
     // for now let's just continuously stimulate every node
-    // maybe try randomly lighting up the node, a 50/50 chance?
     for _, node := range sensor.Nodes {
-        if (sensor.Excitatory) {
+        // if (sensor.Excitatory) {
+        //     node.Value = 1
+        // } else {
+        //     node.Value = 0
+        // }
+        if sensor.Stimulated {
+            fmt.Println("yay")
             node.Value = 1
         } else {
             node.Value = 0
@@ -42,7 +50,8 @@ func (sensor *Sensor) Update() {
 // do I even need the plane stuff
 // seems bloated
 // todo reorder these args
-func (net *Network) CreateSensor(r int, count int, plane string, center [3]int, excitatory bool, trigger string) *Sensor {
+// also it's SO LONG AND MESSY :L
+func (net *Network) CreateSensor(r int, count int, plane string, center [3]int, excitatory bool, trigger string, kb keyboard.Keyboard) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         // Radius: r,
@@ -50,8 +59,12 @@ func (net *Network) CreateSensor(r int, count int, plane string, center [3]int, 
         Nodes: []*Node{},
         Excitatory: excitatory,
         Trigger: trigger,
+        Stimulated: false,
         // Center: center,
     }
+    kb.Bind(func() {
+        sensor.Stimulated = true
+    }, trigger)
     // todo - determine correct coefficient
     stDev := float64(r)
     // plane is which dimension should stay the same - name the variable in a better way?

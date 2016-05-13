@@ -111,6 +111,7 @@ func LoadState(name string) *Network {
             Nodes: nodes,
             Excitatory: importedSensor.Excitatory,
             Trigger: importedSensor.Trigger,
+            Stimulated: false,
         })
     }
     return net

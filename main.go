@@ -29,7 +29,6 @@ func main() {
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
     // myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1}, true)
-    myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1}, true, "a")
     // myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15}, true)
 
     // this is the keyboard sensing stuff
@@ -39,8 +38,9 @@ func main() {
         running = false
     }, "space")
     go KeyboardPoll(kb)
-    
-    myNet.AnimateUntilDone()
+
+    myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1}, true, "a", kb)
+    myNet.AnimateUntilDone(100)
 
     // myNet := LoadState("test")
     // todo - just make this an array of 3-length int arrays

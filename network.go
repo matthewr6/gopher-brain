@@ -7,6 +7,7 @@ import (
     "os"
     "strconv"
     "encoding/json"
+    "time"
 
     "github.com/jteeuwen/keyboard"
     term "github.com/nsf/termbox-go"
@@ -265,10 +266,11 @@ func (net *Network) GenerateAnim(frames int) {
     }
 }
 
-func (net *Network) AnimateUntilDone() {
+func (net *Network) AnimateUntilDone(ms int) {
     os.Mkdir("frames", 755)
     frame := 0
     for running {
+        time.Sleep(time.Duration(ms) * time.Millisecond)
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
     }
