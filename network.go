@@ -273,6 +273,8 @@ func (net *Network) AnimateUntilDone(ms int) {
         time.Sleep(time.Duration(ms) * time.Millisecond)
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
+        fmt.Println(frame)
+        frame++
     }
 }
 

@@ -39,11 +39,13 @@ func (sensor *Sensor) Update() {
         //     node.Value = 0
         // }
         if sensor.Stimulated {
-            fmt.Println("yay")
             node.Value = 1
         } else {
             node.Value = 0
         }
+    }
+    if sensor.Stimulated {
+        sensor.Stimulated = false
     }
 }
 
