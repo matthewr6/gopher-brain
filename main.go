@@ -40,6 +40,7 @@ func main() {
     go KeyboardPoll(kb)
 
     myNet.CreateSensor(3, 50, "", [3]int{25, 1, 1}, true, "a", kb)
+    myNet.CreateSensor(1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
     myNet.AnimateUntilDone(100)
 
     // myNet := LoadState("test")

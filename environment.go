@@ -45,7 +45,7 @@ func (sensor *Sensor) Update() {
         }
     }
     if sensor.Stimulated {
-        sensor.Stimulated = false
+        fmt.Println(sensor.Trigger)
     }
 }
 
@@ -65,7 +65,7 @@ func (net *Network) CreateSensor(r int, count int, plane string, center [3]int, 
         // Center: center,
     }
     kb.Bind(func() {
-        sensor.Stimulated = true
+        sensor.Stimulated = !sensor.Stimulated
     }, trigger)
     // todo - determine correct coefficient
     stDev := float64(r)
