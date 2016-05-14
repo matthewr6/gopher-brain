@@ -7,6 +7,10 @@ import (
     "os"
     "strconv"
     "encoding/json"
+    "time"
+
+    "github.com/jteeuwen/keyboard"
+    term "github.com/nsf/termbox-go"
 )
 
 /*
@@ -14,22 +18,28 @@ import (
     * is "value at address"
 */
 
+// should one axon/connection connect to multiple neurons that are close by?
+// http://changingminds.org/explanations/brain/parts_brain/neuron.htm
+//http://cogsci.stackexchange.com/questions/9144/how-many-dendrite-connections-vs-axon-terminals-does-a-multipolar-cerebral-neuro
+// how would this work with terminals then?
 type Connection struct {
-    To *Node           `json:"-"`
+    To []*Node         `json:"-"`
     HoldingVal int     `json:"holding"`
-    Terminals int      `json:"terminals"` // like strenth - ADD THIS TO STATE.GO
-    Excitatory bool    `json:"excitatory"` // TODO - ADD THIS TO STATE.GO
+    Terminals int      `json:"terminals"`
+    Excitatory bool    `json:"excitatory"`
 }
 
 type Node struct {
     Value int                          `json:"value"`
-    OutgoingConnection *Connection     `json:"axon"`  //which node to send to
+    OutgoingConnection *Connection     `json:"-"`  //which node to send to
     IncomingConnections []*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                    `json:"position"`
 }
 
 type Network struct {
-    Nodes []*Node `json:"nodes"`
+    Nodes []*Node           `json:"nodes"`
+    Dimensions [3]int       `json:"dimensions"`
+    Sensors []*Sensor       `json:"sensors"`
 }
 
 type Stimulus struct {
@@ -65,12 +75,6 @@ func (n *Node) Update() {
         //or else just stay at 0
         n.Value = 1
     }
-
-    // var final float64
-    // for _, conn := range n.IncomingConnections {
-    //     final = final + conn.HoldingVal*conn.Strength
-    // }
-    // n.Value = final
 }
 
 func RandFloat(min, max float64) float64 {
@@ -86,21 +90,24 @@ func (net *Network) Cycle() {
 
     for _, node := range net.Nodes {
         node.OutgoingConnection.HoldingVal = node.Value
-        // bother with strengths?
         node.Value = 0
     }
 
     // then set all the nodes based on connections
-
     for _, node := range net.Nodes {
         node.Update()
     }
 
+    // also update nodes that receive sensory information
+    for _, sensor := range net.Sensors {
+        sensor.Update()
+    }
+
     // then clear the connections
     // do I still need this? doubtful
-    for _, node := range net.Nodes {
-        node.OutgoingConnection.HoldingVal = 0
-    }
+    // for _, node := range net.Nodes {
+    //     node.OutgoingConnection.HoldingVal = 0
+    // }
 }
 
 func (n Node) String() string {
@@ -108,8 +115,6 @@ func (n Node) String() string {
     return string(jsonRep)
 }
 
-
-//rework - stimulate certain neurons, but don't bother with strength - just 1
 func (net *Network) Stimulate(stimuli []Stimulus) {
     for _, stim := range stimuli {
         var applyTo *Node;
@@ -141,30 +146,73 @@ func ThreeDimDist(p1, p2 [3]int) float64 {
     return math.Sqrt(float64(ans))
 }
 
+func NodeExistsIn(node *Node, nodes []*Node) bool {
+    for _, potNode := range nodes {
+        if (node == potNode) {
+            return true
+        }
+    }
+    return false
+}
+
 func (net *Network) Connect() {
     for _, node := range net.Nodes {
         // get the closest nodes and select one randomly to connect to
-        possibleConnections := []*Node{}
-        for _, potConNode := range net.Nodes {
-            if ThreeDimDist(node.Position, potConNode.Position) < 1.75 && node != potConNode {
-                possibleConnections = append(possibleConnections, potConNode)
+        stDev := 3.0 // what should it be?
+        center := node.Position
+        for center == node.Position {
+            potX := int(rand.NormFloat64() * stDev) + node.Position[0]
+            potY := int(rand.NormFloat64() * stDev) + node.Position[1]
+            potZ := int(rand.NormFloat64() * stDev) + node.Position[2]
+            for potX <= 0 || potX > net.Dimensions[0] {
+                potX = int(rand.NormFloat64() * stDev) + node.Position[0]
+            }
+            for potY <= 0 || potY > net.Dimensions[0] {
+                potY = int(rand.NormFloat64() * stDev) + node.Position[1]
+            }
+            for potZ <= 0 || potZ > net.Dimensions[0] {
+                potZ = int(rand.NormFloat64() * stDev) + node.Position[2]
+            }
+            center = [3]int{potX, potY, potZ}
+        }
+        centralConnNode := FindNode(center, net.Nodes)
+
+        // select the X connections here
+        numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS?
+        nodesToConnect := []*Node{
+            centralConnNode,
+        }
+        stDev = 1.5
+        for i := 0; i < numAxonTerminals; i++ {
+            potPos := [3]int{
+                int(rand.NormFloat64() * stDev) + centralConnNode.Position[0],
+                int(rand.NormFloat64() * stDev) + centralConnNode.Position[1],
+                int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
+            }
+            potNode := FindNode(potPos, net.Nodes)
+            // potNode := possibleConnections[rand.Intn(len(possibleConnections))]
+            if !NodeExistsIn(potNode, nodesToConnect) && potNode != node {
+                nodesToConnect = append(nodesToConnect, potNode)
             }
         }
-        // select the one connection here
-        nodeToConnect := possibleConnections[rand.Intn(len(possibleConnections))]
-        numTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
+
+        // do I even want this now?
+        numTerminals := rand.Intn(2) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
+
         var excitatory bool
-        randTest := rand.Float32()
-        if randTest < 0.5 {
+        // should this have a higher probability of being excitatory?
+        if rand.Intn(2) != 0 {
             excitatory = true
         }
         newConn := &Connection{
-            To: nodeToConnect,
+            To: nodesToConnect,
             Terminals: numTerminals,
             Excitatory: excitatory,
         }
         node.OutgoingConnection = newConn
-        nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
+        for _, nodeToConnect := range nodesToConnect {
+            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
+        }
     }
 }
 
@@ -203,7 +251,9 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
             }
         }
     }
+
     return &Network {
+        Dimensions: dimensions,
         Nodes: nodes,
     }
 }
@@ -213,5 +263,23 @@ func (net *Network) GenerateAnim(frames int) {
     for frame := 0; frame < frames; frame++ {
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
+    }
+}
+
+func (net *Network) AnimateUntilDone(ms int) {
+    os.Mkdir("frames", 755)
+    frame := 0
+    for running {
+        time.Sleep(time.Duration(ms) * time.Millisecond)
+        net.DumpJSON(strconv.Itoa(frame))
+        net.Cycle()
+        fmt.Println(frame)
+        frame++
+    }
+}
+
+func KeyboardPoll(kb keyboard.Keyboard) {
+    for running {
+        kb.Poll(term.PollEvent())
     }
 }

@@ -1,3 +1,7 @@
+### latest animation
+
+![Latest image](/latest.gif)
+
 ### to produce an animation
 
 - `cd` into the root of the project
