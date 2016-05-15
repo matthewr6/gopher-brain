@@ -13,16 +13,11 @@ import (
 // dangit gonna have to add this to savestate/loadstate
 
 // sensors feed data to nodes
-// todo what attrs do I need
 type Sensor struct {
-    // Radius int          `json:"radius"`
-    // NodeCount int       `json:"nodeCount"`
     Nodes []*Node       `json:"nodes"`
     Excitatory bool     `json:"excitatory"`
     Trigger string      `json:"trigger"`
     Stimulated bool     `json:"-"`
-    // Center [3]int       `json:"center"`
-    // FlatPlane string    `json:"plane"` // make it a flat plane
 }
 
 func (s Sensor) String() string {
@@ -33,20 +28,15 @@ func (s Sensor) String() string {
 func (sensor *Sensor) Update() {
     // for now let's just continuously stimulate every node
     for _, node := range sensor.Nodes {
-        // if (sensor.Excitatory) {
-        //     node.Value = 1
-        // } else {
-        //     node.Value = 0
-        // }
         if sensor.Stimulated {
             node.Value = 1
         } else {
             node.Value = 0
         }
     }
-    if sensor.Stimulated {
-        fmt.Println(sensor.Trigger)
-    }
+    // if sensor.Stimulated {
+    //     fmt.Println(sensor.Trigger)
+    // }
 }
 
 // do I even need the plane stuff

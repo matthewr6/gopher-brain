@@ -21,7 +21,7 @@ import (
 // should one axon/connection connect to multiple neurons that are close by?
 // http://changingminds.org/explanations/brain/parts_brain/neuron.htm
 //http://cogsci.stackexchange.com/questions/9144/how-many-dendrite-connections-vs-axon-terminals-does-a-multipolar-cerebral-neuro
-// how would this work with terminals then?
+// todo how would this work with terminals then?
 type Connection struct {
     To []*Node         `json:"-"`
     HoldingVal int     `json:"holding"`
@@ -271,9 +271,10 @@ func (net *Network) AnimateUntilDone(ms int) {
     frame := 0
     for running {
         time.Sleep(time.Duration(ms) * time.Millisecond)
-        net.DumpJSON(strconv.Itoa(frame))
+        frameStr := strconv.Itoa(frame)
+        net.DumpJSON(frameStr)
         net.Cycle()
-        fmt.Println(frame)
+        fmt.Print("\r" + frameStr)
         frame++
     }
 }
