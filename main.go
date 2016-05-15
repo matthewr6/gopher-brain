@@ -55,46 +55,6 @@ func main() {
     myNet.CreateSensor(1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
     myNet.CreateSensor(1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
     myNet.AnimateUntilDone(100)
-
-    // myNet := LoadState("test")
-    // todo - just make this an array of 3-length int arrays
-    // myNet.Stimulate([]Stimulus{
-    //     Stimulus{
-    //         Position: [3]int{1,1,1},
-    //     },
-    //     Stimulus{
-    //         Position: [3]int{1,1,2},
-    //     },
-    //     Stimulus{
-    //         Position: [3]int{1,2,1},
-    //     },
-    //     Stimulus{
-    //         Position: [3]int{2,1,1},
-    //     },
-    //     Stimulus{
-    //         Position: [3]int{1,2,2},
-    //     },
-    //     Stimulus{
-    //         Position: [3]int{2,1,2},
-    //     },
-    //     Stimulus{
-    //         Position: [3]int{2,2,1},
-    //     },
-    //     Stimulus{
-    //         Position: [3]int{2,2,2},
-    //     },
-    // })
-    // myNet.RandomizeValues()
-
-
-    // frames, err := strconv.Atoi(os.Args[1])
-    // if err != nil {
-    //     fmt.Println(err)
-    //     return
-    // }
-    // myNet.GenerateAnim(frames)
-    
-    // myNet.SaveState("state")
     
     // myNet.SaveState("test")
     // loadedNet := LoadState("test")
@@ -103,8 +63,8 @@ func main() {
     elapsed := time.Since(start)
     term.Close()
 
-    fmt.Print("Save state?  Enter a name if you wish to save the state:  ")
-    fileName, _ := reader.ReadString('\n')
+    fmt.Print("\nSave state?  Enter a name if you wish to save the state:  ")
+    fileName, _ = reader.ReadString('\n')
     fileName = strings.TrimSpace(fileName)
     if fileName != "" {
         myNet.SaveState(fileName)
