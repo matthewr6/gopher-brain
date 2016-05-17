@@ -102,6 +102,7 @@ func LoadState(name string) *Network {
 
     // set sensors
     // this is also inefficient
+    // todo - add keyboard bindings
     for _, importedSensor := range importedNet.Sensors {
         nodes := []*Node{}
         for _, nodePos := range importedSensor.Nodes {
