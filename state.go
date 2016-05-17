@@ -55,7 +55,7 @@ func FindNode(position [3]int, potentialNodes []*Node) *Node {
 }
 
 func LoadState(name string) *Network {
-    fmt.Println("loading")
+    fmt.Println(fmt.Sprintf("Loading state \"%v\"...", name))
     datafile, err := os.Open(fmt.Sprintf("./state/%v_state.json", name))
     if err != nil {
         fmt.Println(err)
@@ -119,7 +119,7 @@ func LoadState(name string) *Network {
 }
 
 func (net Network) SaveState(name string) {
-    fmt.Println("saving")
+    fmt.Println(fmt.Sprintf("Saving state \"%v\"...", name))
     os.Mkdir("state", 755)
     dispNet := DisplayNetwork{
         Nodes: []*DisplayNode{},
