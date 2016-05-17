@@ -40,7 +40,8 @@ func main() {
     go KeyboardPoll(kb)
     
     var myNet *Network
-    if fileName == "" {
+    _, err := os.Stat(fmt.Sprintf("./state/%v_state.json", fileName))
+    if fileName == "" || err != nil {
         NETWORK_SIZE := [3]int{25, 25, 25}
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
