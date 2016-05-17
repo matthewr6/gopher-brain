@@ -31,19 +31,6 @@ func main() {
     start := time.Now()
     rand.Seed(time.Now().UTC().UnixNano())
 
-    var myNet *Network
-
-    if fileName != "" {
-        // [width, depth, height]
-        NETWORK_SIZE := [3]int{25, 25, 25}
-        myNet = MakeNetwork(NETWORK_SIZE, false)
-        myNet.Connect()
-    } else {
-        myNet = LoadState(fileName)
-    }
-    // myNet.CreateSensor(3, 25, "", [3]int{1, 1, 1}, true)
-    // myNet.CreateSensor(2, 25, "y", [3]int{15, 1, 15}, true)
-
     // this is the keyboard sensing stuff
     term.Init()
     kb := termbox.New()
@@ -51,11 +38,20 @@ func main() {
         running = false
     }, "space")
     go KeyboardPoll(kb)
-
+    
+    var myNet *Network
+    if fileName != "" {
+        NETWORK_SIZE := [3]int{25, 25, 25}
+        myNet = MakeNetwork(NETWORK_SIZE, false)
+        myNet.Connect()
+    } else {
+        myNet = LoadState(fileName)
+    }
     myNet.CreateSensor(1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
     myNet.CreateSensor(1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
     myNet.AnimateUntilDone(100)
     
+    // uncomment this to test state saving/loading capabilities
     // myNet.SaveState("test")
     // loadedNet := LoadState("test")
     // fmt.Println(reflect.DeepEqual(loadedNet, myNet))

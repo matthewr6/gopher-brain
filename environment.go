@@ -3,7 +3,7 @@ package main
 import (
     "math/rand"
     "encoding/json"
-    "fmt"
+    // "fmt"
     "github.com/jteeuwen/keyboard"
 )
 
@@ -34,6 +34,7 @@ func (sensor *Sensor) Update() {
             node.Value = 0
         }
     }
+    // todo - should I have any indication?
     // if sensor.Stimulated {
     //     fmt.Println(sensor.Trigger)
     // }
