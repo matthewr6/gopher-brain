@@ -45,11 +45,12 @@ func main() {
         NETWORK_SIZE := [3]int{25, 25, 25}
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
+        
+        myNet.CreateSensor(1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
+        myNet.CreateSensor(1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
     } else {
-        myNet = LoadState(fileName)
+        myNet = LoadState(fileName, kb)
     }
-    myNet.CreateSensor(1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
-    myNet.CreateSensor(1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
     myNet.AnimateUntilDone(100)
     
 

@@ -4,6 +4,8 @@ import (
     "fmt"
     "os"
     "encoding/json"
+
+    "github.com/jteeuwen/keyboard"
 )
 
 /*
@@ -54,7 +56,7 @@ func FindNode(position [3]int, potentialNodes []*Node) *Node {
     return &Node{}
 }
 
-func LoadState(name string) *Network {
+func LoadState(name string, kb keyboard.Keyboard) *Network {
     fmt.Println(fmt.Sprintf("Loading state \"%v\"...", name))
     datafile, err := os.Open(fmt.Sprintf("./state/%v_state.json", name))
     if err != nil {
@@ -102,18 +104,21 @@ func LoadState(name string) *Network {
 
     // set sensors
     // this is also inefficient
-    // todo - add keyboard bindings
     for _, importedSensor := range importedNet.Sensors {
         nodes := []*Node{}
         for _, nodePos := range importedSensor.Nodes {
             nodes = append(nodes, FindNode(nodePos, net.Nodes))
         }
-        net.Sensors = append(net.Sensors, &Sensor{
+        newSensor := &Sensor{
             Nodes: nodes,
             Excitatory: importedSensor.Excitatory,
             Trigger: importedSensor.Trigger,
             Stimulated: false,
-        })
+        }
+        net.Sensors = append(net.Sensors, newSensor)
+        kb.Bind(func() {
+            newSensor.Stimulated = !newSensor.Stimulated
+        }, importedSensor.Trigger)
     }
     return net
 }
