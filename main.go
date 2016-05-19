@@ -35,9 +35,14 @@ func main() {
     term.Init()
     term.SetCursor(0, 0)
     
+    netBuilt := false
+    
     kb := termbox.New()
     kb.Bind(func() {
         running = false
+        if !netBuilt {
+            os.Exit(1)
+        }
     }, "space")
     go KeyboardPoll(kb)
     
@@ -53,6 +58,7 @@ func main() {
     } else {
         myNet = LoadState(fileName, kb)
     }
+    netBuilt = true
     myNet.AnimateUntilDone(100)
     
 
