@@ -8,7 +8,6 @@ import (
     "strconv"
     "encoding/json"
     "time"
-    "bytes"
 
     "github.com/jteeuwen/keyboard"
     term "github.com/nsf/termbox-go"
@@ -289,14 +288,14 @@ func KeyboardPoll(kb keyboard.Keyboard) {
 }
 
 func (net Network) Info(frame int) {
-    var out bytes.Buffer
-    out.WriteString(fmt.Sprintf("\rFrame %v", frame))
+    term.SetCursor(0, 0)
+    fmt.Printf("Frame %v\n", frame)
     for _, sensor := range net.Sensors {
         active := "inactive"
         if sensor.Stimulated {
             active = "active"
         }
-        out.WriteString(fmt.Sprintf(" | %v: %v", sensor.Name, active))
+        fmt.Printf("%v: %v\n", sensor.Name, active)
     }
-    fmt.Print(out.String())
+    term.HideCursor()
 }
