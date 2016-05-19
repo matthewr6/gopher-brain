@@ -290,7 +290,10 @@ func KeyboardPoll(kb keyboard.Keyboard) {
 
 func (net Network) Info(frame int) {
     var out bytes.Buffer
-    out.WriteString(fmt.Sprintf("\rFrame %v", frame))
+    // term.Clear(term.ColorDefault, term.ColorDefault)
+    // term.Flush()
+    term.SetCursor(0, 0)
+    out.WriteString(fmt.Sprintf("Frame %v", frame))
     for _, sensor := range net.Sensors {
         active := "inactive"
         if sensor.Stimulated {

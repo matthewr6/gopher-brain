@@ -33,6 +33,8 @@ func main() {
 
     // this is the keyboard sensing stuff
     term.Init()
+    term.SetCursor(0, 0)
+    
     kb := termbox.New()
     kb.Bind(func() {
         running = false
