@@ -8,6 +8,7 @@ import (
     "strconv"
     "encoding/json"
     "time"
+    "bytes"
 
     "github.com/jteeuwen/keyboard"
     term "github.com/nsf/termbox-go"
@@ -274,7 +275,9 @@ func (net *Network) AnimateUntilDone(ms int) {
         frameStr := strconv.Itoa(frame)
         net.DumpJSON(frameStr)
         net.Cycle()
-        fmt.Print("\r" + frameStr)
+        // should print everything on one line, just because it's simpler
+        // fmt.Print("\r" + frameStr)
+        net.Info(frame)
         frame++
     }
 }
@@ -283,4 +286,17 @@ func KeyboardPoll(kb keyboard.Keyboard) {
     for running {
         kb.Poll(term.PollEvent())
     }
+}
+
+func (net Network) Info(frame int) {
+    var out bytes.Buffer
+    out.WriteString(fmt.Sprintf("\rFrame %v", frame))
+    for _, sensor := range net.Sensors {
+        active := "inactive"
+        if sensor.Stimulated {
+            active = "active"
+        }
+        out.WriteString(fmt.Sprintf(" | %v: %v", sensor.Name, active))
+    }
+    fmt.Print(out.String())
 }

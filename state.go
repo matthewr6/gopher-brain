@@ -39,6 +39,7 @@ type DisplaySensor struct {
     Nodes[][3]int     `json:"nodes"`
     Excitatory bool   `json:"excitatory"`
     Trigger string    `json:"trigger"`
+    Name string       `json:"name"`
 }
 
 func (d DisplayNetwork) String() string {
@@ -114,6 +115,7 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
             Excitatory: importedSensor.Excitatory,
             Trigger: importedSensor.Trigger,
             Stimulated: false,
+            Name: importedSensor.Name,
         }
         net.Sensors = append(net.Sensors, newSensor)
         kb.Bind(func() {
@@ -140,6 +142,7 @@ func (net Network) SaveState(name string) {
             Nodes: positions,
             Excitatory: sensor.Excitatory,
             Trigger: sensor.Trigger,
+            Name: sensor.Name,
         })
     }
     for _, node := range net.Nodes {

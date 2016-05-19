@@ -18,6 +18,7 @@ type Sensor struct {
     Excitatory bool     `json:"excitatory"`
     Trigger string      `json:"trigger"`
     Stimulated bool     `json:"-"`
+    Name string         `json:"name"`
 }
 
 func (s Sensor) String() string {
@@ -44,7 +45,7 @@ func (sensor *Sensor) Update() {
 // seems bloated
 // todo reorder these args
 // also it's SO LONG AND MESSY :L
-func (net *Network) CreateSensor(r int, count int, plane string, center [3]int, excitatory bool, trigger string, kb keyboard.Keyboard) *Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, kb keyboard.Keyboard) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         // Radius: r,
@@ -53,6 +54,7 @@ func (net *Network) CreateSensor(r int, count int, plane string, center [3]int, 
         Excitatory: excitatory,
         Trigger: trigger,
         Stimulated: false,
+        Name: name,
         // Center: center,
     }
     kb.Bind(func() {
