@@ -291,9 +291,9 @@ func (net Network) Info(frame int) {
     term.SetCursor(0, 0)
     fmt.Printf("Frame %v\n", frame)
     for _, sensor := range net.Sensors {
-        active := "inactive"
+        active := "x"
         if sensor.Stimulated {
-            active = "active"
+            active = "o"
         }
         fmt.Printf("%v: %v\n", sensor.Name, active)
     }
