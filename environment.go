@@ -57,9 +57,11 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
         Name: name,
         // Center: center,
     }
-    kb.Bind(func() {
-        sensor.Stimulated = !sensor.Stimulated
-    }, trigger)
+    if kb != nil {
+        kb.Bind(func() {
+            sensor.Stimulated = !sensor.Stimulated
+        }, trigger)
+    }
     // todo - determine correct coefficient
     stDev := float64(r)
     // plane is which dimension should stay the same - name the variable in a better way?

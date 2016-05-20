@@ -37,18 +37,9 @@ type Node struct {
 }
 
 type Network struct {
-    Nodes []*Node           `json:"nodes"`
+    Nodes [][][]*Node       `json:"nodes"`
     Dimensions [3]int       `json:"dimensions"`
     Sensors []*Sensor       `json:"sensors"`
-}
-
-type Stimulus struct {
-    Position [3]int   `json:"position"`
-}
-
-func (s Stimulus) String() string {
-    jsonRep, _ := json.MarshalIndent(s, "", "    ")
-    return string(jsonRep)
 }
 
 func (c Connection) String() string {
@@ -88,15 +79,16 @@ func (net *Network) Cycle() {
     // fake concurrency
     // first, set all the connections based on their nodes
 
-    for _, node := range net.Nodes {
+    // todo this is used too often, make a function so I don't copy/paste
+    net.ForEachNode(func(node *Node) {
         node.OutgoingConnection.HoldingVal = node.Value
         node.Value = 0
-    }
+    })
 
     // then set all the nodes based on connections
-    for _, node := range net.Nodes {
+    net.ForEachNode(func(node *Node) {
         node.Update()
-    }
+    })
 
     // also update nodes that receive sensory information
     for _, sensor := range net.Sensors {
@@ -115,30 +107,17 @@ func (n Node) String() string {
     return string(jsonRep)
 }
 
-func (net *Network) Stimulate(stimuli []Stimulus) {
-    for _, stim := range stimuli {
-        var applyTo *Node;
-        for _, node := range net.Nodes {
-            if node.Position == stim.Position {
-                applyTo = node
-                break
-            }
-        }
-        applyTo.Value = 1
-    }
-}
-
 // is this still needed?
 // for cool viz, sure
 func (net *Network) RandomizeValues() {
-    for _, node := range net.Nodes {
+    net.ForEachNode(func(node *Node) {
         temp := rand.Float32()
         if temp < 0.5 {
             node.Value = 0
         } else {
             node.Value = 1
         }
-    }
+    })
 }
 
 func ThreeDimDist(p1, p2 [3]int) float64 {
@@ -156,7 +135,7 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
 }
 
 func (net *Network) Connect() {
-    for _, node := range net.Nodes {
+    net.ForEachNode(func(node *Node) {
         // get the closest nodes and select one randomly to connect to
         stDev := 3.0 // what should it be?
         center := node.Position
@@ -213,7 +192,7 @@ func (net *Network) Connect() {
         for _, nodeToConnect := range nodesToConnect {
             nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
         }
-    }
+    })
 }
 
 func (net Network) String() string {
@@ -228,7 +207,7 @@ func (net Network) DumpJSON(name string) {
 }
 
 func MakeNetwork(dimensions [3]int, blank bool) *Network {
-    nodes := []*Node{}
+    nodes := [][][]*Node{}
     math.Mod(5, 5)
     for i := 1; i <= dimensions[0]; i++ {
         for j := 1; j <= dimensions[1]; j++ {
@@ -243,11 +222,11 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                         newValue = 1
                     }
                 }
-                nodes = append(nodes, &Node{
+                nodes[i][j][k] = &Node{
                     Value: newValue,
                     Position: [3]int{i, j, k},
                     IncomingConnections: []*Connection{},
-                })
+                }
             }
         }
     }
@@ -298,4 +277,14 @@ func (net Network) Info(frame int) {
         fmt.Printf("%v: %v\n", sensor.Name, active)
     }
     term.HideCursor()
+}
+
+func (net *Network) ForEachNode(handler func(*Node)) {
+    for i := range net.Nodes {
+        for j := range net.Nodes[i] {
+            for k := range net.Nodes[i][j] {
+                handler(net.Nodes[i][j][k])
+            }
+        }
+    }
 }

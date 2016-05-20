@@ -16,9 +16,9 @@ import (
 // still have to reconcile the updated network.go stuff
 
 type DisplayNetwork struct {
-    Nodes []*DisplayNode     `json:"nodes"`
-    Dimensions [3]int        `json:"dimensions"`
-    Sensors []*DisplaySensor `json:"sensors"`
+    Nodes [][][]*DisplayNode   `json:"nodes"`
+    Dimensions [3]int          `json:"dimensions"`
+    Sensors []*DisplaySensor   `json:"sensors"`
     // Connections []*DisplayConnection `json:"connections"`
 }
 
@@ -48,13 +48,9 @@ func (d DisplayNetwork) String() string {
 }
 
 // oh sweet jesus MORE INEFFICIENCY
-func FindNode(position [3]int, potentialNodes []*Node) *Node {
-    for _, potNode := range potentialNodes {
-        if potNode.Position == position {
-            return potNode
-        }
-    }
-    return &Node{}
+// todo replace all references
+func FindNode(position [3]int, potentialNodes [][][]*Node) *Node {
+    return potentialNodes[position[0]][position[1]][position[2]]
 }
 
 func LoadState(name string, kb keyboard.Keyboard) *Network {
@@ -69,23 +65,23 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
     datafile.Close()
 
     net := &Network{
-        Nodes: []*Node{},
+        Nodes: [][][]*Node{},
         Dimensions: importedNet.Dimensions,
     }
     // set nodes
     // this looks good
-    for _, importedNode := range importedNet.Nodes {
+    importedNet.ForEachINode(func(importedNode DisplayNode, pos [3]int) {
         newNode := &Node{
             Value: importedNode.Value,
             Position: importedNode.Position,
             IncomingConnections: []*Connection{},
         }
-        net.Nodes = append(net.Nodes, newNode)
-    }
+        net.Nodes[pos[0]][pos[1]][pos[2]] = newNode
+    });
     // set connections
     // this part is super inefficient
     // still should optimize
-    for _,  importedNode := range importedNet.Nodes {
+    importedNet.ForEachINode(func(importedNode DisplayNode, pos [3]int) {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
             Terminals: importedNode.OutgoingConnection.Terminals,
@@ -101,7 +97,7 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
         }
         node.OutgoingConnection = newConn
         newConn.To = nodesToConnect
-    }
+    })
 
     // set sensors
     // this is also inefficient
@@ -118,9 +114,11 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
             Name: importedSensor.Name,
         }
         net.Sensors = append(net.Sensors, newSensor)
-        kb.Bind(func() {
-            newSensor.Stimulated = !newSensor.Stimulated
-        }, importedSensor.Trigger)
+        if kb != nil {
+            kb.Bind(func() {
+                newSensor.Stimulated = !newSensor.Stimulated
+            }, importedSensor.Trigger)
+        }
     }
     return net
 }
@@ -167,4 +165,14 @@ func (net Network) SaveState(name string) {
     f, _ := os.Create(fmt.Sprintf("./state/%v_state.json", name))
     f.WriteString(dispNet.String())
     f.Close()
+}
+
+func (impNet DisplayNetwork) ForEachINode(handler func(DisplayNode, [3]int)) {
+    for i := range impNet.Nodes {
+        for j := range impNet.Nodes[i] {
+            for k := range impNet.Nodes[i][j] {
+                handler(impNet.Nodes[i][j][k], [3]int{i, j, k})
+            }
+        }
+    }
 }
