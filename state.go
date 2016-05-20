@@ -19,6 +19,7 @@ type DisplayNetwork struct {
     Nodes [][][]*DisplayNode   `json:"nodes"`
     Dimensions [3]int          `json:"dimensions"`
     Sensors []*DisplaySensor   `json:"sensors"`
+    Outputs []*DisplayOutput   `json:"outputs"`
     // Connections []*DisplayConnection `json:"connections"`
 }
 
@@ -39,6 +40,11 @@ type DisplaySensor struct {
     Nodes[][3]int     `json:"nodes"`
     Excitatory bool   `json:"excitatory"`
     Trigger string    `json:"trigger"`
+    Name string       `json:"name"`
+}
+
+type DisplayOutput struct {
+    Nodes[][3]int     `json:"nodes"`
     Name string       `json:"name"`
 }
 
@@ -149,6 +155,16 @@ func (net Network) SaveState(name string) {
             Excitatory: sensor.Excitatory,
             Trigger: sensor.Trigger,
             Name: sensor.Name,
+        })
+    }
+    for _, output := range net.Outputs {
+        positions := [][3]int{}
+        for _, outputNode := range output.Nodes {
+            positions = append(positions, outputNode.Position)
+        }
+        dispNet.Outputs = append(dispNet.Outputs, &DisplayOutput{
+            Nodes: positions,
+            Name: output.Name,
         })
     }
     for i := 0; i < net.Dimensions[0]; i++ {
