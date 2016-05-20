@@ -19,6 +19,7 @@ type DisplayNetwork struct {
     Nodes [][][]*DisplayNode   `json:"nodes"`
     Dimensions [3]int          `json:"dimensions"`
     Sensors []*DisplaySensor   `json:"sensors"`
+    Outputs []*DisplayOutput   `json:"outputs"`
     // Connections []*DisplayConnection `json:"connections"`
 }
 
@@ -32,12 +33,18 @@ type DisplayConnection struct {
     To [][3]int           `json:"to"`
     HoldingVal int        `json:"holdingVal"`
     Excitatory bool       `json:"excitatory"`
+    Strength float64      `json:"strength"`
 }
 
 type DisplaySensor struct {
     Nodes[][3]int     `json:"nodes"`
     Excitatory bool   `json:"excitatory"`
     Trigger string    `json:"trigger"`
+    Name string       `json:"name"`
+}
+
+type DisplayOutput struct {
+    Nodes[][3]int     `json:"nodes"`
     Name string       `json:"name"`
 }
 
@@ -92,6 +99,7 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
             Excitatory: importedNode.OutgoingConnection.Excitatory,
+            Strength: importedNode.OutgoingConnection.Strength,
         }
         node := FindNode(importedNode.Position, net.Nodes)
         nodesToConnect := []*Node{}
@@ -126,6 +134,19 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
             }, importedSensor.Trigger)
         }
     }
+
+    for _, importedOutput := range importedNet.Outputs {
+        nodes := []*Node{}
+        for _, nodePos := range importedOutput.Nodes {
+            nodes = append(nodes, FindNode(nodePos, net.Nodes))
+        }
+        newOutput := &Output{
+            Nodes: nodes,
+            Name: importedOutput.Name,
+        }
+        net.Outputs = append(net.Outputs, newOutput)
+    }
+
     return net
 }
 
@@ -149,6 +170,16 @@ func (net Network) SaveState(name string) {
             Name: sensor.Name,
         })
     }
+    for _, output := range net.Outputs {
+        positions := [][3]int{}
+        for _, outputNode := range output.Nodes {
+            positions = append(positions, outputNode.Position)
+        }
+        dispNet.Outputs = append(dispNet.Outputs, &DisplayOutput{
+            Nodes: positions,
+            Name: output.Name,
+        })
+    }
     for i := 0; i < net.Dimensions[0]; i++ {
         iDim := [][]*DisplayNode{}
         for j := 0; j < net.Dimensions[1]; j++ {
@@ -163,6 +194,7 @@ func (net Network) SaveState(name string) {
                     To: toPositions,
                     HoldingVal: node.OutgoingConnection.HoldingVal,
                     Excitatory: node.OutgoingConnection.Excitatory,
+                    Strength: node.OutgoingConnection.Strength,
                 }
 
                 dispNode := &DisplayNode{
