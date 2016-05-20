@@ -79,8 +79,8 @@ func main() {
     myNet := MakeNetwork(NETWORK_SIZE, false)
     myNet.Connect()
 
-    myNet.CreateSensor("aa", 1, 50, "", [3]int{25, 1, 1}, true, "a", nil)
-    myNet.CreateSensor("bb", 1, 50, "", [3]int{1, 1, 1}, true, "b", nil)
+    myNet.CreateSensor("aa", 1, 50, "", [3]int{24, 0, 0}, true, "a", nil)
+    myNet.CreateSensor("bb", 1, 50, "", [3]int{0, 0, 0}, true, "b", nil)
     myNet.SaveState("test")
     loadedNet := LoadState("test", nil)
     fmt.Println(reflect.DeepEqual(loadedNet, myNet))
