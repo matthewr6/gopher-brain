@@ -143,25 +143,34 @@ func (net Network) SaveState(name string) {
             Name: sensor.Name,
         })
     }
-    net.ForEachNode(func(node *Node, pos [3]int) {
-        toPositions := [][3]int{}
-        for _, outNode := range node.OutgoingConnection.To {
-            toPositions = append(toPositions, outNode.Position)
-        }
-        dispConn := &DisplayConnection{
-            To: toPositions,
-            HoldingVal: node.OutgoingConnection.HoldingVal,
-            Terminals: node.OutgoingConnection.Terminals,
-            Excitatory: node.OutgoingConnection.Excitatory,
-        }
+    for i := 0; i < net.Dimensions[0]; i++ {
+        iDim := [][]*DisplayNode{}
+        for j := 0; j < net.Dimensions[1]; j++ {
+            jDim := []*DisplayNode{}
+            for k := 0; k < net.Dimensions[2]; k++ {
+                node := net.Nodes[i][j][k]
+                toPositions := [][3]int{}
+                for _, outNode := range node.OutgoingConnection.To {
+                    toPositions = append(toPositions, outNode.Position)
+                }
+                dispConn := &DisplayConnection{
+                    To: toPositions,
+                    HoldingVal: node.OutgoingConnection.HoldingVal,
+                    Terminals: node.OutgoingConnection.Terminals,
+                    Excitatory: node.OutgoingConnection.Excitatory,
+                }
 
-        dispNode := &DisplayNode{
-            Value: node.Value,
-            Position: node.Position,
-            OutgoingConnection: dispConn,
+                dispNode := &DisplayNode{
+                    Value: node.Value,
+                    Position: node.Position,
+                    OutgoingConnection: dispConn,
+                }
+                jDim = append(jDim, dispNode)
+            }
+            iDim = append(iDim, jDim)
         }
-        dispNet.Nodes[pos[0]][pos[1]][pos[2]] = dispNode
-    })
+        dispNet.Nodes = append(dispNet.Nodes, iDim)
+    }
     f, _ := os.Create(fmt.Sprintf("./state/%v_state.json", name))
     f.WriteString(dispNet.String())
     f.Close()
