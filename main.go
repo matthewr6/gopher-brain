@@ -75,7 +75,13 @@ func main() {
     fmt.Printf("Took %s\n", elapsed)
 
     // this section is to test state saving/loading capabilities
+    // NETWORK_SIZE := [3]int{25, 25, 25}
+    // myNet := MakeNetwork(NETWORK_SIZE, false)
+    // myNet.Connect()
+
+    // myNet.CreateSensor("aa", 1, 50, "", [3]int{24, 0, 0}, true, "a", nil)
+    // myNet.CreateSensor("bb", 1, 50, "", [3]int{0, 0, 0}, true, "b", nil)
     // myNet.SaveState("test")
-    // loadedNet := LoadState("test")
+    // loadedNet := LoadState("test", nil)
     // fmt.Println(reflect.DeepEqual(loadedNet, myNet))
 }

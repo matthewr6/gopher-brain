@@ -16,9 +16,9 @@ import (
 // still have to reconcile the updated network.go stuff
 
 type DisplayNetwork struct {
-    Nodes []*DisplayNode     `json:"nodes"`
-    Dimensions [3]int        `json:"dimensions"`
-    Sensors []*DisplaySensor `json:"sensors"`
+    Nodes [][][]*DisplayNode   `json:"nodes"`
+    Dimensions [3]int          `json:"dimensions"`
+    Sensors []*DisplaySensor   `json:"sensors"`
     // Connections []*DisplayConnection `json:"connections"`
 }
 
@@ -48,13 +48,9 @@ func (d DisplayNetwork) String() string {
 }
 
 // oh sweet jesus MORE INEFFICIENCY
-func FindNode(position [3]int, potentialNodes []*Node) *Node {
-    for _, potNode := range potentialNodes {
-        if potNode.Position == position {
-            return potNode
-        }
-    }
-    return &Node{}
+// todo replace all references
+func FindNode(position [3]int, potentialNodes [][][]*Node) *Node {
+    return potentialNodes[position[0]][position[1]][position[2]]
 }
 
 func LoadState(name string, kb keyboard.Keyboard) *Network {
@@ -69,23 +65,31 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
     datafile.Close()
 
     net := &Network{
-        Nodes: []*Node{},
+        Nodes: [][][]*Node{},
         Dimensions: importedNet.Dimensions,
     }
     // set nodes
     // this looks good
-    for _, importedNode := range importedNet.Nodes {
-        newNode := &Node{
-            Value: importedNode.Value,
-            Position: importedNode.Position,
-            IncomingConnections: []*Connection{},
+    for i := 0; i < net.Dimensions[0]; i++ {
+        iDim := [][]*Node{}
+        for j := 0; j < net.Dimensions[1]; j++ {
+            jDim := []*Node{}
+            for k := 0; k < net.Dimensions[2]; k++ {
+                newNode := &Node{
+                    Value: importedNet.Nodes[i][j][k].Value,
+                    Position: importedNet.Nodes[i][j][k].Position,
+                    IncomingConnections: []*Connection{},
+                }
+                jDim = append(jDim, newNode)
+            }
+            iDim = append(iDim, jDim)
         }
-        net.Nodes = append(net.Nodes, newNode)
+        net.Nodes = append(net.Nodes, iDim)
     }
     // set connections
     // this part is super inefficient
     // still should optimize
-    for _,  importedNode := range importedNet.Nodes {
+    importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
             Terminals: importedNode.OutgoingConnection.Terminals,
@@ -101,7 +105,7 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
         }
         node.OutgoingConnection = newConn
         newConn.To = nodesToConnect
-    }
+    })
 
     // set sensors
     // this is also inefficient
@@ -118,9 +122,11 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
             Name: importedSensor.Name,
         }
         net.Sensors = append(net.Sensors, newSensor)
-        kb.Bind(func() {
-            newSensor.Stimulated = !newSensor.Stimulated
-        }, importedSensor.Trigger)
+        if kb != nil {
+            kb.Bind(func() {
+                newSensor.Stimulated = !newSensor.Stimulated
+            }, importedSensor.Trigger)
+        }
     }
     return net
 }
@@ -129,7 +135,7 @@ func (net Network) SaveState(name string) {
     fmt.Println(fmt.Sprintf("Saving state \"%v\"...", name))
     os.Mkdir("state", 755)
     dispNet := DisplayNetwork{
-        Nodes: []*DisplayNode{},
+        Nodes: [][][]*DisplayNode{},
         Sensors: []*DisplaySensor{},
         Dimensions: net.Dimensions,
     }
@@ -145,26 +151,45 @@ func (net Network) SaveState(name string) {
             Name: sensor.Name,
         })
     }
-    for _, node := range net.Nodes {
-        toPositions := [][3]int{}
-        for _, outNode := range node.OutgoingConnection.To {
-            toPositions = append(toPositions, outNode.Position)
-        }
-        dispConn := &DisplayConnection{
-            To: toPositions,
-            HoldingVal: node.OutgoingConnection.HoldingVal,
-            Terminals: node.OutgoingConnection.Terminals,
-            Excitatory: node.OutgoingConnection.Excitatory,
-        }
+    for i := 0; i < net.Dimensions[0]; i++ {
+        iDim := [][]*DisplayNode{}
+        for j := 0; j < net.Dimensions[1]; j++ {
+            jDim := []*DisplayNode{}
+            for k := 0; k < net.Dimensions[2]; k++ {
+                node := net.Nodes[i][j][k]
+                toPositions := [][3]int{}
+                for _, outNode := range node.OutgoingConnection.To {
+                    toPositions = append(toPositions, outNode.Position)
+                }
+                dispConn := &DisplayConnection{
+                    To: toPositions,
+                    HoldingVal: node.OutgoingConnection.HoldingVal,
+                    Terminals: node.OutgoingConnection.Terminals,
+                    Excitatory: node.OutgoingConnection.Excitatory,
+                }
 
-        dispNode := &DisplayNode{
-            Value: node.Value,
-            Position: node.Position,
-            OutgoingConnection: dispConn,
+                dispNode := &DisplayNode{
+                    Value: node.Value,
+                    Position: node.Position,
+                    OutgoingConnection: dispConn,
+                }
+                jDim = append(jDim, dispNode)
+            }
+            iDim = append(iDim, jDim)
         }
-        dispNet.Nodes = append(dispNet.Nodes, dispNode)
+        dispNet.Nodes = append(dispNet.Nodes, iDim)
     }
     f, _ := os.Create(fmt.Sprintf("./state/%v_state.json", name))
     f.WriteString(dispNet.String())
     f.Close()
+}
+
+func (impNet DisplayNetwork) ForEachINode(handler func(*DisplayNode, [3]int)) {
+    for i := range impNet.Nodes {
+        for j := range impNet.Nodes[i] {
+            for k := range impNet.Nodes[i][j] {
+                handler(impNet.Nodes[i][j][k], [3]int{i, j, k})
+            }
+        }
+    }
 }
