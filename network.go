@@ -18,14 +18,11 @@ import (
     * is "value at address"
 */
 
-// should one axon/connection connect to multiple neurons that are close by?
-// http://changingminds.org/explanations/brain/parts_brain/neuron.htm
-//http://cogsci.stackexchange.com/questions/9144/how-many-dendrite-connections-vs-axon-terminals-does-a-multipolar-cerebral-neuro
-// todo how would this work with terminals then?
+// http://www.scientificamerican.com/article/ask-the-brains-aug-08/
+// maybe do a map of a connected node to its strength and/or its excitatory/inhibitory
 type Connection struct {
     To []*Node         `json:"-"`
     HoldingVal int     `json:"holding"`
-    Terminals int      `json:"terminals"`
     Excitatory bool    `json:"excitatory"`
 }
 
@@ -54,9 +51,9 @@ func (n *Node) Update() {
 
     for _, conn := range n.IncomingConnections {
         if conn.Excitatory {
-            sum = sum + (conn.HoldingVal*conn.Terminals)
+            sum = sum + conn.HoldingVal
         } else {
-            sum = sum - (conn.HoldingVal*conn.Terminals)
+            sum = sum - conn.HoldingVal
         }
     }
 
@@ -75,6 +72,8 @@ func RandFloat(min, max float64) float64 {
     return min + r
 }
 
+// let's see which one causes the most overhead...
+// or it might just be all of them
 func (net *Network) Cycle() {
     // fake concurrency
     // first, set all the connections based on their nodes
@@ -178,8 +177,11 @@ func (net *Network) Connect() {
             }
         }
 
+        // todo - instead of terminals, maybe do random strength?  (float32 or 64)
+        // would better simulate neurotransmitters
+
         // do I even want this now?
-        numTerminals := rand.Intn(2) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
+        // numTerminals := rand.Intn(2) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
 
         var excitatory bool
         // should this have a higher probability of being excitatory?
@@ -188,7 +190,6 @@ func (net *Network) Connect() {
         }
         newConn := &Connection{
             To: nodesToConnect,
-            Terminals: numTerminals,
             Excitatory: excitatory,
         }
         node.OutgoingConnection = newConn

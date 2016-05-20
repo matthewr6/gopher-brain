@@ -31,7 +31,6 @@ type DisplayNode struct {
 type DisplayConnection struct {
     To [][3]int           `json:"to"`
     HoldingVal int        `json:"holdingVal"`
-    Terminals int         `json:"terminals"`
     Excitatory bool       `json:"excitatory"`
 }
 
@@ -92,7 +91,6 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
     importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
-            Terminals: importedNode.OutgoingConnection.Terminals,
             Excitatory: importedNode.OutgoingConnection.Excitatory,
         }
         node := FindNode(importedNode.Position, net.Nodes)
@@ -164,7 +162,6 @@ func (net Network) SaveState(name string) {
                 dispConn := &DisplayConnection{
                     To: toPositions,
                     HoldingVal: node.OutgoingConnection.HoldingVal,
-                    Terminals: node.OutgoingConnection.Terminals,
                     Excitatory: node.OutgoingConnection.Excitatory,
                 }
 
