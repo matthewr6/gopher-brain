@@ -24,6 +24,7 @@ type Connection struct {
     To []*Node         `json:"-"`
     HoldingVal int     `json:"holding"`
     Excitatory bool    `json:"excitatory"`
+    Strength float64   `json:"strength"`
 }
 
 type Node struct {
@@ -47,17 +48,17 @@ func (c Connection) String() string {
 func (n *Node) Update() {
     // calculate if it's going to fire or not - calculate sum and then set to 1, 0
     // base sum on excitatory/inhibiting
-    sum := 0
+    var sum float64
 
     for _, conn := range n.IncomingConnections {
         if conn.Excitatory {
-            sum = sum + conn.HoldingVal
+            sum = sum + (float64(conn.HoldingVal) * conn.Strength)
         } else {
-            sum = sum - conn.HoldingVal
+            sum = sum - (float64(conn.HoldingVal) * conn.Strength)
         }
     }
 
-    if sum >= 1 { // do 1 for threshold?
+    if sum >= 1.0 { // do 1 for threshold?
         //things
         //accept the value
         //or else just stay at 0

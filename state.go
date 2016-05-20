@@ -32,6 +32,7 @@ type DisplayConnection struct {
     To [][3]int           `json:"to"`
     HoldingVal int        `json:"holdingVal"`
     Excitatory bool       `json:"excitatory"`
+    Strength float64      `json:"strength"`
 }
 
 type DisplaySensor struct {
@@ -92,6 +93,7 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
             Excitatory: importedNode.OutgoingConnection.Excitatory,
+            Strength: importedNode.OutgoingConnection.Strength,
         }
         node := FindNode(importedNode.Position, net.Nodes)
         nodesToConnect := []*Node{}
@@ -163,6 +165,7 @@ func (net Network) SaveState(name string) {
                     To: toPositions,
                     HoldingVal: node.OutgoingConnection.HoldingVal,
                     Excitatory: node.OutgoingConnection.Excitatory,
+                    Strength: node.OutgoingConnection.Strength,
                 }
 
                 dispNode := &DisplayNode{

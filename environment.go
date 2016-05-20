@@ -21,9 +21,32 @@ type Sensor struct {
     Name string         `json:"name"`
 }
 
+type Output struct {
+    Nodes []*Node   `json:"nodes"`
+    Name string     `json:"name"`
+    Value float64   `json:"value"` // do we want single or double precision float?  (32/64)
+}
+
 func (s Sensor) String() string {
     jsonRep, _ := json.MarshalIndent(s, "", "    ")
     return string(jsonRep)
+}
+
+func (o Output) String() string {
+    jsonRep, _ := json.MarshalIndent(o, "", "    ")
+    return string(jsonRep)
+}
+
+func (output *Output) Update() {
+    var sum float64
+    for _, node := range output.Nodes {
+        if node.OutgoingConnection.Excitatory {
+            sum += float64(node.Value) * node.OutgoingConnection.Strength
+        } else {
+            sum -= float64(node.Value) * node.OutgoingConnection.Strength
+        }
+    }
+    output.Value = sum
 }
 
 func (sensor *Sensor) Update() {
