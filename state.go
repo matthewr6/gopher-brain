@@ -134,6 +134,19 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
             }, importedSensor.Trigger)
         }
     }
+
+    for _, importedOutput := range importedNet.Outputs {
+        nodes := []*Node{}
+        for _, nodePos := range importedOutput.Nodes {
+            nodes = append(nodes, FindNode(nodePos, net.Nodes))
+        }
+        newOutput := &Output{
+            Nodes: nodes,
+            Name: importedOutput.Name,
+        }
+        net.Outputs = append(net.Outputs, newOutput)
+    }
+
     return net
 }
 
