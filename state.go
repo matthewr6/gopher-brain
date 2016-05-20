@@ -70,14 +70,22 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
     }
     // set nodes
     // this looks good
-    importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
-        newNode := &Node{
-            Value: importedNode.Value,
-            Position: importedNode.Position,
-            IncomingConnections: []*Connection{},
+    for i := 0; i < net.Dimensions[0]; i++ {
+        iDim := [][]*Node{}
+        for j := 0; j < net.Dimensions[1]; j++ {
+            jDim := []*Node{}
+            for k := 0; k < net.Dimensions[2]; k++ {
+                newNode := &Node{
+                    Value: importedNet.Nodes[i][j][k].Value,
+                    Position: importedNet.Nodes[i][j][k].Position,
+                    IncomingConnections: []*Connection{},
+                }
+                jDim = append(jDim, newNode)
+            }
+            iDim = append(iDim, jDim)
         }
-        net.Nodes[pos[0]][pos[1]][pos[2]] = newNode
-    });
+        net.Nodes = append(net.Nodes, iDim)
+    }
     // set connections
     // this part is super inefficient
     // still should optimize
