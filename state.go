@@ -70,7 +70,7 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
     }
     // set nodes
     // this looks good
-    importedNet.ForEachINode(func(importedNode DisplayNode, pos [3]int) {
+    importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
         newNode := &Node{
             Value: importedNode.Value,
             Position: importedNode.Position,
@@ -81,7 +81,7 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
     // set connections
     // this part is super inefficient
     // still should optimize
-    importedNet.ForEachINode(func(importedNode DisplayNode, pos [3]int) {
+    importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
             Terminals: importedNode.OutgoingConnection.Terminals,
@@ -127,7 +127,7 @@ func (net Network) SaveState(name string) {
     fmt.Println(fmt.Sprintf("Saving state \"%v\"...", name))
     os.Mkdir("state", 755)
     dispNet := DisplayNetwork{
-        Nodes: []*DisplayNode{},
+        Nodes: [][][]*DisplayNode{},
         Sensors: []*DisplaySensor{},
         Dimensions: net.Dimensions,
     }
@@ -143,7 +143,7 @@ func (net Network) SaveState(name string) {
             Name: sensor.Name,
         })
     }
-    for _, node := range net.Nodes {
+    net.ForEachNode(func(node *Node, pos [3]int) {
         toPositions := [][3]int{}
         for _, outNode := range node.OutgoingConnection.To {
             toPositions = append(toPositions, outNode.Position)
@@ -160,14 +160,14 @@ func (net Network) SaveState(name string) {
             Position: node.Position,
             OutgoingConnection: dispConn,
         }
-        dispNet.Nodes = append(dispNet.Nodes, dispNode)
-    }
+        dispNet.Nodes[pos[0]][pos[1]][pos[2]] = dispNode
+    })
     f, _ := os.Create(fmt.Sprintf("./state/%v_state.json", name))
     f.WriteString(dispNet.String())
     f.Close()
 }
 
-func (impNet DisplayNetwork) ForEachINode(handler func(DisplayNode, [3]int)) {
+func (impNet DisplayNetwork) ForEachINode(handler func(*DisplayNode, [3]int)) {
     for i := range impNet.Nodes {
         for j := range impNet.Nodes[i] {
             for k := range impNet.Nodes[i][j] {
