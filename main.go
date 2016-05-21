@@ -52,9 +52,11 @@ func main() {
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
         
-        myNet.CreateSensor("aa", 1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
-        myNet.CreateSensor("bb", 1, 50, "", [3]int{1, 1, 1}, true, "b", kb)
-        myNet.CreateOutput("output", 1, 50,"", [3]int{5, 1, 1})
+        myNet.CreateSensor("a", 1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
+        myNet.CreateSensor("s", 1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
+        myNet.CreateSensor("d", 1, 50, "", [3]int{12, 12, 1}, true, "d", kb)
+        myNet.CreateSensor("f", 1, 50, "", [3]int{12, 1, 12}, true, "f", kb)
+        myNet.CreateOutput("12, 1, 1", 1, 50,"", [3]int{12, 1, 1})
     } else {
         myNet = LoadState(fileName, kb)
     }
