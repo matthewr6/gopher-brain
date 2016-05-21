@@ -96,6 +96,10 @@ func (net *Network) Cycle() {
         sensor.Update()
     }
 
+    for _, output := range net.Outputs {
+        output.Update()
+    }
+
     // then clear the connections
     // do I still need this? doubtful
     // for _, node := range net.Nodes {
@@ -193,6 +197,7 @@ func (net *Network) Connect() {
         newConn := &Connection{
             To: nodesToConnect,
             Excitatory: excitatory,
+            Strength: RandFloat(0.5, 1.5), // todo - good values
         }
         node.OutgoingConnection = newConn
         for _, nodeToConnect := range nodesToConnect {

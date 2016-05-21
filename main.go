@@ -54,7 +54,7 @@ func main() {
         
         myNet.CreateSensor("aa", 1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
         myNet.CreateSensor("bb", 1, 50, "", [3]int{1, 1, 1}, true, "b", kb)
-        myNet.CreateOutput("output", 1, 50,"", [3]int{12, 1, 1})
+        myNet.CreateOutput("output", 1, 50,"", [3]int{5, 1, 1})
     } else {
         myNet = LoadState(fileName, kb)
     }
