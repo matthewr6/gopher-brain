@@ -279,12 +279,17 @@ func KeyboardPoll(kb keyboard.Keyboard) {
 func (net Network) Info(frame int) {
     term.SetCursor(0, 0)
     fmt.Printf("Frame %v\n", frame)
+    fmt.Print("\n-----SENSORS-----\n")
     for _, sensor := range net.Sensors {
         active := "x"
         if sensor.Stimulated {
             active = "o"
         }
         fmt.Printf("%v: %v\n", sensor.Name, active)
+    }
+    fmt.Print("\n-----OUTPUTS-----\n")
+    for _, output := range net.Outputs {
+        fmt.Printf("%v: %v\n", output.Name, output.Value)
     }
     term.HideCursor()
 }

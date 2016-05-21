@@ -6,7 +6,6 @@ import (
     "bufio"
     "os"
     "strings"
-    // "strconv"
     // "reflect"
     "math/rand"
 
@@ -55,6 +54,7 @@ func main() {
         
         myNet.CreateSensor("aa", 1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
         myNet.CreateSensor("bb", 1, 50, "", [3]int{1, 1, 1}, true, "b", kb)
+        myNet.CreateOutput("output", 1, 50,"", [3]int{12, 1, 1})
     } else {
         myNet = LoadState(fileName, kb)
     }
@@ -81,6 +81,7 @@ func main() {
 
     // myNet.CreateSensor("aa", 1, 50, "", [3]int{24, 0, 0}, true, "a", nil)
     // myNet.CreateSensor("bb", 1, 50, "", [3]int{0, 0, 0}, true, "b", nil)
+    // myNet.CreateOutput("output", 1, 50,"", [3]int{12, 1, 1})
     // myNet.SaveState("test")
     // loadedNet := LoadState("test", nil)
     // fmt.Println(reflect.DeepEqual(loadedNet, myNet))

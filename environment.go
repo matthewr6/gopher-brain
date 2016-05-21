@@ -151,7 +151,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
     return sensor
 }
 
-func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int, excitatory bool) *Output {
+func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int) *Output {
     // radius is basically density...
     output := &Output{
         Nodes: []*Node{},
