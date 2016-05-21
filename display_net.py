@@ -12,25 +12,27 @@ COLOR_MAP = cm.plasma
 
 for num in range(0, int(sys.argv[1])):
     with open('frames/net_{num}.json'.format(num=num)) as data_file:   
-        nodes = json.load(data_file)['nodes']
+        node_grid = json.load(data_file)['nodes']
 
     def randrange(n, vmin, vmax):
         return (vmax-vmin)*np.random.rand(n) + vmin
 
     fig = plt.figure(figsize=(8,6))
 
-    ax = fig.add_subplot(111,projection='3d')
+    ax = fig.add_subplot(111, projection='3d')
     n = 100
 
     xs = np.array([])
     ys = np.array([])
     zs = np.array([])
     values = []
-    for node in nodes:
-        xs = np.append(xs, node['position'][0])
-        ys = np.append(ys, node['position'][1])
-        zs = np.append(zs, node['position'][2])
-        values = np.append(values, node['value'])
+    for node_plane in node_grid:
+        for node_row in node_plane:
+            for node in node_row:
+                xs = np.append(xs, node['position'][0])
+                ys = np.append(ys, node['position'][1])
+                zs = np.append(zs, node['position'][2])
+                values = np.append(values, node['value'])
 
     colors = COLOR_MAP(values/max(values))
 

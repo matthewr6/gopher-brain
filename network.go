@@ -36,9 +36,9 @@ type Node struct {
 
 type Network struct {
     Nodes [][][]*Node       `json:"nodes"`
-    Dimensions [3]int       `json:"dimensions"`
-    Sensors []*Sensor       `json:"sensors"`
-    Outputs []*Output       `json:"outputs"`
+    Dimensions [3]int       `json:"-"`
+    Sensors []*Sensor       `json:"-"`
+    Outputs []*Output       `json:"-"`
 }
 
 func (c Connection) String() string {
