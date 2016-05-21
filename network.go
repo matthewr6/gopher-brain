@@ -197,7 +197,7 @@ func (net *Network) Connect() {
         newConn := &Connection{
             To: nodesToConnect,
             Excitatory: excitatory,
-            Strength: RandFloat(0.5, 1.5), // todo - good values
+            Strength: RandFloat(0.75, 1.75), // todo - good values
         }
         node.OutgoingConnection = newConn
         for _, nodeToConnect := range nodesToConnect {
