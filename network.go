@@ -80,7 +80,6 @@ func (net *Network) Cycle() {
     // fake concurrency
     // first, set all the connections based on their nodes
 
-    // todo this is used too often, make a function so I don't copy/paste
     net.ForEachNode(func(node *Node, pos [3]int) {
         node.OutgoingConnection.HoldingVal = node.Value
         node.Value = 0
@@ -183,7 +182,6 @@ func (net *Network) Connect() {
             }
         }
 
-        // todo - instead of terminals, maybe do random strength?  (float32 or 64)
         // would better simulate neurotransmitters
 
         // do I even want this now?

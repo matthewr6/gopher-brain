@@ -58,10 +58,6 @@ func (sensor *Sensor) Update() {
             node.Value = 0
         }
     }
-    // todo - should I have any indication?
-    // if sensor.Stimulated {
-    //     fmt.Println(sensor.Trigger)
-    // }
 }
 
 // todo - there's probably an easier way to do the plane stuff now

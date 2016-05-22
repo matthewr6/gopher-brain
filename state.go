@@ -54,7 +54,6 @@ func (d DisplayNetwork) String() string {
 }
 
 // oh sweet jesus MORE INEFFICIENCY
-// todo replace all references
 func FindNode(position [3]int, potentialNodes [][][]*Node) *Node {
     return potentialNodes[position[0]][position[1]][position[2]]
 }

@@ -20,7 +20,6 @@ import (
 
 var running = true
 
-// todo - clean up goroutines and whatnot
 func main() {
     reader := bufio.NewReader(os.Stdin)
     fmt.Print("Enter state name to load state, or leave blank to create a new network:  ")
