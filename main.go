@@ -20,6 +20,37 @@ import (
 
 var running = true
 
+// var choice string
+// fmt.Printf("Network has %v sensor(s).\n", len(myNet.Sensors))
+// for _, sensor := range myNet.Sensors {
+//     fmt.Printf("    %v\n", sensor.Name)
+// }
+// fmt.Println("\n    Add sensor? y/n")
+// choice, _ = reader.ReadString('\n')
+// if choice == "y" {
+
+// }
+// fmt.Println("    Remove sensor? y/n")
+// choice, _ = reader.ReadString('\n')
+// if choice == "y" {
+
+// }
+
+// fmt.Printf("Network has %v output(s).\n", len(myNet.Sensors))
+// for _, output := range myNet.Outputs {
+//     fmt.Printf("    %v\n", output.Name)
+// }
+// fmt.Println("\n    Add output? y/n")
+// choice, _ = reader.ReadString('\n')
+// if choice == "y" {
+
+// }
+// fmt.Println("    Remove output? y/n")
+// choice, _ = reader.ReadString('\n')
+// if choice == "y" {
+
+// }
+
 func main() {
     reader := bufio.NewReader(os.Stdin)
     fmt.Print("Enter state name to load state, or leave blank to create a new network:  ")
@@ -29,20 +60,6 @@ func main() {
     start := time.Now()
     rand.Seed(time.Now().UTC().UnixNano())
 
-    // this is the keyboard sensing stuff
-    term.Init()
-    term.SetCursor(0, 0)
-    
-    netBuilt := false
-    
-    kb := termbox.New()
-    kb.Bind(func() {
-        running = false
-        if !netBuilt {
-            os.Exit(1)
-        }
-    }, "space")
-    go KeyboardPoll(kb)
     
     var myNet *Network
     _, err := os.Stat(fmt.Sprintf("./state/%v_state.json", fileName))
@@ -50,19 +67,62 @@ func main() {
         NETWORK_SIZE := [3]int{25, 25, 25}
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
-        
-        myNet.CreateSensor("a", 1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
-        myNet.CreateSensor("s", 1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
-        myNet.CreateSensor("d", 1, 50, "", [3]int{12, 12, 1}, true, "d", kb)
-        myNet.CreateSensor("f", 1, 50, "", [3]int{12, 1, 12}, true, "f", kb)
-        myNet.CreateOutput("12, 1, 1", 1, 50,"", [3]int{12, 1, 1})
+        // myNet.CreateSensor("a", 1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
+        // myNet.CreateSensor("s", 1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
+        // myNet.CreateSensor("d", 1, 50, "", [3]int{12, 12, 1}, true, "d", kb)
+        // myNet.CreateSensor("f", 1, 50, "", [3]int{12, 1, 12}, true, "f", kb)
+        // myNet.CreateOutput("12, 1, 1", 1, 50,"", [3]int{12, 1, 1})
     } else {
-        myNet = LoadState(fileName, kb)
+        myNet = LoadState(fileName)
     }
-    netBuilt = true
+
+    var choice string
+    fmt.Printf("Network has %v sensor(s).\n", len(myNet.Sensors))
+    for _, sensor := range myNet.Sensors {
+        fmt.Printf("    %v\n", sensor.Name)
+    }
+    fmt.Println("\n    Add sensor? y/n")
+    choice, _ = reader.ReadString('\n')
+    if choice == "y" {
+
+    }
+    fmt.Println("    Remove sensor? y/n")
+    choice, _ = reader.ReadString('\n')
+    if choice == "y" {
+
+    }
+
+    fmt.Printf("Network has %v output(s).\n", len(myNet.Sensors))
+    for _, output := range myNet.Outputs {
+        fmt.Printf("    %v\n", output.Name)
+    }
+    fmt.Println("\n    Add output? y/n")
+    choice, _ = reader.ReadString('\n')
+    if choice == "y" {
+
+    }
+    fmt.Println("    Remove output? y/n")
+    choice, _ = reader.ReadString('\n')
+    if choice == "y" {
+
+    }
+
+    // this is the keyboard sensing stuff
+    term.Init()
+    term.SetCursor(0, 0)
+    
+    kb := termbox.New()
+    kb.Bind(func() {
+        running = false
+        // if !netBuilt {
+        //     os.Exit(1)
+        // }
+    }, "space")
+    go KeyboardPoll(kb)
+    myNet.BindKeyboard(kb)
+
     myNet.AnimateUntilDone(100)
     
-
     elapsed := time.Since(start)
     term.Close()
 

@@ -58,7 +58,7 @@ func FindNode(position [3]int, potentialNodes [][][]*Node) *Node {
     return potentialNodes[position[0]][position[1]][position[2]]
 }
 
-func LoadState(name string, kb keyboard.Keyboard) *Network {
+func LoadState(name string) *Network {
     fmt.Println(fmt.Sprintf("Loading state \"%v\"...", name))
     datafile, err := os.Open(fmt.Sprintf("./state/%v_state.json", name))
     if err != nil {
@@ -127,11 +127,11 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
             Name: importedSensor.Name,
         }
         net.Sensors = append(net.Sensors, newSensor)
-        if kb != nil {
-            kb.Bind(func() {
-                newSensor.Stimulated = !newSensor.Stimulated
-            }, importedSensor.Trigger)
-        }
+        // if kb != nil {
+        //     kb.Bind(func() {
+        //         newSensor.Stimulated = !newSensor.Stimulated
+        //     }, importedSensor.Trigger)
+        // }
     }
 
     for _, importedOutput := range importedNet.Outputs {
@@ -147,6 +147,15 @@ func LoadState(name string, kb keyboard.Keyboard) *Network {
     }
 
     return net
+}
+
+func (net *Network) BindKeyboard(kb keyboard.Keyboard) {
+    for _, sensor := range net.Sensors {
+        s := sensor
+        kb.Bind(func() {
+            s.Stimulated = !s.Stimulated
+        }, sensor.Trigger)
+    }
 }
 
 func (net Network) SaveState(name string) {
