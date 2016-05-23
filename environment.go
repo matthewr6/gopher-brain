@@ -4,7 +4,6 @@ import (
     "math/rand"
     "encoding/json"
     // "fmt"
-    "github.com/jteeuwen/keyboard"
 )
 
 // TODO - some sort of equation fitted on each to determine the response
@@ -15,7 +14,7 @@ import (
 // sensors feed data to nodes
 type Sensor struct {
     Nodes []*Node       `json:"nodes"`
-    Excitatory bool     `json:"excitatory"`
+    Excitatory bool     `json:"excitatory"` // todo this probably isn't used
     Trigger string      `json:"trigger"`
     Stimulated bool     `json:"-"`
     Name string         `json:"name"`
@@ -66,7 +65,7 @@ func (sensor *Sensor) Update() {
 // seems bloated
 // todo reorder these args
 // also it's SO LONG AND MESSY :L
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, kb keyboard.Keyboard) *Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         // Radius: r,
@@ -78,11 +77,11 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
         Name: name,
         // Center: center,
     }
-    if kb != nil {
-        kb.Bind(func() {
-            sensor.Stimulated = !sensor.Stimulated
-        }, trigger)
-    }
+    // if kb != nil {
+    //     kb.Bind(func() {
+    //         sensor.Stimulated = !sensor.Stimulated
+    //     }, trigger)
+    // }
     // todo - determine correct coefficient
     stDev := float64(r)
     // plane is which dimension should stay the same - name the variable in a better way?
