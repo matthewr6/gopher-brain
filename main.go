@@ -85,8 +85,10 @@ func main() {
 
     fmt.Print("\nEnter a sensor name to remove a sensor:  ")
     choice, _ = reader.ReadString('\n')
+    choice = strings.TrimSpace(choice)
     for choice != "" {
         // todo - remove sensor
+        myNet.RemoveSensor(choice)
         fmt.Print("Enter another sensor name to remove:  ")
         choice, _ = reader.ReadString('\n')
         choice = strings.TrimSpace(choice)

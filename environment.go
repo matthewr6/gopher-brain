@@ -36,6 +36,19 @@ func (o Output) String() string {
     return string(jsonRep)
 }
 
+func (net *Network) RemoveSensor(name string) {
+    index := len(net.Sensors)
+    for i, sensor := range net.Sensors {
+        if sensor.Name == name {
+            index = i
+            break
+        }
+    }
+    if index != len(net.Sensors) {
+        net.Sensors = append(net.Sensors[:index], net.Sensors[index+1:]...)
+    }
+}
+
 func (output *Output) Update() {
     var sum float64
     for _, node := range output.Nodes {
