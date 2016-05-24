@@ -7,10 +7,7 @@ import (
 func StrsToInts(strings []string) []int {
     retval := []int{}
     for _, i := range strings {
-        j, err := strconv.Atoi(i)
-        if err != nil {
-            panic(err)
-        }
+        j, _ := strconv.Atoi(i)
         retval = append(retval, j)
     }
     return retval
