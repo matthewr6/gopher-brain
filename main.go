@@ -22,9 +22,7 @@ var running = true
 
 func main() {
     reader := bufio.NewReader(os.Stdin)
-    fmt.Print("Enter state name to load state, or leave blank to create a new network:  ")
-    fileName, _ := reader.ReadString('\n')
-    fileName = strings.TrimSpace(fileName)
+    fileName := Prompt("Enter state name to load state, or leave blank to create a new network:  ", reader)
 
     rand.Seed(time.Now().UTC().UnixNano())
 
@@ -48,21 +46,13 @@ func main() {
     for _, sensor := range myNet.Sensors {
         fmt.Printf("    %v\n", sensor.Name)
     }
-    fmt.Print("\nAdd sensor? [y/n]  ")
-    choice, _ = reader.ReadString('\n')
-    choice = strings.TrimSpace(choice)
+    choice = Prompt("\nAdd sensor? [y/n]  ", reader)
     for choice == "y" {
-        fmt.Print("    Name:  ")
-        sensorName, _ := reader.ReadString('\n')
-        sensorName = strings.TrimSpace(sensorName)
+        sensorName := Prompt("    Name:  ", reader)
 
-        fmt.Print("    Trigger [single key]:  ") // should validate to be one key
-        trigger, _ := reader.ReadString('\n')
-        trigger = strings.TrimSpace(trigger)
+        trigger := Prompt("    Trigger [single key]:  ", reader) // should validate to be one key
 
-        fmt.Print("    Plane [x/y/z/blank]:  ")
-        plane, _ := reader.ReadString('\n')
-        plane = strings.TrimSpace(plane)
+        plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
         if plane != "x" && plane != "y" && plane != "z" {
             plane = ""
         }
@@ -70,28 +60,20 @@ func main() {
         // validate for negatives
         centerArr := []int{}
         for len(centerArr) != 3 {
-            fmt.Print("    Center [format x,y,z]:  ")
-            center, _ := reader.ReadString('\n')
-            center = strings.TrimSpace(center)
+            center := Prompt("    Center [format x,y,z]:  ", reader)
             centerArr = StrsToInts(strings.Split(center, ","))
         }
 
         myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger) // todo find numbers and stuff
 
-        fmt.Print("Add another sensor? [y/n]  ")
-        choice, _ = reader.ReadString('\n')
-        choice = strings.TrimSpace(choice)
+        choice = Prompt("Add another sensor? [y/n]  ", reader)
     }
 
-    fmt.Print("\nEnter a sensor name to remove a sensor:  ")
-    choice, _ = reader.ReadString('\n')
-    choice = strings.TrimSpace(choice)
+    choice = Prompt("\nEnter a sensor name to remove a sensor:  ", reader)
     for choice != "" {
         // todo - remove sensor
         myNet.RemoveSensor(choice)
-        fmt.Print("Enter another sensor name to remove:  ")
-        choice, _ = reader.ReadString('\n')
-        choice = strings.TrimSpace(choice)
+        choice = Prompt("Enter another sensor name to remove:  ", reader)
     }
 
     // fmt.Printf("Network has %v output(s).\n", len(myNet.Sensors))
