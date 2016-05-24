@@ -49,6 +49,19 @@ func (net *Network) RemoveSensor(name string) {
     }
 }
 
+func (net *Network) RemoveOutput(name string) {
+    index := len(net.Outputs)
+    for i, output := range net.Outputs {
+        if output.Name == name {
+            index = i
+            break
+        }
+    }
+    if index != len(net.Outputs) {
+        net.Outputs = append(net.Outputs[:index], net.Outputs[index+1:]...)
+    }
+}
+
 func (output *Output) Update() {
     var sum float64
     for _, node := range output.Nodes {

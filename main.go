@@ -71,25 +71,39 @@ func main() {
 
     choice = Prompt("\nEnter a sensor name to remove a sensor:  ", reader)
     for choice != "" {
-        // todo - remove sensor
         myNet.RemoveSensor(choice)
         choice = Prompt("Enter another sensor name to remove:  ", reader)
     }
 
-    // fmt.Printf("Network has %v output(s).\n", len(myNet.Sensors))
-    // for _, output := range myNet.Outputs {
-    //     fmt.Printf("    %v\n", output.Name)
-    // }
-    // fmt.Print("\n\n    Add output? y/n")
-    // choice, _ = reader.ReadString('\n')
-    // for choice == "y" {
+    fmt.Printf("Network has %v output(s).\n", len(myNet.Outputs))
+    for _, output := range myNet.Outputs {
+        fmt.Printf("    %v\n", output.Name)
+    }
+    choice = Prompt("\n    Add output? [y/n]  ", reader)
+    for choice == "y" {
+        outputName := Prompt("    Name:  ", reader)
 
-    // }
-    // fmt.Print("\n    Remove output? y/n")
-    // choice, _ = reader.ReadString('\n')
-    // for choice == "y" {
+        plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
+        if plane != "x" && plane != "y" && plane != "z" {
+            plane = ""
+        }
 
-    // }
+        // validate for negatives
+        centerArr := []int{}
+        for len(centerArr) != 3 {
+            center := Prompt("    Center [format x,y,z]:  ", reader)
+            centerArr = StrsToInts(strings.Split(center, ","))
+        }
+
+        myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}) //todo get numbers
+
+        choice = Prompt("Add another output? [y/n]  ", reader)
+    }
+    choice = Prompt("\n    Enter an output name to remove an output:  ", reader)
+    for choice != "" {
+        myNet.RemoveOutput(choice)
+        choice = Prompt("Enter another output name to remove:  ", reader)
+    }
 
     // this is the keyboard sensing stuff
     term.Init()
