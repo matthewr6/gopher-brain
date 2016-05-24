@@ -63,7 +63,20 @@ func main() {
         fmt.Print("    Plane [x/y/z/blank]:  ")
         plane, _ := reader.ReadString('\n')
         plane = strings.TrimSpace(plane)
-        // myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{1, 1, 1}, true, trigger) // todo find numbers and stuff
+        if plane != "x" && plane != "y" && plane != "z" {
+            plane = ""
+        }
+
+        // validate for negatives
+        centerArr := []int{}
+        for len(centerArr) != 3 {
+            fmt.Print("    Center [format x,y,z]:  ")
+            center, _ := reader.ReadString('\n')
+            center = strings.TrimSpace(center)
+            centerArr = StrsToInts(strings.Split(center, ","))
+        }
+
+        myNet.CreateSensor(sensorName, 1, 50, plane, centerArr, true, trigger) // todo find numbers and stuff
 
         fmt.Print("Add another sensor? [y/n]  ")
         choice, _ = reader.ReadString('\n')
