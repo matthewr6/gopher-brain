@@ -42,7 +42,7 @@ func main() {
     }
 
     var choice string
-    fmt.Printf("Network has %v sensor(s):\n", len(myNet.Sensors))
+    fmt.Printf("\nNetwork has %v sensor(s):\n", len(myNet.Sensors))
     for _, sensor := range myNet.Sensors {
         fmt.Printf("    %v\n", sensor.Name)
     }
@@ -66,7 +66,7 @@ func main() {
 
         myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger) // todo find numbers and stuff
 
-        choice = Prompt("Add another sensor? [y/n]  ", reader)
+        choice = Prompt("\nAdd another sensor? [y/n]  ", reader)
     }
 
     choice = Prompt("\nEnter a sensor name to remove a sensor:  ", reader)
@@ -75,7 +75,7 @@ func main() {
         choice = Prompt("Enter another sensor name to remove:  ", reader)
     }
 
-    fmt.Printf("Network has %v output(s).\n", len(myNet.Outputs))
+    fmt.Printf("\nNetwork has %v output(s).\n", len(myNet.Outputs))
     for _, output := range myNet.Outputs {
         fmt.Printf("    %v\n", output.Name)
     }
@@ -99,7 +99,7 @@ func main() {
 
         choice = Prompt("Add another output? [y/n]  ", reader)
     }
-    choice = Prompt("\n    Enter an output name to remove an output:  ", reader)
+    choice = Prompt("\nEnter an output name to remove an output:  ", reader)
     for choice != "" {
         myNet.RemoveOutput(choice)
         choice = Prompt("Enter another output name to remove:  ", reader)
