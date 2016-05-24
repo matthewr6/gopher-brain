@@ -76,7 +76,7 @@ func main() {
             centerArr = StrsToInts(strings.Split(center, ","))
         }
 
-        myNet.CreateSensor(sensorName, 1, 50, plane, centerArr, true, trigger) // todo find numbers and stuff
+        myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger) // todo find numbers and stuff
 
         fmt.Print("Add another sensor? [y/n]  ")
         choice, _ = reader.ReadString('\n')
