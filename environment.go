@@ -3,19 +3,12 @@ package main
 import (
     "math/rand"
     "encoding/json"
-    // "fmt"
-    "github.com/jteeuwen/keyboard"
 )
-
-// TODO - some sort of equation fitted on each to determine the response
-// TODO - some sort of responder struct - should it be a many-to-many relationship?
-//      - if so - one receiver can influence many whatevers, and one whatever can be influenced by multiple receivers
-// dangit gonna have to add this to savestate/loadstate
 
 // sensors feed data to nodes
 type Sensor struct {
     Nodes []*Node       `json:"nodes"`
-    Excitatory bool     `json:"excitatory"`
+    Excitatory bool     `json:"excitatory"` // todo this probably isn't used
     Trigger string      `json:"trigger"`
     Stimulated bool     `json:"-"`
     Name string         `json:"name"`
@@ -37,6 +30,32 @@ func (o Output) String() string {
     return string(jsonRep)
 }
 
+func (net *Network) RemoveSensor(name string) {
+    index := len(net.Sensors)
+    for i, sensor := range net.Sensors {
+        if sensor.Name == name {
+            index = i
+            break
+        }
+    }
+    if index != len(net.Sensors) {
+        net.Sensors = append(net.Sensors[:index], net.Sensors[index+1:]...)
+    }
+}
+
+func (net *Network) RemoveOutput(name string) {
+    index := len(net.Outputs)
+    for i, output := range net.Outputs {
+        if output.Name == name {
+            index = i
+            break
+        }
+    }
+    if index != len(net.Outputs) {
+        net.Outputs = append(net.Outputs[:index], net.Outputs[index+1:]...)
+    }
+}
+
 func (output *Output) Update() {
     var sum float64
     for _, node := range output.Nodes {
@@ -54,9 +73,11 @@ func (sensor *Sensor) Update() {
     for _, node := range sensor.Nodes {
         if sensor.Stimulated {
             node.Value = 1
-        } else {
-            node.Value = 0
         }
+        // let's try removing this for now, see what happens...
+        // else {
+        //     node.Value = 0
+        // }
     }
 }
 
@@ -66,7 +87,7 @@ func (sensor *Sensor) Update() {
 // seems bloated
 // todo reorder these args
 // also it's SO LONG AND MESSY :L
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, kb keyboard.Keyboard) *Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         // Radius: r,
@@ -78,11 +99,11 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
         Name: name,
         // Center: center,
     }
-    if kb != nil {
-        kb.Bind(func() {
-            sensor.Stimulated = !sensor.Stimulated
-        }, trigger)
-    }
+    // if kb != nil {
+    //     kb.Bind(func() {
+    //         sensor.Stimulated = !sensor.Stimulated
+    //     }, trigger)
+    // }
     // todo - determine correct coefficient
     stDev := float64(r)
     // plane is which dimension should stay the same - name the variable in a better way?
