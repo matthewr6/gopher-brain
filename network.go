@@ -161,7 +161,7 @@ func (net *Network) Connect() {
         centralConnNode := FindNode(center, net.Nodes)
 
         // select the X connections here
-        numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS?
+        numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
         nodesToConnect := []*Node{
             centralConnNode,
         }
@@ -182,11 +182,6 @@ func (net *Network) Connect() {
             }
         }
 
-        // would better simulate neurotransmitters
-
-        // do I even want this now?
-        // numTerminals := rand.Intn(2) + 1 // TODO - HOW MANY POSSIBLE TERMINALS
-
         var excitatory bool
         // should this have a higher probability of being excitatory?
         if rand.Intn(2) != 0 {
@@ -195,7 +190,7 @@ func (net *Network) Connect() {
         newConn := &Connection{
             To: nodesToConnect,
             Excitatory: excitatory,
-            Strength: RandFloat(0.75, 1.75), // todo - good values
+            Strength: RandFloat(0.75, 1.75),
         }
         node.OutgoingConnection = newConn
         for _, nodeToConnect := range nodesToConnect {

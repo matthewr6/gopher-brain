@@ -3,13 +3,7 @@ package main
 import (
     "math/rand"
     "encoding/json"
-    // "fmt"
 )
-
-// TODO - some sort of equation fitted on each to determine the response
-// TODO - some sort of responder struct - should it be a many-to-many relationship?
-//      - if so - one receiver can influence many whatevers, and one whatever can be influenced by multiple receivers
-// dangit gonna have to add this to savestate/loadstate
 
 // sensors feed data to nodes
 type Sensor struct {
@@ -79,9 +73,11 @@ func (sensor *Sensor) Update() {
     for _, node := range sensor.Nodes {
         if sensor.Stimulated {
             node.Value = 1
-        } else {
-            node.Value = 0
         }
+        // let's try removing this for now, see what happens...
+        // else {
+        //     node.Value = 0
+        // }
     }
 }
 
