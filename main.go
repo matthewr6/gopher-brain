@@ -36,12 +36,17 @@ func main() {
         myNet = LoadState(fileName)
     }
     var mode string
-    mode = Prompt("Custom or simple?  Defaults to simple.  [custom/simple]", reader)
+    mode = Prompt("Custom or simple?  Defaults to simple.  [custom/simple]  ", reader)
     if mode == "custom" {
+        fmt.Println("WARNING!  Sensors and outputs will not save properly in this mode!")
         myNet.ClearIO()
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
-        myNet.CreateSensor("left (a)", 1, 50, "y", [3]int{24, 0, 12}, true, "a")
-        myNet.CreateSensor("right (d)", 1, 50, "y", [3]int{0, 0, 12}, true, "d")
+        myNet.CreateSensor("left (a)", 1, 50, "y", [3]int{24, 0, 12}, true, "a", func(nodes []*Node, stimulated bool) {
+
+        })
+        myNet.CreateSensor("right (d)", 1, 50, "y", [3]int{0, 0, 12}, true, "d", func(nodes []*Node, stimulated bool) {
+
+        })
 
         // myNet.CreateOutput("front")
         // myNet.CreateOutput("left")
@@ -67,7 +72,19 @@ func main() {
                 center := Prompt("    Center [format x,y,z]:  ", reader)
                 centerArr = StrsToInts(strings.Split(center, ","))
             }
-            myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger) // todo find numbers and stuff
+            // todo find numbers and stuff
+            myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger, func(nodes []*Node, stimulated bool) {
+                // for simplicity - just continuously stimulate every node
+                for _, node := range nodes {
+                    if stimulated {
+                        node.Value = 1
+                    }
+                    // let's try removing this for now, see what happens...
+                    // else {
+                    //     node.Value = 0
+                    // }
+                }
+            })
             choice = Prompt("\nAdd another sensor? [y/n]  ", reader)
         }
         choice = Prompt("\nEnter a sensor name to remove a sensor:  ", reader)
@@ -92,7 +109,18 @@ func main() {
                 center := Prompt("    Center [format x,y,z]:  ", reader)
                 centerArr = StrsToInts(strings.Split(center, ","))
             }
-            myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}) //todo get numbers
+            // todo get numbers
+            myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes []*Node) float64 {
+                var sum float64
+                for _, node := range nodes {
+                    if node.OutgoingConnection.Excitatory {
+                        sum += float64(node.Value) * node.OutgoingConnection.Strength
+                    } else {
+                        sum -= float64(node.Value) * node.OutgoingConnection.Strength
+                    }
+                }
+                return sum
+            })
             choice = Prompt("Add another output? [y/n]  ", reader)
         }
         choice = Prompt("\nEnter an output name to remove an output:  ", reader)
