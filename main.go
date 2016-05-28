@@ -32,66 +32,74 @@ func main() {
         NETWORK_SIZE := [3]int{25, 25, 25}
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
-        // myNet.CreateSensor("a", 1, 50, "", [3]int{25, 1, 1}, true, "a", kb)
-        // myNet.CreateSensor("s", 1, 50, "", [3]int{1, 1, 1}, true, "s", kb)
-        // myNet.CreateSensor("d", 1, 50, "", [3]int{12, 12, 1}, true, "d", kb)
-        // myNet.CreateSensor("f", 1, 50, "", [3]int{12, 1, 12}, true, "f", kb)
-        // myNet.CreateOutput("12, 1, 1", 1, 50,"", [3]int{12, 1, 1})
     } else {
         myNet = LoadState(fileName)
     }
+    var mode string
+    mode = Prompt("Custom or simple?  Defaults to simple.  [custom/simple]", reader)
+    if mode == "custom" {
+        myNet.ClearIO()
+        // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
+        myNet.CreateSensor("left (a)", 1, 50, "y", [3]int{24, 0, 12}, true, "a")
+        myNet.CreateSensor("right (d)", 1, 50, "y", [3]int{0, 0, 12}, true, "d")
 
-    var choice string
-    fmt.Printf("\nNetwork has %v sensor(s):\n", len(myNet.Sensors))
-    for _, sensor := range myNet.Sensors {
-        fmt.Printf("    %v\n", sensor.Name)
-    }
-    choice = Prompt("\nAdd sensor? [y/n]  ", reader)
-    for choice == "y" {
-        sensorName := Prompt("    Name:  ", reader)
-        trigger := Prompt("    Trigger [single key]:  ", reader) // should validate to be one key
-        plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
-        if plane != "x" && plane != "y" && plane != "z" {
-            plane = ""
+        // myNet.CreateOutput("front")
+        // myNet.CreateOutput("left")
+        // myNet.CreateOutput("right")
+        // myNet.CreateOutput("back")
+    } else {
+        var choice string
+        fmt.Printf("\nNetwork has %v sensor(s):\n", len(myNet.Sensors))
+        for _, sensor := range myNet.Sensors {
+            fmt.Printf("    %v\n", sensor.Name)
         }
-        // todo - validate for negatives
-        centerArr := []int{}
-        for len(centerArr) != 3 {
-            center := Prompt("    Center [format x,y,z]:  ", reader)
-            centerArr = StrsToInts(strings.Split(center, ","))
+        choice = Prompt("\nAdd sensor? [y/n]  ", reader)
+        for choice == "y" {
+            sensorName := Prompt("    Name:  ", reader)
+            trigger := Prompt("    Trigger [single key]:  ", reader) // should validate to be one key
+            plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
+            if plane != "x" && plane != "y" && plane != "z" {
+                plane = ""
+            }
+            // todo - validate for negatives
+            centerArr := []int{}
+            for len(centerArr) != 3 {
+                center := Prompt("    Center [format x,y,z]:  ", reader)
+                centerArr = StrsToInts(strings.Split(center, ","))
+            }
+            myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger) // todo find numbers and stuff
+            choice = Prompt("\nAdd another sensor? [y/n]  ", reader)
         }
-        myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger) // todo find numbers and stuff
-        choice = Prompt("\nAdd another sensor? [y/n]  ", reader)
-    }
-    choice = Prompt("\nEnter a sensor name to remove a sensor:  ", reader)
-    for choice != "" {
-        myNet.RemoveSensor(choice)
-        choice = Prompt("Enter another sensor name to remove:  ", reader)
-    }
-    fmt.Printf("\nNetwork has %v output(s).\n", len(myNet.Outputs))
-    for _, output := range myNet.Outputs {
-        fmt.Printf("    %v\n", output.Name)
-    }
-    choice = Prompt("\n    Add output? [y/n]  ", reader)
-    for choice == "y" {
-        outputName := Prompt("    Name:  ", reader)
-        plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
-        if plane != "x" && plane != "y" && plane != "z" {
-            plane = ""
+        choice = Prompt("\nEnter a sensor name to remove a sensor:  ", reader)
+        for choice != "" {
+            myNet.RemoveSensor(choice)
+            choice = Prompt("Enter another sensor name to remove:  ", reader)
         }
-        // todo - validate for negatives
-        centerArr := []int{}
-        for len(centerArr) != 3 {
-            center := Prompt("    Center [format x,y,z]:  ", reader)
-            centerArr = StrsToInts(strings.Split(center, ","))
+        fmt.Printf("\nNetwork has %v output(s).\n", len(myNet.Outputs))
+        for _, output := range myNet.Outputs {
+            fmt.Printf("    %v\n", output.Name)
         }
-        myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}) //todo get numbers
-        choice = Prompt("Add another output? [y/n]  ", reader)
-    }
-    choice = Prompt("\nEnter an output name to remove an output:  ", reader)
-    for choice != "" {
-        myNet.RemoveOutput(choice)
-        choice = Prompt("Enter another output name to remove:  ", reader)
+        choice = Prompt("\n    Add output? [y/n]  ", reader)
+        for choice == "y" {
+            outputName := Prompt("    Name:  ", reader)
+            plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
+            if plane != "x" && plane != "y" && plane != "z" {
+                plane = ""
+            }
+            // todo - validate for negatives
+            centerArr := []int{}
+            for len(centerArr) != 3 {
+                center := Prompt("    Center [format x,y,z]:  ", reader)
+                centerArr = StrsToInts(strings.Split(center, ","))
+            }
+            myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}) //todo get numbers
+            choice = Prompt("Add another output? [y/n]  ", reader)
+        }
+        choice = Prompt("\nEnter an output name to remove an output:  ", reader)
+        for choice != "" {
+            myNet.RemoveOutput(choice)
+            choice = Prompt("Enter another output name to remove:  ", reader)
+        }
     }
 
     // this is the keyboard sensing stuff

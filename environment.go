@@ -30,6 +30,19 @@ func (o Output) String() string {
     return string(jsonRep)
 }
 
+func (net *Network) ClearIO() {
+    net.RemoveAllSensors()
+    net.RemoveAllOutputs()
+}
+
+func (net *Network) RemoveAllSensors() {
+    net.Sensors = []*Sensor{}
+}
+
+func (net *Network) RemoveAllOutputs() {
+    net.Outputs = []*Output{}
+}
+
 func (net *Network) RemoveSensor(name string) {
     index := len(net.Sensors)
     for i, sensor := range net.Sensors {
