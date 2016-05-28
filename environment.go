@@ -7,17 +7,19 @@ import (
 
 // sensors feed data to nodes
 type Sensor struct {
-    Nodes []*Node       `json:"nodes"`
-    Excitatory bool     `json:"excitatory"` // todo this probably isn't used
-    Trigger string      `json:"trigger"`
-    Stimulated bool     `json:"-"`
-    Name string         `json:"name"`
+    Nodes []*Node          `json:"nodes"`
+    Excitatory bool        `json:"excitatory"` // todo this probably isn't used
+    Trigger string         `json:"trigger"`
+    Stimulated bool        `json:"-"`
+    Name string            `json:"name"`
+    In func([]*Node, bool) `json:"-"`
 }
 
 type Output struct {
-    Nodes []*Node   `json:"nodes"`
-    Name string     `json:"name"`
-    Value float64   `json:"value"` // do we want single or double precision float?  (32/64)
+    Nodes []*Node              `json:"nodes"`
+    Name string                `json:"name"`
+    Value float64              `json:"value"` // do we want single or double precision float?  (32/64)
+    Out func([]*Node) float64  `json:"-"`
 }
 
 func (s Sensor) String() string {
@@ -69,30 +71,30 @@ func (net *Network) RemoveOutput(name string) {
     }
 }
 
-func (output *Output) Update() {
-    var sum float64
-    for _, node := range output.Nodes {
-        if node.OutgoingConnection.Excitatory {
-            sum += float64(node.Value) * node.OutgoingConnection.Strength
-        } else {
-            sum -= float64(node.Value) * node.OutgoingConnection.Strength
-        }
-    }
-    output.Value = sum
-}
+// func (output *Output) Update() {
+//     var sum float64
+//     for _, node := range output.Nodes {
+//         if node.OutgoingConnection.Excitatory {
+//             sum += float64(node.Value) * node.OutgoingConnection.Strength
+//         } else {
+//             sum -= float64(node.Value) * node.OutgoingConnection.Strength
+//         }
+//     }
+//     output.Value = sum
+// }
 
-func (sensor *Sensor) Update() {
-    // for now let's just continuously stimulate every node
-    for _, node := range sensor.Nodes {
-        if sensor.Stimulated {
-            node.Value = 1
-        }
-        // let's try removing this for now, see what happens...
-        // else {
-        //     node.Value = 0
-        // }
-    }
-}
+// func (sensor *Sensor) Update() {
+//     // // for now let's just continuously stimulate every node
+//     // for _, node := range sensor.Nodes {
+//     //     if sensor.Stimulated {
+//     //         node.Value = 1
+//     //     }
+//     //     // let's try removing this for now, see what happens...
+//     //     // else {
+//     //     //     node.Value = 0
+//     //     // }
+//     // }
+// }
 
 // todo - there's probably an easier way to do the plane stuff now
 
@@ -100,7 +102,7 @@ func (sensor *Sensor) Update() {
 // seems bloated
 // todo reorder these args
 // also it's SO LONG AND MESSY :L
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string) *Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, inputFunc func([]*Node, bool)) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         // Radius: r,
@@ -110,6 +112,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
         Trigger: trigger,
         Stimulated: false,
         Name: name,
+        In: inputFunc,
         // Center: center,
     }
     // if kb != nil {
@@ -181,11 +184,12 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
     return sensor
 }
 
-func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int) *Output {
+func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int, outputFunc func([]*Node) float64) *Output {
     // radius is basically density...
     output := &Output{
         Nodes: []*Node{},
         Name: name,
+        Out: outputFunc,
         // Center: center,
     }
     // todo - determine correct coefficient

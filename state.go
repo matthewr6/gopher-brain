@@ -125,6 +125,18 @@ func LoadState(name string) *Network {
             Trigger: importedSensor.Trigger,
             Stimulated: false,
             Name: importedSensor.Name,
+            In: func(nodes []*Node, stimulated bool) {
+                // for simplicity - just continuously stimulate every node
+                for _, node := range nodes {
+                    if stimulated {
+                        node.Value = 1
+                    }
+                    // let's try removing this for now, see what happens...
+                    // else {
+                    //     node.Value = 0
+                    // }
+                }
+            },
         }
         net.Sensors = append(net.Sensors, newSensor)
         // if kb != nil {
@@ -142,6 +154,17 @@ func LoadState(name string) *Network {
         newOutput := &Output{
             Nodes: nodes,
             Name: importedOutput.Name,
+            Out: func(nodes []*Node) float64 {
+                var sum float64
+                for _, node := range nodes {
+                    if node.OutgoingConnection.Excitatory {
+                        sum += float64(node.Value) * node.OutgoingConnection.Strength
+                    } else {
+                        sum -= float64(node.Value) * node.OutgoingConnection.Strength
+                    }
+                }
+                return sum
+            },
         }
         net.Outputs = append(net.Outputs, newOutput)
     }
