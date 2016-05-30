@@ -189,7 +189,7 @@ func main() {
     // maybe write custom comparison?
     fmt.Println(Test(myNet, loadedNet))
     fmt.Println(reflect.DeepEqual(loadedNet, myNet))
-    fmt.Println(reflect.DeepEqual(myNet.Nodes[0][0][0].OutgoingConnection.To, loadedNet.Nodes[0][0][0].OutgoingConnection.To))
-    fmt.Println(myNet.Nodes[0][0][0].OutgoingConnection.To)
-    fmt.Println(loadedNet.Nodes[0][0][0].OutgoingConnection.To)
+    // fmt.Println(reflect.DeepEqual(myNet.Nodes[0][0][0].OutgoingConnection.To, loadedNet.Nodes[0][0][0].OutgoingConnection.To))
+    // fmt.Println(myNet.Nodes[0][0][0].OutgoingConnection.To)
+    // fmt.Println(loadedNet.Nodes[0][0][0].OutgoingConnection.To)
 }

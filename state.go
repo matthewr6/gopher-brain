@@ -4,6 +4,7 @@ import (
     "os"
     "fmt"
     "strings"
+    "reflect"
     "encoding/json"
 
     "github.com/jteeuwen/keyboard"
@@ -34,8 +35,6 @@ type DisplayNode struct {
 type DisplayConnection struct {
     To map[string]*ConnInfo `json:"to"` // shouldn't need a display struct for this
     HoldingVal int          `json:"holdingVal"`
-    Excitatory bool         `json:"excitatory"`
-    Strength float64        `json:"strength"`
 }
 
 type DisplaySensor struct {
@@ -53,11 +52,6 @@ type DisplayOutput struct {
 func (d DisplayNetwork) String() string {
     jsonRep, _ := json.MarshalIndent(d, "", "    ")
     return string(jsonRep)
-}
-
-// oh sweet jesus MORE INEFFICIENCY
-func FindNode(position [3]int, potentialNodes [][][]*Node) *Node {
-    return potentialNodes[position[0]][position[1]][position[2]]
 }
 
 func LoadState(name string) *Network {
@@ -100,8 +94,6 @@ func LoadState(name string) *Network {
     importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
-            // Excitatory: importedNode.OutgoingConnection.Excitatory,
-            // Strength: importedNode.OutgoingConnection.Strength,
         }
         node := FindNode(importedNode.Position, net.Nodes)
         toNodes := make(map[*Node]*ConnInfo)
@@ -109,9 +101,10 @@ func LoadState(name string) *Network {
             posSlice := StrsToInts(strings.Split(id, "|"))
             nodeToConnect := FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]}, net.Nodes)
             toNodes[nodeToConnect] = connInfo
+            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
         }
-        node.OutgoingConnection = newConn
         newConn.To = toNodes
+        node.OutgoingConnection = newConn
     })
 
     // set sensors
@@ -258,6 +251,7 @@ func (impNet DisplayNetwork) ForEachINode(handler func(*DisplayNode, [3]int)) {
 }
 
 func Test(orig, loaded *Network) bool {
+    // compare dimensions
     if orig.Dimensions != loaded.Dimensions {
         return false
     }
@@ -268,15 +262,46 @@ func Test(orig, loaded *Network) bool {
                 oNode := orig.Nodes[i][j][k]
                 lNode := loaded.Nodes[i][j][k]
                 // first compare value, position, id
-                if (oNode.Value != lNode.Value) || (oNode.Position != lNode.Position) || (oNode.Id != lNode.Id) {
+                if ((oNode.Value != lNode.Value) ||
+                    (oNode.Position != lNode.Position) ||
+                    (oNode.Id != lNode.Id)) {
                     return false
                 }
                 // then compare the input/output connections
+                oConns := []Connection{*oNode.OutgoingConnection}
+                for _, iConn := range oNode.IncomingConnections {
+                    oConns = append(oConns, *iConn)
+                }
+
+                lConns := []Connection{*lNode.OutgoingConnection}
+                for _, lConn := range lNode.IncomingConnections {
+                    lConns = append(lConns, *lConn)
+                }
+
+                if len(oConns) != len(lConns) {
+                    return false
+                }
+
+                // this should work because slices and arrays are ordered
+                for i := range oConns {
+                    if oConns[i].HoldingVal != lConns[i].HoldingVal {
+                        return false
+                    }
+                }
+
+                // - convert the maps to map[string]*ConnInfo to be comparable
+                // oConnInfo := map[string]*ConnInfo{}
             }
         }
     }
-    // compare dimensions
+    // these still use reflect for now
     // compare sensors
-    // compare output
+    if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
+        return false
+    }
+    // compare outputs
+    if !reflect.DeepEqual(orig.Outputs, loaded.Outputs) {
+        return false
+    }
     return true
 }
