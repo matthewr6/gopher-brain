@@ -17,3 +17,6 @@
 - `ffmpeg -framerate Y -i net_%01d.png anim.gif`, Y being fps
 
 Modify `main.go` to create sensors for the state of the net/brain/whatever
+
+#### personal notes/links
+http://biology.stackexchange.com/questions/5306/how-do-neurons-form-new-connections-in-brain-plasticity

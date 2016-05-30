@@ -53,81 +53,81 @@ func main() {
         // myNet.CreateOutput("right")
         // myNet.CreateOutput("back")
     } else {
-        var choice string
-        fmt.Printf("\nNetwork has %v sensor(s):\n", len(myNet.Sensors))
-        for _, sensor := range myNet.Sensors {
-            fmt.Printf("    %v\n", sensor.Name)
-        }
-        choice = Prompt("\nAdd sensor? [y/n]  ", reader)
-        for choice == "y" {
-            sensorName := Prompt("    Name:  ", reader)
-            trigger := Prompt("    Trigger [single key]:  ", reader) // should validate to be one key
-            plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
-            if plane != "x" && plane != "y" && plane != "z" {
-                plane = ""
-            }
-            // todo - validate for negatives
-            centerArr := []int{}
-            for len(centerArr) != 3 {
-                center := Prompt("    Center [format x,y,z]:  ", reader)
-                centerArr = StrsToInts(strings.Split(center, ","))
-            }
-            // todo find numbers and stuff
-            myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger, func(nodes []*Node, stimulated bool) {
-                // for simplicity - just continuously stimulate every node
-                for _, node := range nodes {
-                    if stimulated {
-                        node.Value = 1
-                    }
-                    // let's try removing this for now, see what happens...
-                    // else {
-                    //     node.Value = 0
-                    // }
-                }
-            })
-            choice = Prompt("\nAdd another sensor? [y/n]  ", reader)
-        }
-        choice = Prompt("\nEnter a sensor name to remove a sensor:  ", reader)
-        for choice != "" {
-            myNet.RemoveSensor(choice)
-            choice = Prompt("Enter another sensor name to remove:  ", reader)
-        }
-        fmt.Printf("\nNetwork has %v output(s).\n", len(myNet.Outputs))
-        for _, output := range myNet.Outputs {
-            fmt.Printf("    %v\n", output.Name)
-        }
-        choice = Prompt("\n    Add output? [y/n]  ", reader)
-        for choice == "y" {
-            outputName := Prompt("    Name:  ", reader)
-            plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
-            if plane != "x" && plane != "y" && plane != "z" {
-                plane = ""
-            }
-            // todo - validate for negatives
-            centerArr := []int{}
-            for len(centerArr) != 3 {
-                center := Prompt("    Center [format x,y,z]:  ", reader)
-                centerArr = StrsToInts(strings.Split(center, ","))
-            }
-            // todo get numbers
-            myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes []*Node) float64 {
-                var sum float64
-                for _, node := range nodes {
-                    if node.OutgoingConnection.Excitatory {
-                        sum += float64(node.Value) * node.OutgoingConnection.Strength
-                    } else {
-                        sum -= float64(node.Value) * node.OutgoingConnection.Strength
-                    }
-                }
-                return sum
-            })
-            choice = Prompt("Add another output? [y/n]  ", reader)
-        }
-        choice = Prompt("\nEnter an output name to remove an output:  ", reader)
-        for choice != "" {
-            myNet.RemoveOutput(choice)
-            choice = Prompt("Enter another output name to remove:  ", reader)
-        }
+        // var choice string
+        // fmt.Printf("\nNetwork has %v sensor(s):\n", len(myNet.Sensors))
+        // for _, sensor := range myNet.Sensors {
+        //     fmt.Printf("    %v\n", sensor.Name)
+        // }
+        // choice = Prompt("\nAdd sensor? [y/n]  ", reader)
+        // for choice == "y" {
+        //     sensorName := Prompt("    Name:  ", reader)
+        //     trigger := Prompt("    Trigger [single key]:  ", reader) // should validate to be one key
+        //     plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
+        //     if plane != "x" && plane != "y" && plane != "z" {
+        //         plane = ""
+        //     }
+        //     // todo - validate for negatives
+        //     centerArr := []int{}
+        //     for len(centerArr) != 3 {
+        //         center := Prompt("    Center [format x,y,z]:  ", reader)
+        //         centerArr = StrsToInts(strings.Split(center, ","))
+        //     }
+        //     // todo find numbers and stuff
+        //     myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger, func(nodes []*Node, stimulated bool) {
+        //         // for simplicity - just continuously stimulate every node
+        //         for _, node := range nodes {
+        //             if stimulated {
+        //                 node.Value = 1
+        //             }
+        //             // let's try removing this for now, see what happens...
+        //             // else {
+        //             //     node.Value = 0
+        //             // }
+        //         }
+        //     })
+        //     choice = Prompt("\nAdd another sensor? [y/n]  ", reader)
+        // }
+        // choice = Prompt("\nEnter a sensor name to remove a sensor:  ", reader)
+        // for choice != "" {
+        //     myNet.RemoveSensor(choice)
+        //     choice = Prompt("Enter another sensor name to remove:  ", reader)
+        // }
+        // fmt.Printf("\nNetwork has %v output(s).\n", len(myNet.Outputs))
+        // for _, output := range myNet.Outputs {
+        //     fmt.Printf("    %v\n", output.Name)
+        // }
+        // choice = Prompt("\n    Add output? [y/n]  ", reader)
+        // for choice == "y" {
+        //     outputName := Prompt("    Name:  ", reader)
+        //     plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
+        //     if plane != "x" && plane != "y" && plane != "z" {
+        //         plane = ""
+        //     }
+        //     // todo - validate for negatives
+        //     centerArr := []int{}
+        //     for len(centerArr) != 3 {
+        //         center := Prompt("    Center [format x,y,z]:  ", reader)
+        //         centerArr = StrsToInts(strings.Split(center, ","))
+        //     }
+        //     // todo get numbers
+        //     myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes []*Node) float64 {
+        //         var sum float64
+        //         for _, node := range nodes {
+        //             if node.OutgoingConnection.Excitatory {
+        //                 sum += float64(node.Value) * node.OutgoingConnection.Strength
+        //             } else {
+        //                 sum -= float64(node.Value) * node.OutgoingConnection.Strength
+        //             }
+        //         }
+        //         return sum
+        //     })
+        //     choice = Prompt("Add another output? [y/n]  ", reader)
+        // }
+        // choice = Prompt("\nEnter an output name to remove an output:  ", reader)
+        // for choice != "" {
+        //     myNet.RemoveOutput(choice)
+        //     choice = Prompt("Enter another output name to remove:  ", reader)
+        // }
     }
 
     // this is the keyboard sensing stuff

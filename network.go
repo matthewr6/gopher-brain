@@ -20,11 +20,19 @@ import (
 
 // http://www.scientificamerican.com/article/ask-the-brains-aug-08/
 // maybe do a map of a connected node to its strength and/or its excitatory/inhibitory
+
+// todo - state.go
+// array with {node: node, strength: strength}
+// unique ids for each node, maybe?  based on position?  like "x|y|z" concatenated?
+
+type ConnInfo struct {
+    Excitatory bool  `json:"excitatory"`
+    Strength float64 `json:"strength"`
+}
+
 type Connection struct {
-    To []*Node         `json:"-"`
-    HoldingVal int     `json:"holding"`
-    Excitatory bool    `json:"excitatory"`
-    Strength float64   `json:"strength"`
+    To map[*Node]*ConnInfo  `json:"-"`
+    HoldingVal int          `json:"holding"`
 }
 
 type Node struct {
@@ -32,6 +40,7 @@ type Node struct {
     OutgoingConnection *Connection     `json:"-"`  //which node to send to
     IncomingConnections []*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                    `json:"position"`
+    Id string                          `json:"id"` //"x|y|z"
 }
 
 type Network struct {
@@ -52,10 +61,10 @@ func (n *Node) Update() {
     var sum float64
 
     for _, conn := range n.IncomingConnections {
-        if conn.Excitatory {
-            sum = sum + (float64(conn.HoldingVal) * conn.Strength)
+        if conn.To[n].Excitatory {
+            sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
         } else {
-            sum = sum - (float64(conn.HoldingVal) * conn.Strength)
+            sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
         }
     }
 
@@ -183,14 +192,20 @@ func (net *Network) Connect() {
         }
 
         var excitatory bool
-        // should this have a higher probability of being excitatory?
-        if rand.Intn(2) != 0 {
-            excitatory = true
+        toNodes := make(map[*Node]*ConnInfo)
+        for _, node := range nodesToConnect {
+            // should this have a higher probability of being excitatory?
+            if rand.Intn(2) != 0 {
+                excitatory = true
+            }
+            toNodes[node] = &ConnInfo{
+                Strength: RandFloat(0.75, 1.75),
+                Excitatory: excitatory,
+            }
         }
+
         newConn := &Connection{
-            To: nodesToConnect,
-            Excitatory: excitatory,
-            Strength: RandFloat(0.75, 1.75),
+            To: toNodes,
         }
         node.OutgoingConnection = newConn
         for _, nodeToConnect := range nodesToConnect {
@@ -232,6 +247,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                     Value: newValue,
                     Position: [3]int{i, j, k},
                     IncomingConnections: []*Connection{},
+                    Id: fmt.Sprintf("%v|%v|%v", i, j, k),
                 })
             }
             iDim = append(iDim, jDim)
