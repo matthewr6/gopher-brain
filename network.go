@@ -31,7 +31,7 @@ type ConnInfo struct {
 }
 
 type Connection struct {
-    To map[*Node]*ConnInfo  `json:"-"`
+    To map[*Node]*ConnInfo  `json:"to"`
     HoldingVal int          `json:"holding"`
 }
 

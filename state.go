@@ -86,6 +86,7 @@ func LoadState(name string) *Network {
                     Value: importedNet.Nodes[i][j][k].Value,
                     Position: importedNet.Nodes[i][j][k].Position,
                     IncomingConnections: []*Connection{},
+                    Id: fmt.Sprintf("%v|%v|%v", i, j, k),
                 }
                 jDim = append(jDim, newNode)
             }
@@ -254,4 +255,28 @@ func (impNet DisplayNetwork) ForEachINode(handler func(*DisplayNode, [3]int)) {
             }
         }
     }
+}
+
+func Test(orig, loaded *Network) bool {
+    if orig.Dimensions != loaded.Dimensions {
+        return false
+    }
+    // compare nodes
+    for i := range orig.Nodes {
+        for j := range orig.Nodes[i] {
+            for k := range orig.Nodes[i][j] {
+                oNode := orig.Nodes[i][j][k]
+                lNode := loaded.Nodes[i][j][k]
+                // first compare value, position, id
+                if (oNode.Value != lNode.Value) || (oNode.Position != lNode.Position) || (oNode.Id != lNode.Id) {
+                    return false
+                }
+                // then compare the input/output connections
+            }
+        }
+    }
+    // compare dimensions
+    // compare sensors
+    // compare output
+    return true
 }
