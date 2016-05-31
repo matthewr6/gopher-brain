@@ -281,16 +281,28 @@ func Test(orig, loaded *Network) bool {
                 if len(oConns) != len(lConns) {
                     return false
                 }
-
                 // this should work because slices and arrays are ordered
                 for i := range oConns {
                     if oConns[i].HoldingVal != lConns[i].HoldingVal {
                         return false
                     }
                 }
-
-                // - convert the maps to map[string]*ConnInfo to be comparable
-                // oConnInfo := map[string]*ConnInfo{}
+                // convert the maps to map[string]*ConnInfo to be comparable
+                oConnInfo := map[string]*ConnInfo{}
+                for _, conn := range oConns {
+                    for node, connInfo := range conn.To {
+                        oConnInfo[node.Id] = connInfo
+                    }
+                }
+                lConnInfo := map[string]*ConnInfo{}
+                for _, conn := range lConns {
+                    for node, connInfo := range conn.To {
+                        lConnInfo[node.Id] = connInfo
+                    }
+                }
+                if !reflect.DeepEqual(oConnInfo, lConnInfo) {
+                    return false
+                }
             }
         }
     }
