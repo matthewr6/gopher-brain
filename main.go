@@ -181,7 +181,7 @@ func main() {
     // //     return sum
     // // })
 
-    // // myNet.SaveState("test")
-    // // loadedNet := LoadState("test")
-    // // fmt.Println(Test(myNet, loadedNet))
+    // myNet.SaveState("test")
+    // loadedNet := LoadState("test")
+    // fmt.Println(Test(myNet, loadedNet))
 }
