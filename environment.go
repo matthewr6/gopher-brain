@@ -15,11 +15,12 @@ type Sensor struct {
     In func([]*Node, bool) `json:"-"`
 }
 
+// dang gonna have to do the same saving trick stuff as the Connection type
 type Output struct {
-    Nodes []*Node              `json:"nodes"`
-    Name string                `json:"name"`
-    Value float64              `json:"value"` // do we want single or double precision float?  (32/64)
-    Out func([]*Node) float64  `json:"-"`
+    Nodes map[*Node]*ConnInfo               `json:"nodes"`
+    Name string                             `json:"name"`
+    Value float64                           `json:"value"`
+    Out func(map[*Node]*ConnInfo) float64   `json:"-"`
 }
 
 func (s Sensor) String() string {
@@ -184,16 +185,19 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
     return sensor
 }
 
-func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int, outputFunc func([]*Node) float64) *Output {
+func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int, outputFunc func(map[*Node]*ConnInfo) float64) *Output {
     // radius is basically density...
     output := &Output{
-        Nodes: []*Node{},
+        // Nodes: []*Node{},
         Name: name,
         Out: outputFunc,
         // Center: center,
     }
     // todo - determine correct coefficient
     stDev := float64(r)
+
+    // set up nodes
+    nodes := []*Node{}
     // plane is which dimension should stay the same - name the variable in a better way?
     if (plane != "") {
         if (plane == "x" || plane == "y" || plane == "z") {
@@ -202,56 +206,70 @@ func (net *Network) CreateOutput(name string, r int, count int, plane string, ce
         }
         if (plane == "x") {
             potX := center[0]
-            for len(output.Nodes) < count {
+            for len(nodes) < count {
                 potY := int(rand.NormFloat64() * stDev) + center[1]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
                 if potY > 0 && potZ > 0 {
                     potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
-                    if !NodeExistsIn(potNode, output.Nodes) {
-                        output.Nodes = append(output.Nodes, potNode)
+                    if !NodeExistsIn(potNode, nodes) {
+                        nodes = append(nodes, potNode)
                     }
                 }
             }
         }
         if (plane == "y") {
             potY := center[1]
-            for len(output.Nodes) < count {
+            for len(nodes) < count {
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
                 if potX > 0 && potZ > 0 {
                     potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
-                    if !NodeExistsIn(potNode, output.Nodes) {
-                        output.Nodes = append(output.Nodes, potNode)
+                    if !NodeExistsIn(potNode, nodes) {
+                        nodes = append(nodes, potNode)
                     }
                 }
             }
         }
         if (plane == "z") {
             potZ := center[2]
-            for len(output.Nodes) < count {
+            for len(nodes) < count {
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potY := int(rand.NormFloat64() * stDev) + center[1]
                 if potX > 0 && potY > 0 {
                     potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
-                    if !NodeExistsIn(potNode, output.Nodes) {
-                        output.Nodes = append(output.Nodes, potNode)
+                    if !NodeExistsIn(potNode, nodes) {
+                        nodes = append(nodes, potNode)
                     }
                 }
             }
         }
     } else {
-        for len(output.Nodes) < count {
+        for len(nodes) < count {
             potX := int(rand.NormFloat64() * stDev) + center[0]
             potY := int(rand.NormFloat64() * stDev) + center[1]
             potZ := int(rand.NormFloat64() * stDev) + center[2]
             if potX >= 0 && potY >= 0 && potZ >= 0 && potX < net.Dimensions[0] && potY < net.Dimensions[1] && potZ < net.Dimensions[2] {
                 potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
-                if !NodeExistsIn(potNode, output.Nodes) {
-                    output.Nodes = append(output.Nodes, potNode)
+                if !NodeExistsIn(potNode, nodes) {
+                    nodes = append(nodes, potNode)
                 }
             }
         }
     }
+
+    // iterate through nodes
+    nodeMapping := make(map[*Node]*ConnInfo)
+    var excitatory bool
+    for _, node := range nodes {
+        if rand.Intn(2) != 0 {
+            excitatory = true
+        }
+        nodeMapping[node] = &ConnInfo{
+            Strength: RandFloat(0.75, 1.75),
+            Excitatory: excitatory,
+        }
+    }
+    output.Nodes = nodeMapping
     net.Outputs = append(net.Outputs, output)
     return output
 }

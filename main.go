@@ -114,9 +114,10 @@ func main() {
             // LITERALLY EVERYTHING
             // THAT MAY TAKE A LITTLE WHILE!
             // see also:  line 152 of state.go
-            myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes []*Node) float64 {
+            myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes map[*Node]*ConnInfo) float64 {
                 var sum float64
-                for _, node := range nodes {
+                // todo
+                for node, connInfo := range nodes {
                     if node.OutgoingConnection.To[node].Excitatory {
                         sum += float64(node.Value) * node.OutgoingConnection.To[node].Strength
                     } else {
