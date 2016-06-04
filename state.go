@@ -38,14 +38,14 @@ type DisplayConnection struct {
 }
 
 type DisplaySensor struct {
-    Nodes[][3]int     `json:"nodes"`
+    Nodes [][3]int    `json:"nodes"`
     Excitatory bool   `json:"excitatory"`
     Trigger string    `json:"trigger"`
     Name string       `json:"name"`
 }
 
 type DisplayOutput struct {
-    Nodes[][3]int     `json:"nodes"`
+    Nodes [][3]int     `json:"nodes"`
     Name string       `json:"name"`
 }
 
