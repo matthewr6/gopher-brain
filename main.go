@@ -112,10 +112,10 @@ func main() {
             myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes []*Node) float64 {
                 var sum float64
                 for _, node := range nodes {
-                    if node.OutgoingConnection.To[node].Excitatory {
-                        sum += float64(node.Value) * node.OutgoingConnection.To[node].Strength
+                    if node.IncomingConnection.To[node].Excitatory {
+                        sum += float64(node.Value) * node.IncomingConnection.To[node].Strength
                     } else {
-                        sum -= float64(node.Value) * node.OutgoingConnection.To[node].Strength
+                        sum -= float64(node.Value) * node.IncomingConnection.To[node].Strength
                     }
                 }
                 return sum
