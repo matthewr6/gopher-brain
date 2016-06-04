@@ -198,14 +198,10 @@ func (net Network) SaveState(name string) {
     }
 
     for _, output := range net.Outputs {
-        // positions := [][3]int{}
         nodeMap := make(map[string]*ConnInfo)
         for node, connInfo := range output.Nodes {
             nodeMap[node.Id] = connInfo
         }
-        // for _, outputNode := range output.Nodes {
-        //     positions = append(positions, outputNode.Position)
-        // }
         dispNet.Outputs = append(dispNet.Outputs, &DisplayOutput{
             Nodes: nodeMap,
             Name: output.Name,
