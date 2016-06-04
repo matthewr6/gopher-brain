@@ -45,8 +45,8 @@ type DisplaySensor struct {
 }
 
 type DisplayOutput struct {
-    Nodes [][3]int     `json:"nodes"`
-    Name string       `json:"name"`
+    Nodes map[string]*ConnInfo    `json:"nodes"`
+    Name string                   `json:"name"`
 }
 
 func (d DisplayNetwork) String() string {
