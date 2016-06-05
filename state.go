@@ -54,118 +54,125 @@ func (d DisplayNetwork) String() string {
     return string(jsonRep)
 }
 
-// func LoadState(name string) *Network {
-//     fmt.Println(fmt.Sprintf("Loading state \"%v\"...", name))
-//     datafile, err := os.Open(fmt.Sprintf("./state/%v_state.json", name))
-//     if err != nil {
-//         fmt.Println(err)
-//     }
-//     decoder := json.NewDecoder(datafile)
-//     importedNet := &DisplayNetwork{}
-//     decoder.Decode(&importedNet)
-//     datafile.Close()
+func LoadState(name string) *Network {
+    fmt.Println(fmt.Sprintf("Loading state \"%v\"...", name))
+    datafile, err := os.Open(fmt.Sprintf("./state/%v_state.json", name))
+    if err != nil {
+        fmt.Println(err)
+    }
+    decoder := json.NewDecoder(datafile)
+    importedNet := &DisplayNetwork{}
+    decoder.Decode(&importedNet)
+    datafile.Close()
 
-//     net := &Network{
-//         Nodes: [][][]*Node{},
-//         Dimensions: importedNet.Dimensions,
-//     }
-//     // set nodes
-//     // this looks good
-//     for i := 0; i < net.Dimensions[0]; i++ {
-//         iDim := [][]*Node{}
-//         for j := 0; j < net.Dimensions[1]; j++ {
-//             jDim := []*Node{}
-//             for k := 0; k < net.Dimensions[2]; k++ {
-//                 newNode := &Node{
-//                     Value: importedNet.Nodes[i][j][k].Value,
-//                     Position: importedNet.Nodes[i][j][k].Position,
-//                     IncomingConnections: []*Connection{},
-//                     Id: fmt.Sprintf("%v|%v|%v", i, j, k),
-//                 }
-//                 jDim = append(jDim, newNode)
-//             }
-//             iDim = append(iDim, jDim)
-//         }
-//         net.Nodes = append(net.Nodes, iDim)
-//     }
-//     // set connections
-//     // this part is super inefficient
-//     // still should optimize
-//     importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
-//         newConn := &Connection{
-//             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
-//         }
-//         node := FindNode(importedNode.Position, net.Nodes)
-//         toNodes := make(map[*Node]*ConnInfo)
-//         for id, connInfo := range importedNode.OutgoingConnection.To {
-//             posSlice := StrsToInts(strings.Split(id, "|"))
-//             nodeToConnect := FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]}, net.Nodes)
-//             toNodes[nodeToConnect] = connInfo
-//             nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
-//         }
-//         newConn.To = toNodes
-//         node.OutgoingConnection = newConn
-//     })
+    net := &Network{
+        Nodes: [][][]*Node{},
+        Dimensions: importedNet.Dimensions,
+    }
+    // set nodes
+    // this looks good
+    for i := 0; i < net.Dimensions[0]; i++ {
+        iDim := [][]*Node{}
+        for j := 0; j < net.Dimensions[1]; j++ {
+            jDim := []*Node{}
+            for k := 0; k < net.Dimensions[2]; k++ {
+                newNode := &Node{
+                    Value: importedNet.Nodes[i][j][k].Value,
+                    Position: importedNet.Nodes[i][j][k].Position,
+                    IncomingConnections: []*Connection{},
+                    Id: fmt.Sprintf("%v|%v|%v", i, j, k),
+                }
+                jDim = append(jDim, newNode)
+            }
+            iDim = append(iDim, jDim)
+        }
+        net.Nodes = append(net.Nodes, iDim)
+    }
+    // set connections
+    // this part is super inefficient
+    // still should optimize
+    importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
+        newConn := &Connection{
+            HoldingVal: importedNode.OutgoingConnection.HoldingVal,
+        }
+        node := FindNode(importedNode.Position, net.Nodes)
+        toNodes := make(map[*Node]*ConnInfo)
+        for id, connInfo := range importedNode.OutgoingConnection.To {
+            posSlice := StrsToInts(strings.Split(id, "|"))
+            nodeToConnect := FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]}, net.Nodes)
+            toNodes[nodeToConnect] = connInfo
+            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
+        }
+        newConn.To = toNodes
+        node.OutgoingConnection = newConn
+    })
 
-//     // set sensors
-//     // this is also inefficient
-//     for _, importedSensor := range importedNet.Sensors {
-//         nodes := []*Node{}
-//         for _, nodePos := range importedSensor.Nodes {
-//             nodes = append(nodes, FindNode(nodePos, net.Nodes))
-//         }
-//         newSensor := &Sensor{
-//             Nodes: nodes,
-//             Excitatory: importedSensor.Excitatory,
-//             Trigger: importedSensor.Trigger,
-//             Stimulated: false,
-//             Name: importedSensor.Name,
-//             In: func(nodes []*Node, stimulated bool) {
-//                 // for simplicity - just continuously stimulate every node
-//                 for _, node := range nodes {
-//                     if stimulated {
-//                         node.Value = 1
-//                     }
-//                     // let's try removing this for now, see what happens...
-//                     // else {
-//                     //     node.Value = 0
-//                     // }
-//                 }
-//             },
-//         }
-//         net.Sensors = append(net.Sensors, newSensor)
-//         // if kb != nil {
-//         //     kb.Bind(func() {
-//         //         newSensor.Stimulated = !newSensor.Stimulated
-//         //     }, importedSensor.Trigger)
-//         // }
-//     }
+    // set sensors
+    // this is also inefficient
+    for _, importedSensor := range importedNet.Sensors {
+        nodes := []*Node{}
+        for _, nodePos := range importedSensor.Nodes {
+            nodes = append(nodes, FindNode(nodePos, net.Nodes))
+        }
+        newSensor := &Sensor{
+            Nodes: nodes,
+            Excitatory: importedSensor.Excitatory,
+            Trigger: importedSensor.Trigger,
+            Stimulated: false,
+            Name: importedSensor.Name,
+            In: func(nodes []*Node, stimulated bool) {
+                // for simplicity - just continuously stimulate every node
+                for _, node := range nodes {
+                    if stimulated {
+                        node.Value = 1
+                    }
+                    // let's try removing this for now, see what happens...
+                    // else {
+                    //     node.Value = 0
+                    // }
+                }
+            },
+        }
+        net.Sensors = append(net.Sensors, newSensor)
+        // if kb != nil {
+        //     kb.Bind(func() {
+        //         newSensor.Stimulated = !newSensor.Stimulated
+        //     }, importedSensor.Trigger)
+        // }
+    }
 
-//     for _, importedOutput := range importedNet.Outputs {
-//         nodes := []*Node{}
-//         for _, nodePos := range importedOutput.Nodes {
-//             nodes = append(nodes, FindNode(nodePos, net.Nodes))
-//         }
-//         newOutput := &Output{
-//             Nodes: nodes,
-//             Name: importedOutput.Name,
-//             Out: func(nodes []*Node) float64 {
-//                 var sum float64
-//                 for _, node := range nodes {
-//                     if node.OutgoingConnection.To[node].Excitatory {
-//                         sum += float64(node.Value) * node.OutgoingConnection.To[node].Strength
-//                     } else {
-//                         sum -= float64(node.Value) * node.OutgoingConnection.To[node].Strength
-//                     }
-//                 }
-//                 return sum
-//             },
-//         }
-//         net.Outputs = append(net.Outputs, newOutput)
-//     }
+    for _, importedOutput := range importedNet.Outputs {
+        // nodes := []*Node{}
+        // for _, nodePos := range importedOutput.Nodes {
+        //     nodes = append(nodes, FindNode(nodePos, net.Nodes))
+        // }
+        nodes := make(map[*Node]*ConnInfo)
+        for id, connInfo := range importedOutput.Nodes {
+            posSlice := StrsToInts(strings.Split(id, "|"))
+            node := FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]}, net.Nodes)
+            nodes[node] = connInfo
+        }
+        newOutput := &Output{
+            Nodes: nodes,
+            Name: importedOutput.Name,
+            // todo
+            Out: func(nodes []*Node) float64 {
+                var sum float64
+                for _, node := range nodes {
+                    if node.OutgoingConnection.To[node].Excitatory {
+                        sum += float64(node.Value) * node.OutgoingConnection.To[node].Strength
+                    } else {
+                        sum -= float64(node.Value) * node.OutgoingConnection.To[node].Strength
+                    }
+                }
+                return sum
+            },
+        }
+        net.Outputs = append(net.Outputs, newOutput)
+    }
 
-//     return net
-// }
+    return net
+}
 
 func (net *Network) BindKeyboard(kb keyboard.Keyboard) {
     for _, sensor := range net.Sensors {
@@ -196,7 +203,6 @@ func (net Network) SaveState(name string) {
             Name: sensor.Name,
         })
     }
-
     for _, output := range net.Outputs {
         nodeMap := make(map[string]*ConnInfo)
         for node, connInfo := range output.Nodes {
@@ -207,7 +213,6 @@ func (net Network) SaveState(name string) {
             Name: output.Name,
         })
     }
-
     for i := 0; i < net.Dimensions[0]; i++ {
         iDim := [][]*DisplayNode{}
         for j := 0; j < net.Dimensions[1]; j++ {
