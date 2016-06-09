@@ -72,31 +72,6 @@ func (net *Network) RemoveOutput(name string) {
     }
 }
 
-// func (output *Output) Update() {
-//     var sum float64
-//     for _, node := range output.Nodes {
-//         if node.OutgoingConnection.Excitatory {
-//             sum += float64(node.Value) * node.OutgoingConnection.Strength
-//         } else {
-//             sum -= float64(node.Value) * node.OutgoingConnection.Strength
-//         }
-//     }
-//     output.Value = sum
-// }
-
-// func (sensor *Sensor) Update() {
-//     // // for now let's just continuously stimulate every node
-//     // for _, node := range sensor.Nodes {
-//     //     if sensor.Stimulated {
-//     //         node.Value = 1
-//     //     }
-//     //     // let's try removing this for now, see what happens...
-//     //     // else {
-//     //     //     node.Value = 0
-//     //     // }
-//     // }
-// }
-
 // todo - there's probably an easier way to do the plane stuff now
 
 // do I even need the plane stuff
@@ -106,21 +81,13 @@ func (net *Network) RemoveOutput(name string) {
 func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, inputFunc func([]*Node, bool)) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
-        // Radius: r,
-        // NodeCount: count,
         Nodes: []*Node{},
         Excitatory: excitatory,
         Trigger: trigger,
         Stimulated: false,
         Name: name,
         In: inputFunc,
-        // Center: center,
     }
-    // if kb != nil {
-    //     kb.Bind(func() {
-    //         sensor.Stimulated = !sensor.Stimulated
-    //     }, trigger)
-    // }
     // todo - determine correct coefficient
     stDev := float64(r)
     // plane is which dimension should stay the same - name the variable in a better way?
@@ -188,10 +155,8 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
 func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int, outputFunc func(map[*Node]*ConnInfo) float64) *Output {
     // radius is basically density...
     output := &Output{
-        // Nodes: []*Node{},
         Name: name,
         Out: outputFunc,
-        // Center: center,
     }
     // todo - determine correct coefficient
     stDev := float64(r)

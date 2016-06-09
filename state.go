@@ -134,18 +134,9 @@ func LoadState(name string) *Network {
             },
         }
         net.Sensors = append(net.Sensors, newSensor)
-        // if kb != nil {
-        //     kb.Bind(func() {
-        //         newSensor.Stimulated = !newSensor.Stimulated
-        //     }, importedSensor.Trigger)
-        // }
     }
 
     for _, importedOutput := range importedNet.Outputs {
-        // nodes := []*Node{}
-        // for _, nodePos := range importedOutput.Nodes {
-        //     nodes = append(nodes, FindNode(nodePos, net.Nodes))
-        // }
         nodes := make(map[*Node]*ConnInfo)
         for id, connInfo := range importedOutput.Nodes {
             posSlice := StrsToInts(strings.Split(id, "|"))
@@ -225,8 +216,6 @@ func (net Network) SaveState(name string) {
                 dispConn := &DisplayConnection{
                     To: toNodes,
                     HoldingVal: node.OutgoingConnection.HoldingVal,
-                    // Excitatory: node.OutgoingConnection.Excitatory,
-                    // Strength: node.OutgoingConnection.Strength,
                 }
 
                 dispNode := &DisplayNode{

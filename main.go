@@ -109,11 +109,6 @@ func main() {
                 centerArr = StrsToInts(strings.Split(center, ","))
             }
             // todo get numbers
-            // crap how do we sum up stuff
-            // just sum up everything in the node?
-            // LITERALLY EVERYTHING
-            // THAT MAY TAKE A LITTLE WHILE!
-            // see also:  line 152 of state.go
             myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes map[*Node]*ConnInfo) float64 {
                 var sum float64
                 for node, connInfo := range nodes {
