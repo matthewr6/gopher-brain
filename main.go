@@ -116,12 +116,11 @@ func main() {
             // see also:  line 152 of state.go
             myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes map[*Node]*ConnInfo) float64 {
                 var sum float64
-                // todo
                 for node, connInfo := range nodes {
-                    if node.OutgoingConnection.To[node].Excitatory {
-                        sum += float64(node.Value) * node.OutgoingConnection.To[node].Strength
+                    if connInfo.Excitatory {
+                        sum += float64(node.Value) * connInfo.Strength
                     } else {
-                        sum -= float64(node.Value) * node.OutgoingConnection.To[node].Strength
+                        sum -= float64(node.Value) * connInfo.Strength
                     }
                 }
                 return sum

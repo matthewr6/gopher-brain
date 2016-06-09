@@ -155,14 +155,13 @@ func LoadState(name string) *Network {
         newOutput := &Output{
             Nodes: nodes,
             Name: importedOutput.Name,
-            // todo
-            Out: func(nodes []*Node) float64 {
+            Out: func(nodes map[*Node]*ConnInfo) float64 {
                 var sum float64
-                for _, node := range nodes {
-                    if node.OutgoingConnection.To[node].Excitatory {
-                        sum += float64(node.Value) * node.OutgoingConnection.To[node].Strength
+                for node, connInfo := range nodes {
+                    if connInfo.Excitatory {
+                        sum += float64(node.Value) * connInfo.Strength
                     } else {
-                        sum -= float64(node.Value) * node.OutgoingConnection.To[node].Strength
+                        sum -= float64(node.Value) * connInfo.Strength
                     }
                 }
                 return sum
