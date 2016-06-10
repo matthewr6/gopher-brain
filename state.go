@@ -35,6 +35,7 @@ type DisplayNode struct {
 type DisplayConnection struct {
     To map[string]*ConnInfo `json:"to"` // shouldn't need a display struct for this, also idk why it's *ConnInfo instead of ConnInfo but hey it works
     HoldingVal int          `json:"holdingVal"`
+    Center [3]int           `json:"center"`
 }
 
 type DisplaySensor struct {
@@ -94,6 +95,7 @@ func LoadState(name string) *Network {
     importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
+            Center: importedNode.OutgoingConnection.Center,
         }
         node := FindNode(importedNode.Position, net.Nodes)
         toNodes := make(map[*Node]*ConnInfo)
@@ -216,6 +218,7 @@ func (net Network) SaveState(name string) {
                 dispConn := &DisplayConnection{
                     To: toNodes,
                     HoldingVal: node.OutgoingConnection.HoldingVal,
+                    Center: node.OutgoingConnection.Center,
                 }
 
                 dispNode := &DisplayNode{

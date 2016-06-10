@@ -2,7 +2,6 @@ package main
 
 import (
     "fmt"
-    "math"
     "math/rand"
     "os"
     "strconv"
@@ -33,6 +32,7 @@ type ConnInfo struct {
 type Connection struct {
     To map[*Node]*ConnInfo  `json:"to"`
     HoldingVal int          `json:"holding"`
+    Center [3]int           `json:"center"`
 }
 
 type Node struct {
@@ -227,6 +227,7 @@ func (net *Network) Connect() {
 
         newConn := &Connection{
             To: toNodes,
+            Center: centralConnNode.Position,
         }
         node.OutgoingConnection = newConn
         for _, nodeToConnect := range nodesToConnect {
