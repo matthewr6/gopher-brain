@@ -108,6 +108,34 @@ func RandFloat(min, max float64) float64 {
     return min + r
 }
 
+func (node *Node) AddConnections() {
+    center := node.OutgoingConnection.Center
+    possibleExtensions := []*Node{}
+    numPossible := rand.Intn(15 - 5) + 5
+    stDev := 3.0 // todo, what number?
+    for i := 0; i < numPossible; i++ {
+        // todo - wrapper function for this since it's used so much
+        potX := int(rand.NormFloat64() * stDev) + node.Position[0]
+        potY := int(rand.NormFloat64() * stDev) + node.Position[1]
+        potZ := int(rand.NormFloat64() * stDev) + node.Position[2]
+        for potX < 0 || potX >= net.Dimensions[0] {
+            potX = int(rand.NormFloat64() * stDev) + node.Position[0]
+        }
+        for potY < 0 || potY >= net.Dimensions[0] {
+            potY = int(rand.NormFloat64() * stDev) + node.Position[1]
+        }
+        for potZ < 0 || potZ >= net.Dimensions[0] {
+            potZ = int(rand.NormFloat64() * stDev) + node.Position[2]
+        }
+        potCenter := [3]int{potX, potY, potZ}
+        possibleExtensions = append(possibleExtensions, potCenter)
+    }
+    // could merge this into the above loop...
+    for _, pos := range possibleExtensions {
+        // potNode := FindNode(
+    }
+}
+
 // let's see which one causes the most overhead...
 // or it might just be all of them
 func (net *Network) Cycle() {
@@ -116,6 +144,9 @@ func (net *Network) Cycle() {
 
     net.ForEachNode(func(node *Node, pos [3]int) {
         // todo - search for nodes to connect to?
+        // what should this be on, the node or the connection?
+        // also make sure the order is good
+        node.AddConnections()
         node.OutgoingConnection.HoldingVal = node.Value
         node.Value = 0
     })
