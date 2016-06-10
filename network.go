@@ -159,11 +159,6 @@ func (net *Network) RandomizeValues() {
     })
 }
 
-func ThreeDimDist(p1, p2 [3]int) float64 {
-    ans := (p1[0]-p2[0])*(p1[0]-p2[0]) + (p1[1]-p2[1])*(p1[1]-p2[1]) + (p1[2]-p2[2])*(p1[2]-p2[2])
-    return math.Sqrt(float64(ans))
-}
-
 func NodeExistsIn(node *Node, nodes []*Node) bool {
     for _, potNode := range nodes {
         if (node == potNode) {
