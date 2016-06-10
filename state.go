@@ -97,11 +97,11 @@ func LoadState(name string) *Network {
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
             Center: importedNode.OutgoingConnection.Center,
         }
-        node := FindNode(importedNode.Position, net.Nodes)
+        node := net.FindNode(importedNode.Position)
         toNodes := make(map[*Node]*ConnInfo)
         for id, connInfo := range importedNode.OutgoingConnection.To {
             posSlice := StrsToInts(strings.Split(id, "|"))
-            nodeToConnect := FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]}, net.Nodes)
+            nodeToConnect := net.FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]})
             toNodes[nodeToConnect] = connInfo
             nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
         }
@@ -114,7 +114,7 @@ func LoadState(name string) *Network {
     for _, importedSensor := range importedNet.Sensors {
         nodes := []*Node{}
         for _, nodePos := range importedSensor.Nodes {
-            nodes = append(nodes, FindNode(nodePos, net.Nodes))
+            nodes = append(nodes, net.FindNode(nodePos))
         }
         newSensor := &Sensor{
             Nodes: nodes,
@@ -142,7 +142,7 @@ func LoadState(name string) *Network {
         nodes := make(map[*Node]*ConnInfo)
         for id, connInfo := range importedOutput.Nodes {
             posSlice := StrsToInts(strings.Split(id, "|"))
-            node := FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]}, net.Nodes)
+            node := net.FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]})
             nodes[node] = connInfo
         }
         newOutput := &Output{

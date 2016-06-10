@@ -108,31 +108,31 @@ func RandFloat(min, max float64) float64 {
     return min + r
 }
 
-func (node *Node) AddConnections() {
+func (net *Network) AddConnections(node *Node) {
     center := node.OutgoingConnection.Center
     possibleExtensions := []*Node{}
     numPossible := rand.Intn(15 - 5) + 5
     stDev := 3.0 // todo, what number?
     for i := 0; i < numPossible; i++ {
         // todo - wrapper function for this since it's used so much
-        potX := int(rand.NormFloat64() * stDev) + node.Position[0]
-        potY := int(rand.NormFloat64() * stDev) + node.Position[1]
-        potZ := int(rand.NormFloat64() * stDev) + node.Position[2]
+        potX := int(rand.NormFloat64() * stDev) + center[0]
+        potY := int(rand.NormFloat64() * stDev) + center[1]
+        potZ := int(rand.NormFloat64() * stDev) + center[2]
         for potX < 0 || potX >= net.Dimensions[0] {
-            potX = int(rand.NormFloat64() * stDev) + node.Position[0]
+            potX = int(rand.NormFloat64() * stDev) + center[0]
         }
         for potY < 0 || potY >= net.Dimensions[0] {
-            potY = int(rand.NormFloat64() * stDev) + node.Position[1]
+            potY = int(rand.NormFloat64() * stDev) + center[1]
         }
         for potZ < 0 || potZ >= net.Dimensions[0] {
-            potZ = int(rand.NormFloat64() * stDev) + node.Position[2]
+            potZ = int(rand.NormFloat64() * stDev) + center[2]
         }
         potCenter := [3]int{potX, potY, potZ}
-        possibleExtensions = append(possibleExtensions, potCenter)
+        possibleExtensions = append(possibleExtensions, net.FindNode(potCenter))
     }
     // could merge this into the above loop...
-    for _, pos := range possibleExtensions {
-        // potNode := FindNode(
+    for _, potNode := range possibleExtensions {
+        // potNode :(
     }
 }
 
@@ -146,7 +146,7 @@ func (net *Network) Cycle() {
         // todo - search for nodes to connect to?
         // what should this be on, the node or the connection?
         // also make sure the order is good
-        node.AddConnections()
+        net.AddConnections(node)
         node.OutgoingConnection.HoldingVal = node.Value
         node.Value = 0
     })
@@ -219,7 +219,7 @@ func (net *Network) Connect() {
             }
             center = [3]int{potX, potY, potZ}
         }
-        centralConnNode := FindNode(center, net.Nodes)
+        centralConnNode := net.FindNode(center)
 
         // select the X connections here
         numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
@@ -236,7 +236,7 @@ func (net *Network) Connect() {
                     int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
                 }
             }
-            potNode := FindNode(potPos, net.Nodes)
+            potNode := net.FindNode(potPos)
             // potNode := possibleConnections[rand.Intn(len(possibleConnections))]
             if !NodeExistsIn(potNode, nodesToConnect) && potNode != node {
                 nodesToConnect = append(nodesToConnect, potNode)
