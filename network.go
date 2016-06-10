@@ -133,13 +133,12 @@ func (net *Network) AddConnections(node *Node) {
     // could merge this into the above loop...
     for _, potNode := range possibleExtensions {
         _, exists := node.OutgoingConnection.To[potNode]
-
         if potNode.Value != 0 && !exists { // todo doesthis check work?
+            excitatory := false
             if rand.Intn(2) != 0 {
                 excitatory = true
             }
             node.OutgoingConnection.To[potNode] = &ConnInfo{
-                // stuff
                 Strength: RandFloat(0.50, 1.50),
                 Excitatory: excitatory,
             }
@@ -157,7 +156,9 @@ func (net *Network) Cycle() {
         // todo - search for nodes to connect to?
         // what should this be on, the node or the connection?
         // also make sure the order is good
-        net.AddConnections(node)
+        if node.Value != 0 {
+            net.AddConnections(node)
+        }
         node.OutgoingConnection.HoldingVal = node.Value
         node.Value = 0
     })
