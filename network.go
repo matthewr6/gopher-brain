@@ -18,11 +18,6 @@ import (
 */
 
 // http://www.scientificamerican.com/article/ask-the-brains-aug-08/
-// maybe do a map of a connected node to its strength and/or its excitatory/inhibitory
-
-// todo - state.go
-// array with {node: node, strength: strength}
-// unique ids for each node, maybe?  based on position?  like "x|y|z" concatenated?
 
 type ConnInfo struct {
     Excitatory bool  `json:"excitatory"`
