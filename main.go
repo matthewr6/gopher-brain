@@ -149,39 +149,4 @@ func main() {
     if fileName != "" {
         myNet.SaveState(fileName)
     }
-
-    // this section is to test state saving/loading capabilities
-    // NETWORK_SIZE := [3]int{25, 25, 25}
-    // myNet := MakeNetwork(NETWORK_SIZE, false)
-    // myNet.Connect()
-
-    // // myNet.CreateSensor("aa", 1, 50, "", [3]int{24, 0, 0}, true, "a", func(nodes []*Node, stimulated bool) {
-    // //     for _, node := range nodes {
-    // //         if stimulated {
-    // //             node.Value = 1
-    // //         }
-    // //     }
-    // // })
-    // // myNet.CreateSensor("bb", 1, 50, "", [3]int{0, 0, 0}, true, "b", func(nodes []*Node, stimulated bool) {
-    // //     for _, node := range nodes {
-    // //         if stimulated {
-    // //             node.Value = 1
-    // //         }
-    // //     }
-    // // })
-    // // myNet.CreateOutput("output", 1, 50,"", [3]int{12, 1, 1}, func(nodes []*Node) float64 {
-    // //     var sum float64
-    // //     for _, node := range nodes {
-    // //         if node.OutgoingConnection.To[node].Excitatory {
-    // //             sum += float64(node.Value) * node.OutgoingConnection.To[node].Strength
-    // //         } else {
-    // //             sum -= float64(node.Value) * node.OutgoingConnection.To[node].Strength
-    // //         }
-    // //     }
-    // //     return sum
-    // // })
-
-    // myNet.SaveState("test")
-    // loadedNet := LoadState("test")
-    // fmt.Println(Test(myNet, loadedNet))
 }
