@@ -6,7 +6,6 @@ import (
     "time"
     "bufio"
     "strings"
-    // "reflect"
     "math/rand"
 
     "github.com/jteeuwen/keyboard/termbox"
@@ -110,13 +109,13 @@ func main() {
                 centerArr = StrsToInts(strings.Split(center, ","))
             }
             // todo get numbers
-            myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes []*Node) float64 {
+            myNet.CreateOutput(outputName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, func(nodes map[*Node]*ConnInfo) float64 {
                 var sum float64
-                for _, node := range nodes {
-                    if node.OutgoingConnection.Excitatory {
-                        sum += float64(node.Value) * node.OutgoingConnection.Strength
+                for node, connInfo := range nodes {
+                    if connInfo.Excitatory {
+                        sum += float64(node.Value) * connInfo.Strength
                     } else {
-                        sum -= float64(node.Value) * node.OutgoingConnection.Strength
+                        sum -= float64(node.Value) * connInfo.Strength
                     }
                 }
                 return sum
@@ -150,16 +149,4 @@ func main() {
     if fileName != "" {
         myNet.SaveState(fileName)
     }
-
-    // this section is to test state saving/loading capabilities
-    // NETWORK_SIZE := [3]int{25, 25, 25}
-    // myNet := MakeNetwork(NETWORK_SIZE, false)
-    // myNet.Connect()
-
-    // myNet.CreateSensor("aa", 1, 50, "", [3]int{24, 0, 0}, true, "a", nil)
-    // myNet.CreateSensor("bb", 1, 50, "", [3]int{0, 0, 0}, true, "b", nil)
-    // myNet.CreateOutput("output", 1, 50,"", [3]int{12, 1, 1})
-    // myNet.SaveState("test")
-    // loadedNet := LoadState("test", nil)
-    // fmt.Println(reflect.DeepEqual(loadedNet, myNet))
 }

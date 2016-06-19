@@ -15,11 +15,12 @@ type Sensor struct {
     In func([]*Node, bool) `json:"-"`
 }
 
+// dang gonna have to do the same saving trick stuff as the Connection type
 type Output struct {
-    Nodes []*Node              `json:"nodes"`
-    Name string                `json:"name"`
-    Value float64              `json:"value"` // do we want single or double precision float?  (32/64)
-    Out func([]*Node) float64  `json:"-"`
+    Nodes map[*Node]*ConnInfo               `json:"nodes"`
+    Name string                             `json:"name"`
+    Value float64                           `json:"value"`
+    Out func(map[*Node]*ConnInfo) float64   `json:"-"`
 }
 
 func (s Sensor) String() string {
@@ -71,31 +72,6 @@ func (net *Network) RemoveOutput(name string) {
     }
 }
 
-// func (output *Output) Update() {
-//     var sum float64
-//     for _, node := range output.Nodes {
-//         if node.OutgoingConnection.Excitatory {
-//             sum += float64(node.Value) * node.OutgoingConnection.Strength
-//         } else {
-//             sum -= float64(node.Value) * node.OutgoingConnection.Strength
-//         }
-//     }
-//     output.Value = sum
-// }
-
-// func (sensor *Sensor) Update() {
-//     // // for now let's just continuously stimulate every node
-//     // for _, node := range sensor.Nodes {
-//     //     if sensor.Stimulated {
-//     //         node.Value = 1
-//     //     }
-//     //     // let's try removing this for now, see what happens...
-//     //     // else {
-//     //     //     node.Value = 0
-//     //     // }
-//     // }
-// }
-
 // todo - there's probably an easier way to do the plane stuff now
 
 // do I even need the plane stuff
@@ -105,21 +81,13 @@ func (net *Network) RemoveOutput(name string) {
 func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, inputFunc func([]*Node, bool)) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
-        // Radius: r,
-        // NodeCount: count,
         Nodes: []*Node{},
         Excitatory: excitatory,
         Trigger: trigger,
         Stimulated: false,
         Name: name,
         In: inputFunc,
-        // Center: center,
     }
-    // if kb != nil {
-    //     kb.Bind(func() {
-    //         sensor.Stimulated = !sensor.Stimulated
-    //     }, trigger)
-    // }
     // todo - determine correct coefficient
     stDev := float64(r)
     // plane is which dimension should stay the same - name the variable in a better way?
@@ -134,7 +102,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
                 potY := int(rand.NormFloat64() * stDev) + center[1]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
                 if potY > 0 && potZ > 0 {
-                    potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
+                    potNode := net.FindNode([3]int{potX, potY, potZ})
                     if !NodeExistsIn(potNode, sensor.Nodes) {
                         sensor.Nodes = append(sensor.Nodes, potNode)
                     }
@@ -147,7 +115,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
                 if potX > 0 && potZ > 0 {
-                    potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
+                    potNode := net.FindNode([3]int{potX, potY, potZ})
                     if !NodeExistsIn(potNode, sensor.Nodes) {
                         sensor.Nodes = append(sensor.Nodes, potNode)
                     }
@@ -160,7 +128,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potY := int(rand.NormFloat64() * stDev) + center[1]
                 if potX > 0 && potY > 0 {
-                    potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
+                    potNode := net.FindNode([3]int{potX, potY, potZ})
                     if !NodeExistsIn(potNode, sensor.Nodes) {
                         sensor.Nodes = append(sensor.Nodes, potNode)
                     }
@@ -173,7 +141,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
             potY := int(rand.NormFloat64() * stDev) + center[1]
             potZ := int(rand.NormFloat64() * stDev) + center[2]
             if potX >= 0 && potY >= 0 && potZ >= 0 && potX < net.Dimensions[0] && potY < net.Dimensions[1] && potZ < net.Dimensions[2] {
-                potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
+                potNode := net.FindNode([3]int{potX, potY, potZ})
                 if !NodeExistsIn(potNode, sensor.Nodes) {
                     sensor.Nodes = append(sensor.Nodes, potNode)
                 }
@@ -184,16 +152,17 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
     return sensor
 }
 
-func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int, outputFunc func([]*Node) float64) *Output {
+func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int, outputFunc func(map[*Node]*ConnInfo) float64) *Output {
     // radius is basically density...
     output := &Output{
-        Nodes: []*Node{},
         Name: name,
         Out: outputFunc,
-        // Center: center,
     }
     // todo - determine correct coefficient
     stDev := float64(r)
+
+    // set up nodes
+    nodes := []*Node{}
     // plane is which dimension should stay the same - name the variable in a better way?
     if (plane != "") {
         if (plane == "x" || plane == "y" || plane == "z") {
@@ -202,56 +171,70 @@ func (net *Network) CreateOutput(name string, r int, count int, plane string, ce
         }
         if (plane == "x") {
             potX := center[0]
-            for len(output.Nodes) < count {
+            for len(nodes) < count {
                 potY := int(rand.NormFloat64() * stDev) + center[1]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
                 if potY > 0 && potZ > 0 {
-                    potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
-                    if !NodeExistsIn(potNode, output.Nodes) {
-                        output.Nodes = append(output.Nodes, potNode)
+                    potNode := net.FindNode([3]int{potX, potY, potZ})
+                    if !NodeExistsIn(potNode, nodes) {
+                        nodes = append(nodes, potNode)
                     }
                 }
             }
         }
         if (plane == "y") {
             potY := center[1]
-            for len(output.Nodes) < count {
+            for len(nodes) < count {
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
                 if potX > 0 && potZ > 0 {
-                    potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
-                    if !NodeExistsIn(potNode, output.Nodes) {
-                        output.Nodes = append(output.Nodes, potNode)
+                    potNode := net.FindNode([3]int{potX, potY, potZ})
+                    if !NodeExistsIn(potNode, nodes) {
+                        nodes = append(nodes, potNode)
                     }
                 }
             }
         }
         if (plane == "z") {
             potZ := center[2]
-            for len(output.Nodes) < count {
+            for len(nodes) < count {
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potY := int(rand.NormFloat64() * stDev) + center[1]
                 if potX > 0 && potY > 0 {
-                    potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
-                    if !NodeExistsIn(potNode, output.Nodes) {
-                        output.Nodes = append(output.Nodes, potNode)
+                    potNode := net.FindNode([3]int{potX, potY, potZ})
+                    if !NodeExistsIn(potNode, nodes) {
+                        nodes = append(nodes, potNode)
                     }
                 }
             }
         }
     } else {
-        for len(output.Nodes) < count {
+        for len(nodes) < count {
             potX := int(rand.NormFloat64() * stDev) + center[0]
             potY := int(rand.NormFloat64() * stDev) + center[1]
             potZ := int(rand.NormFloat64() * stDev) + center[2]
             if potX >= 0 && potY >= 0 && potZ >= 0 && potX < net.Dimensions[0] && potY < net.Dimensions[1] && potZ < net.Dimensions[2] {
-                potNode := FindNode([3]int{potX, potY, potZ}, net.Nodes)
-                if !NodeExistsIn(potNode, output.Nodes) {
-                    output.Nodes = append(output.Nodes, potNode)
+                potNode := net.FindNode([3]int{potX, potY, potZ})
+                if !NodeExistsIn(potNode, nodes) {
+                    nodes = append(nodes, potNode)
                 }
             }
         }
     }
+
+    // iterate through nodes
+    nodeMapping := make(map[*Node]*ConnInfo)
+    var excitatory bool
+    for _, node := range nodes {
+        if rand.Intn(2) != 0 {
+            excitatory = true
+        }
+        nodeMapping[node] = &ConnInfo{
+            Strength: RandFloat(0.75, 1.75),
+            Excitatory: excitatory,
+        }
+    }
+    output.Nodes = nodeMapping
     net.Outputs = append(net.Outputs, output)
     return output
 }

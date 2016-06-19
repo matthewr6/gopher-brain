@@ -21,3 +21,7 @@ func Prompt(message string, reader *bufio.Reader) string {
     text, _ := reader.ReadString('\n')
     return strings.TrimSpace(text)
 }
+
+func (net Network) FindNode(position [3]int) *Node {
+    return net.Nodes[position[0]][position[1]][position[2]]
+}

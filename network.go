@@ -2,7 +2,6 @@ package main
 
 import (
     "fmt"
-    "math"
     "math/rand"
     "os"
     "strconv"
@@ -20,18 +19,28 @@ import (
 
 // http://www.scientificamerican.com/article/ask-the-brains-aug-08/
 // maybe do a map of a connected node to its strength and/or its excitatory/inhibitory
+
+// todo - state.go
+// array with {node: node, strength: strength}
+// unique ids for each node, maybe?  based on position?  like "x|y|z" concatenated?
+
+type ConnInfo struct {
+    Excitatory bool  `json:"excitatory"`
+    Strength float64 `json:"strength"`
+}
+
 type Connection struct {
-    To []*Node         `json:"-"`
-    HoldingVal int     `json:"holding"`
-    Excitatory bool    `json:"excitatory"`
-    Strength float64   `json:"strength"`
+    To map[*Node]*ConnInfo  `json:"to"`
+    HoldingVal int          `json:"holding"`
+    Center [3]int           `json:"center"`
 }
 
 type Node struct {
-    Value int                          `json:"value"`
+    Value int                          `json:"value"` // todo- maybe use a bool of true or false, and rename this "firing"?
     OutgoingConnection *Connection     `json:"-"`  //which node to send to
     IncomingConnections []*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                    `json:"position"`
+    Id string                          `json:"id"` //"x|y|z"
 }
 
 type Network struct {
@@ -52,10 +61,34 @@ func (n *Node) Update() {
     var sum float64
 
     for _, conn := range n.IncomingConnections {
-        if conn.Excitatory {
-            sum = sum + (float64(conn.HoldingVal) * conn.Strength)
+        if conn.To[n].Excitatory {
+            sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
         } else {
-            sum = sum - (float64(conn.HoldingVal) * conn.Strength)
+            sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
+        }
+
+        // reassess connections here
+        // todo - calculate how much to increase/decrease connection strength by
+        // https://www.reddit.com/r/askscience/comments/1bb5br/what_physically_happens_when_neural_connections/
+        if conn.HoldingVal == 0 {
+            // the previous node *didn't* fire
+            conn.To[n].Strength -= 0.05
+        } else {
+            // the previous node *did* fire
+            conn.To[n].Strength += 0.05
+        }
+
+        // todo - thresholds
+        if conn.To[n].Strength > 2.25 {
+            // max strength?
+            conn.To[n].Strength = 2.25
+        }
+        // the below has to be at the end
+        // it's not a pretty way to resolve it but it works
+        // maybe use `continue`
+        if conn.To[n].Strength < 0.25 {
+            // remove?  different threshold?
+            delete(conn.To, n)
         }
     }
 
@@ -65,6 +98,7 @@ func (n *Node) Update() {
         //or else just stay at 0
         n.Value = 1
     }
+
 }
 
 func RandFloat(min, max float64) float64 {
@@ -74,6 +108,44 @@ func RandFloat(min, max float64) float64 {
     return min + r
 }
 
+func (net *Network) AddConnections(node *Node) {
+    center := node.OutgoingConnection.Center
+    possibleExtensions := []*Node{}
+    numPossible := rand.Intn(15 - 5) + 5
+    stDev := 3.0 // todo, what number?
+    for i := 0; i < numPossible; i++ {
+        // todo - wrapper function for this since it's used so much
+        potX := int(rand.NormFloat64() * stDev) + center[0]
+        potY := int(rand.NormFloat64() * stDev) + center[1]
+        potZ := int(rand.NormFloat64() * stDev) + center[2]
+        for potX < 0 || potX >= net.Dimensions[0] {
+            potX = int(rand.NormFloat64() * stDev) + center[0]
+        }
+        for potY < 0 || potY >= net.Dimensions[0] {
+            potY = int(rand.NormFloat64() * stDev) + center[1]
+        }
+        for potZ < 0 || potZ >= net.Dimensions[0] {
+            potZ = int(rand.NormFloat64() * stDev) + center[2]
+        }
+        potCenter := [3]int{potX, potY, potZ}
+        possibleExtensions = append(possibleExtensions, net.FindNode(potCenter))
+    }
+    // could merge this into the above loop...
+    for _, potNode := range possibleExtensions {
+        _, exists := node.OutgoingConnection.To[potNode]
+        if potNode.Value != 0 && !exists { // todo doesthis check work?
+            excitatory := false
+            if rand.Intn(2) != 0 {
+                excitatory = true
+            }
+            node.OutgoingConnection.To[potNode] = &ConnInfo{
+                Strength: RandFloat(0.50, 1.50),
+                Excitatory: excitatory,
+            }
+        } 
+    }
+}
+
 // let's see which one causes the most overhead...
 // or it might just be all of them
 func (net *Network) Cycle() {
@@ -81,6 +153,12 @@ func (net *Network) Cycle() {
     // first, set all the connections based on their nodes
 
     net.ForEachNode(func(node *Node, pos [3]int) {
+        // todo - search for nodes to connect to?
+        // what should this be on, the node or the connection?
+        // also make sure the order is good
+        if node.Value != 0 {
+            net.AddConnections(node)
+        }
         node.OutgoingConnection.HoldingVal = node.Value
         node.Value = 0
     })
@@ -124,11 +202,6 @@ func (net *Network) RandomizeValues() {
     })
 }
 
-func ThreeDimDist(p1, p2 [3]int) float64 {
-    ans := (p1[0]-p2[0])*(p1[0]-p2[0]) + (p1[1]-p2[1])*(p1[1]-p2[1]) + (p1[2]-p2[2])*(p1[2]-p2[2])
-    return math.Sqrt(float64(ans))
-}
-
 func NodeExistsIn(node *Node, nodes []*Node) bool {
     for _, potNode := range nodes {
         if (node == potNode) {
@@ -158,7 +231,7 @@ func (net *Network) Connect() {
             }
             center = [3]int{potX, potY, potZ}
         }
-        centralConnNode := FindNode(center, net.Nodes)
+        centralConnNode := net.FindNode(center)
 
         // select the X connections here
         numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
@@ -175,7 +248,7 @@ func (net *Network) Connect() {
                     int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
                 }
             }
-            potNode := FindNode(potPos, net.Nodes)
+            potNode := net.FindNode(potPos)
             // potNode := possibleConnections[rand.Intn(len(possibleConnections))]
             if !NodeExistsIn(potNode, nodesToConnect) && potNode != node {
                 nodesToConnect = append(nodesToConnect, potNode)
@@ -183,14 +256,21 @@ func (net *Network) Connect() {
         }
 
         var excitatory bool
-        // should this have a higher probability of being excitatory?
-        if rand.Intn(2) != 0 {
-            excitatory = true
+        toNodes := make(map[*Node]*ConnInfo)
+        for _, node := range nodesToConnect {
+            // should this have a higher probability of being excitatory?
+            if rand.Intn(2) != 0 {
+                excitatory = true
+            }
+            toNodes[node] = &ConnInfo{
+                Strength: RandFloat(0.75, 1.75),
+                Excitatory: excitatory,
+            }
         }
+
         newConn := &Connection{
-            To: nodesToConnect,
-            Excitatory: excitatory,
-            Strength: RandFloat(0.75, 1.75),
+            To: toNodes,
+            Center: centralConnNode.Position,
         }
         node.OutgoingConnection = newConn
         for _, nodeToConnect := range nodesToConnect {
@@ -232,6 +312,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                     Value: newValue,
                     Position: [3]int{i, j, k},
                     IncomingConnections: []*Connection{},
+                    Id: fmt.Sprintf("%v|%v|%v", i, j, k),
                 })
             }
             iDim = append(iDim, jDim)
