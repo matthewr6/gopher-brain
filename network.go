@@ -59,42 +59,46 @@ func (n *Node) Update() {
     var sum float64
 
     for _, conn := range n.IncomingConnections {
-        // fmt.Println()
-        // fmt.Println(n.Id)
-        // fmt.Println(conn.To[n])
-        if conn.To[n].Excitatory {
-            sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
-        } else {
-            sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
-        }
+        // let's just wrap it in this for now...
+        if conn.To[n] != nil {
+            // fmt.Println()
+            // fmt.Println(n.Id)
+            // fmt.Println(conn.To[n])
+            if conn.To[n].Excitatory {
+                sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
+            } else {
+                sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
+            }
 
-        // reassess connections here
-        // todo - calculate how much to increase/decrease connection strength by
-        // https://www.reddit.com/r/askscience/comments/1bb5br/what_physically_happens_when_neural_connections/
-        if conn.HoldingVal == 0 {
-            // the previous node *didn't* fire
-            conn.To[n].Strength -= 0.05
-        } else {
-            // the previous node *did* fire
-            conn.To[n].Strength += 0.05
-        }
+            // reassess connections here
+            // todo - calculate how much to increase/decrease connection strength by
+            // https://www.reddit.com/r/askscience/comments/1bb5br/what_physically_happens_when_neural_connections/
+            if conn.HoldingVal == 0 {
+                // the previous node *didn't* fire
+                conn.To[n].Strength -= 0.05
+            } else {
+                // the previous node *did* fire
+                conn.To[n].Strength += 0.05
+            }
 
-        // todo - thresholds
-        if conn.To[n].Strength > 2.25 {
-            // max strength?
-            conn.To[n].Strength = 2.25
-        }
-        // the below has to be at the end
-        // it's not a pretty way to resolve it but it works
-        // maybe use `continue`
+            // todo - thresholds
+            if conn.To[n].Strength > 2.25 {
+                // max strength?
+                conn.To[n].Strength = 2.25
+            }
+            // the below has to be at the end
+            // it's not a pretty way to resolve it but it works
+            // maybe use `continue`
 
-        // todo - this isn't working
-        // oh have to delete conn from incomingconnections
-        // maybe this stuff in new loop?
-        if conn.To[n].Strength < 0.25 {
-            fmt.Println("deleting")
-            // remove?  different threshold?
-            delete(conn.To, n)
+            // todo - this isn't working
+            // oh have to delete conn from incomingconnections
+            // maybe this stuff in new loop?
+            if conn.To[n].Strength < 0.25 {
+                // remove?  different threshold?
+                delete(conn.To, n)
+                // fmt.Println("deleting")
+                // fmt.Println(conn.To[n])
+            }
         }
     }
 
