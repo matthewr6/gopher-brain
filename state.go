@@ -249,6 +249,7 @@ func (impNet DisplayNetwork) ForEachINode(handler func(*DisplayNode, [3]int)) {
 }
 
 func Test(orig, loaded *Network) bool {
+    // don't need to compare left/right hemis
     // compare dimensions
     if orig.Dimensions != loaded.Dimensions {
         return false

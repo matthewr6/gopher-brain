@@ -28,9 +28,10 @@ func main() {
     var myNet *Network
     _, err := os.Stat(fmt.Sprintf("./state/%v_state.json", fileName))
     if fileName == "" || err != nil {
-        NETWORK_SIZE := [3]int{25, 25, 25}
+        NETWORK_SIZE := [3]int{3, 3, 3}
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
+        myNet.Mirror()
     } else {
         myNet = LoadState(fileName)
     }

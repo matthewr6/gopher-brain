@@ -38,11 +38,14 @@ type Node struct {
     Id string                          `json:"id"` //"x|y|z"
 }
 
+// let's say y=0 is the front of the "brain"
 type Network struct {
-    Nodes [][][]*Node       `json:"nodes"`
-    Dimensions [3]int       `json:"-"`
-    Sensors []*Sensor       `json:"-"`
-    Outputs []*Output       `json:"-"`
+    Nodes [][][]*Node           `json:"nodes"`
+    LeftHemisphere [][][]*Node  `json:"leftHemisphere"`
+    RightHemisphere [][][]*Node  `json:"rightHemisphere"`
+    Dimensions [3]int           `json:"-"`
+    Sensors []*Sensor           `json:"-"`
+    Outputs []*Output           `json:"-"`
 }
 
 func (c Connection) String() string {
@@ -56,6 +59,9 @@ func (n *Node) Update() {
     var sum float64
 
     for _, conn := range n.IncomingConnections {
+        // fmt.Println()
+        // fmt.Println(n.Id)
+        // fmt.Println(conn.To[n])
         if conn.To[n].Excitatory {
             sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
         } else {
@@ -81,7 +87,12 @@ func (n *Node) Update() {
         // the below has to be at the end
         // it's not a pretty way to resolve it but it works
         // maybe use `continue`
+
+        // todo - this isn't working
+        // oh have to delete conn from incomingconnections
+        // maybe this stuff in new loop?
         if conn.To[n].Strength < 0.25 {
+            fmt.Println("deleting")
             // remove?  different threshold?
             delete(conn.To, n)
         }
@@ -206,8 +217,86 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
     return false
 }
 
-func (net *Network) Connect() {
+// todo
+// call this after connecting first hemisphere
+func (net *Network) Mirror() {
+    // invert in x direction
+    leftHemisphere := [][][]*Node{}
+    for i := len(net.RightHemisphere)-1; i >= 0; i-- {
+        leftHemisphere = append(leftHemisphere, net.RightHemisphere[i])
+    }
+    net.LeftHemisphere = leftHemisphere
+    net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
+        actualNode := net.FindLeftHemisphereNode(pos)
+
+        var newConnection = &Connection{
+            HoldingVal: 0,
+        }
+
+        newConnection.To = make(map[*Node]*ConnInfo)
+        newConnection.Center[0] = (net.Dimensions[0]-1) - newConnection.Center[0]
+        // now have to do the "to" stuff
+        centralConnNode := net.FindLeftHemisphereNode(newConnection.Center) // is this correct
+
+        // start redundancy
+        numAxonTerminals := rand.Intn(3) + 1 // todo
+        nodesToConnect := []*Node{
+            centralConnNode,
+        }
+        stDev := 1.5
+        for i := 0; i < numAxonTerminals; i++ {
+            potPos := [3]int{-1, -1, -1}
+            for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0] || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
+                potPos = [3]int{
+                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[0],
+                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[1],
+                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
+                }
+            }
+            potNode := net.FindLeftHemisphereNode(potPos)
+            // potNode := possibleConnections[rand.Intn(len(possibleConnections))]
+            if !NodeExistsIn(potNode, nodesToConnect) && potNode != actualNode {
+                nodesToConnect = append(nodesToConnect, potNode)
+            }
+        }
+        var excitatory bool
+        toNodes := make(map[*Node]*ConnInfo)
+        for _, connNode := range nodesToConnect {
+            // should this have a higher probability of being excitatory?
+            if rand.Intn(2) != 0 {
+                excitatory = true
+            }
+            toNodes[connNode] = &ConnInfo{
+                Strength: RandFloat(0.75, 1.75),
+                Excitatory: excitatory,
+            }
+        }
+        newConn := &Connection{
+            To: toNodes,
+            Center: centralConnNode.Position,
+        }
+        actualNode.OutgoingConnection = newConn
+        for _, nodeToConnect := range nodesToConnect {
+            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
+        }
+        // end redundancy
+        // maybe abstract some stuff in the Connect() function into another function?
+    })
+    // todo - somehow concatenate both into the Nodes attribute
+    nodes := net.RightHemisphere // pointer issues?
+    for _, nodePlane := range net.LeftHemisphere {
+        nodes = append(nodes, nodePlane)
+    }
+    net.Nodes = nodes
+    // reset ids
     net.ForEachNode(func(node *Node, pos [3]int) {
+        node.Id = fmt.Sprintf("%v|%v|%v", pos[0], pos[1], pos[2])
+        node.Position = pos
+    })
+}
+
+func (net *Network) Connect() {
+    net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
         // get the closest nodes and select one randomly to connect to
         stDev := 3.0 // what should it be?
         center := node.Position
@@ -226,7 +315,7 @@ func (net *Network) Connect() {
             }
             center = [3]int{potX, potY, potZ}
         }
-        centralConnNode := net.FindNode(center)
+        centralConnNode := net.FindRightHemisphereNode(center)
 
         // select the X connections here
         numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
@@ -243,8 +332,7 @@ func (net *Network) Connect() {
                     int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
                 }
             }
-            potNode := net.FindNode(potPos)
-            // potNode := possibleConnections[rand.Intn(len(possibleConnections))]
+            potNode := net.FindRightHemisphereNode(potPos)
             if !NodeExistsIn(potNode, nodesToConnect) && potNode != node {
                 nodesToConnect = append(nodesToConnect, potNode)
             }
@@ -285,7 +373,6 @@ func (net Network) DumpJSON(name string) {
     f.Close()
 }
 
-// probably isn't best way to do this - will have to rethink
 func MakeNetwork(dimensions [3]int, blank bool) *Network {
     nodes := [][][]*Node{}
     for i := 0; i < dimensions[0]; i++ {
@@ -317,7 +404,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
 
     return &Network {
         Dimensions: dimensions,
-        Nodes: nodes,
+        RightHemisphere: nodes,
     }
 }
 
@@ -366,14 +453,4 @@ func (net Network) Info(frame int) {
         fmt.Printf("%v: %v\n", output.Name, output.Value)
     }
     term.HideCursor()
-}
-
-func (net *Network) ForEachNode(handler func(*Node, [3]int)) {
-    for i := range net.Nodes {
-        for j := range net.Nodes[i] {
-            for k := range net.Nodes[i][j] {
-                handler(net.Nodes[i][j][k], [3]int{i, j, k})
-            }
-        }
-    }
 }
