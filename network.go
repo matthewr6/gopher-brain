@@ -41,8 +41,8 @@ type Node struct {
 // let's say y=0 is the front of the "brain"
 type Network struct {
     Nodes [][][]*Node           `json:"nodes"`
-    LeftHemisphere [][][]*Node  `json:"leftHemisphere"`
-    RightHemisphere [][][]*Node  `json:"rightHemisphere"`
+    LeftHemisphere [][][]*Node  `json:"-"`
+    RightHemisphere [][][]*Node  `json:"-"`
     Dimensions [3]int           `json:"-"`
     Sensors []*Sensor           `json:"-"`
     Outputs []*Output           `json:"-"`
@@ -227,6 +227,7 @@ func (net *Network) Mirror() {
     // invert in x direction
     leftHemisphere := [][][]*Node{}
     for i := len(net.RightHemisphere)-1; i >= 0; i-- {
+        // POINTER CRAPS
         leftHemisphere = append(leftHemisphere, net.RightHemisphere[i])
     }
     net.LeftHemisphere = leftHemisphere
@@ -286,15 +287,8 @@ func (net *Network) Mirror() {
         // end redundancy
         // maybe abstract some stuff in the Connect() function into another function?
     })
-    // todo - somehow concatenate both into the Nodes attribute
-    nodes := net.RightHemisphere // pointer issues?
-    for _, nodePlane := range net.LeftHemisphere {
-        nodes = append(nodes, nodePlane)
-    }
-    net.Nodes = nodes
-    // reset ids
+    net.Nodes = append(net.RightHemisphere, net.LeftHemisphere...)
     net.ForEachNode(func(node *Node, pos [3]int) {
-        node.Id = fmt.Sprintf("%v|%v|%v", pos[0], pos[1], pos[2])
         node.Position = pos
     })
 }
