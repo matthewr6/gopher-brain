@@ -72,7 +72,7 @@ func LoadState(name string) *Network {
     }
     // set nodes
     // this looks good
-    for i := 0; i < net.Dimensions[0]; i++ {
+    for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*Node{}
         for j := 0; j < net.Dimensions[1]; j++ {
             jDim := []*Node{}
@@ -205,15 +205,15 @@ func (net Network) SaveState(name string) {
             Name: output.Name,
         })
     }
-    for i := 0; i < net.Dimensions[0]; i++ {
+    for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*DisplayNode{}
         for j := 0; j < net.Dimensions[1]; j++ {
             jDim := []*DisplayNode{}
             for k := 0; k < net.Dimensions[2]; k++ {
                 node := net.Nodes[i][j][k]
                 toNodes := make(map[string]*ConnInfo)
-                for node, connInfo := range node.OutgoingConnection.To {
-                    toNodes[node.Id] = connInfo
+                for connNode, connInfo := range node.OutgoingConnection.To {
+                    toNodes[connNode.Id] = connInfo
                 }
                 dispConn := &DisplayConnection{
                     To: toNodes,
@@ -280,6 +280,7 @@ func Test(orig, loaded *Network) bool {
                 if len(oConns) != len(lConns) {
                     return false
                 }
+
                 // this should work because slices and arrays are ordered
                 for i := range oConns {
                     if oConns[i].HoldingVal != lConns[i].HoldingVal {

@@ -61,9 +61,6 @@ func (n *Node) Update() {
     for _, conn := range n.IncomingConnections {
         // let's just wrap it in this for now...
         if conn.To[n] != nil {
-            // fmt.Println()
-            // fmt.Println(n.Id)
-            // fmt.Println(conn.To[n])
             if conn.To[n].Excitatory {
                 sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
             } else {
@@ -96,8 +93,6 @@ func (n *Node) Update() {
             if conn.To[n].Strength < 0.25 {
                 // remove?  different threshold?
                 delete(conn.To, n)
-                // fmt.Println("deleting")
-                // fmt.Println(conn.To[n])
             }
         }
     }
@@ -234,6 +229,7 @@ func (net *Network) Mirror() {
             for _, rightNode := range rightRow {
                 newNode := &Node{}
                 *newNode = *rightNode
+                newNode.IncomingConnections = []*Connection{}
                 aRightRow = append(aRightRow, newNode)
             }
             rightPlane = append(rightPlane, aRightRow)
@@ -245,16 +241,13 @@ func (net *Network) Mirror() {
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
         actualNode := net.FindLeftHemisphereNode(pos)
 
-        var newConnection = &Connection{
-            HoldingVal: 0,
-        }
-
-        newConnection.To = make(map[*Node]*ConnInfo)
-        newConnection.Center[0] = (net.Dimensions[0]-1) - newConnection.Center[0]
+        newCenter := node.OutgoingConnection.Center
+        // issue lies here?
+        newCenter[0] = (net.Dimensions[0]-1) - node.OutgoingConnection.Center[0]
         // now have to do the "to" stuff
-        centralConnNode := net.FindLeftHemisphereNode(newConnection.Center) // is this correct
+        centralConnNode := net.FindLeftHemisphereNode(newCenter)
 
-        // start redundancy
+        // redundancy
         numAxonTerminals := rand.Intn(3) + 1 // todo
         nodesToConnect := []*Node{
             centralConnNode,
@@ -270,7 +263,6 @@ func (net *Network) Mirror() {
                 }
             }
             potNode := net.FindLeftHemisphereNode(potPos)
-            // potNode := possibleConnections[rand.Intn(len(possibleConnections))]
             if !NodeExistsIn(potNode, nodesToConnect) && potNode != actualNode {
                 nodesToConnect = append(nodesToConnect, potNode)
             }
@@ -287,9 +279,10 @@ func (net *Network) Mirror() {
                 Excitatory: excitatory,
             }
         }
+        newCenter[0] += net.Dimensions[0]
         newConn := &Connection{
             To: toNodes,
-            Center: centralConnNode.Position,
+            Center: newCenter,
         }
         actualNode.OutgoingConnection = newConn
         for _, nodeToConnect := range nodesToConnect {
@@ -301,9 +294,7 @@ func (net *Network) Mirror() {
     net.Nodes = append(net.RightHemisphere, net.LeftHemisphere...)
     net.ForEachNode(func(node *Node, pos [3]int) {
         node.Position = pos
-    })
-    net.ForEachNode(func(node *Node, pos [3]int) {
-        fmt.Println(node.Position)
+        node.Id = fmt.Sprintf("%v|%v|%v", pos[0], pos[1], pos[2])
     })
 }
 
