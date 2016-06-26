@@ -227,8 +227,19 @@ func (net *Network) Mirror() {
     // invert in x direction
     leftHemisphere := [][][]*Node{}
     for i := len(net.RightHemisphere)-1; i >= 0; i-- {
-        // POINTER CRAPS
-        leftHemisphere = append(leftHemisphere, net.RightHemisphere[i])
+        // POINTER CRAPS - NODES
+        rightPlane := [][]*Node{}
+        for _, rightRow := range net.RightHemisphere[i] {
+            aRightRow := []*Node{}
+            for _, rightNode := range rightRow {
+                newNode := &Node{}
+                *newNode = *rightNode
+                aRightRow = append(aRightRow, newNode)
+            }
+            rightPlane = append(rightPlane, aRightRow)
+        }
+        // leftHemisphere = append(leftHemisphere, net.RightHemisphere[i])
+        leftHemisphere = append(leftHemisphere, rightPlane)
     }
     net.LeftHemisphere = leftHemisphere
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
@@ -290,6 +301,9 @@ func (net *Network) Mirror() {
     net.Nodes = append(net.RightHemisphere, net.LeftHemisphere...)
     net.ForEachNode(func(node *Node, pos [3]int) {
         node.Position = pos
+    })
+    net.ForEachNode(func(node *Node, pos [3]int) {
+        fmt.Println(node.Position)
     })
 }
 
