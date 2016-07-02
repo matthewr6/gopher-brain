@@ -11,10 +11,10 @@ func TestState(t *testing.T) {
     testingNet.Connect()
     testingNet.Mirror()
 
-    // this should also work
-    // for i := 0; i < 100; i++ {
-    //     testingNet.Cycle()
-    // }
+    // this is to make sure adding/removing connections works
+    for i := 0; i < 100; i++ {
+        testingNet.Cycle()
+    }
 
     // testingNet.CreateSensor("aa", 1, 50, "", [3]int{24, 0, 0}, true, "a", func(nodes []*Node, stimulated bool) {
     //     for _, node := range nodes {

@@ -58,44 +58,47 @@ func (n *Node) Update() {
     // base sum on excitatory/inhibiting
     var sum float64
 
+    somevar := 0 // todo think of a good name for this
     for _, conn := range n.IncomingConnections {
         // let's just wrap it in this for now...
-        if conn.To[n] != nil {
-            if conn.To[n].Excitatory {
-                sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
-            } else {
-                sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
-            }
+        if conn.To[n].Excitatory {
+            sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
+        } else {
+            sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
+        }
 
-            // reassess connections here
-            // todo - calculate how much to increase/decrease connection strength by
-            // https://www.reddit.com/r/askscience/comments/1bb5br/what_physically_happens_when_neural_connections/
-            if conn.HoldingVal == 0 {
-                // the previous node *didn't* fire
-                conn.To[n].Strength -= 0.05
-            } else {
-                // the previous node *did* fire
-                conn.To[n].Strength += 0.05
-            }
+        // reassess connections here
+        // todo - calculate how much to increase/decrease connection strength by
+        // https://www.reddit.com/r/askscience/comments/1bb5br/what_physically_happens_when_neural_connections/
+        if conn.HoldingVal == 0 {
+            // the previous node *didn't* fire
+            conn.To[n].Strength -= 0.05
+        } else {
+            // the previous node *did* fire
+            conn.To[n].Strength += 0.05
+        }
 
-            // todo - thresholds
-            if conn.To[n].Strength > 2.25 {
-                // max strength?
-                conn.To[n].Strength = 2.25
-            }
-            // the below has to be at the end
-            // it's not a pretty way to resolve it but it works
-            // maybe use `continue`
+        // todo - thresholds
+        if conn.To[n].Strength > 2.25 {
+            // max strength?
+            conn.To[n].Strength = 2.25
+        }
+        // the below has to be at the end
+        // it's not a pretty way to resolve it but it works
+        // maybe use `continue`
 
-            // todo - this isn't working
-            // oh have to delete conn from incomingconnections
-            // maybe this stuff in new loop?
-            if conn.To[n].Strength < 0.25 {
-                // remove?  different threshold?
-                delete(conn.To, n)
-            }
+        // oh have to delete conn from incomingconnections
+        // since it's still there, but conn.To[n] has already been deleted, it just reads as "nil"
+        // http://stackoverflow.com/questions/5020958/go-what-is-the-fastest-cleanest-way-to-remove-multiple-entries-from-a-slice
+        if conn.To[n].Strength < 0.25 {
+            // different threshold?
+            delete(conn.To, n)
+        } else {
+            n.IncomingConnections[somevar] = conn
+            somevar++
         }
     }
+    n.IncomingConnections = n.IncomingConnections[0:somevar]
 
     if sum >= 1.0 { // do 1 for threshold?
         //things
@@ -147,6 +150,7 @@ func (net *Network) AddConnections(node *Node) {
                 Strength: RandFloat(0.50, 1.50),
                 Excitatory: excitatory,
             }
+            potNode.IncomingConnections = append(potNode.IncomingConnections, node.OutgoingConnection)
         } 
     }
 }
