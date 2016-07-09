@@ -221,7 +221,10 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
 }
 
 // todo
-// call this after connecting first hemisphere
+func (net *Network) ConnectHemispheres() {
+
+}
+
 func (net *Network) Mirror() {
     // invert in x direction
     leftHemisphere := [][][]*Node{}

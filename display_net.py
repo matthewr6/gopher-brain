@@ -4,6 +4,8 @@ import sys
 import json
 
 import numpy as np
+import matplotlib
+matplotlib.use('Pdf')
 from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -48,4 +50,4 @@ for num in range(0, int(sys.argv[1])):
 
 
     plt.savefig('frames/net_{num}.png'.format(num=num))
-    # plt.close()
+    plt.close()
