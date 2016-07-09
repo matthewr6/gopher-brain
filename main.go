@@ -31,6 +31,8 @@ func main() {
         NETWORK_SIZE := [3]int{25, 25, 25}
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
+        myNet.Mirror()
+        myNet.ConnectHemispheres()
     } else {
         myNet = LoadState(fileName)
     }
