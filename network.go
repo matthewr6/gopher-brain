@@ -427,7 +427,7 @@ func (net *Network) GenerateAnim(frames int) {
     }
 }
 
-func (net *Network) AnimateUntilDone(ms int) {
+func (net *Network) AnimateUntilDone() {
     os.Mkdir("frames", 755)
     frame := 0
     for running {
