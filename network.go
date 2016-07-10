@@ -119,20 +119,20 @@ func RandFloat(min, max float64) float64 {
 func (net *Network) AddConnections(node *Node) {
     center := node.OutgoingConnection.Center
     possibleExtensions := []*Node{}
-    numPossible := rand.Intn(15 - 5) + 5
+    numPossible := rand.Intn(15 - 5) + 5 // 10 to 15
     stDev := 3.0 // todo, what number?
     for i := 0; i < numPossible; i++ {
         // todo - wrapper function for this since it's used so much
         potX := int(rand.NormFloat64() * stDev) + center[0]
         potY := int(rand.NormFloat64() * stDev) + center[1]
         potZ := int(rand.NormFloat64() * stDev) + center[2]
-        for potX < 0 || potX >= net.Dimensions[0] {
+        for potX < 0 || potX >= (net.Dimensions[0] * 2) {
             potX = int(rand.NormFloat64() * stDev) + center[0]
         }
-        for potY < 0 || potY >= net.Dimensions[0] {
+        for potY < 0 || potY >= net.Dimensions[1] {
             potY = int(rand.NormFloat64() * stDev) + center[1]
         }
-        for potZ < 0 || potZ >= net.Dimensions[0] {
+        for potZ < 0 || potZ >= net.Dimensions[2] {
             potZ = int(rand.NormFloat64() * stDev) + center[2]
         }
         potCenter := [3]int{potX, potY, potZ}
@@ -171,11 +171,13 @@ func (net *Network) Cycle() {
         node.OutgoingConnection.HoldingVal = node.Value
         node.Value = 0
     })
+    
 
     // then set all the nodes based on connections
     net.ForEachNode(func(node *Node, pos [3]int) {
         node.Update()
     })
+
 
     // also update nodes that receive sensory information
     for _, sensor := range net.Sensors {
