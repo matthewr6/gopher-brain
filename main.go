@@ -141,7 +141,7 @@ func main() {
     go KeyboardPoll(kb)
     myNet.BindKeyboard(kb)
 
-    myNet.AnimateUntilDone(100)
+    myNet.AnimateUntilDone()
 
     term.Close()
 
