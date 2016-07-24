@@ -221,9 +221,48 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
     return false
 }
 
-// todo
 func (net *Network) ConnectHemispheres() {
+    net.ForEachNode(func(node *Node, pos [3]int) {
+        centralConnNode := net.FindNode(pos)
+        // select the X connections here
+        numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
+        nodesToConnect := []*Node{
+            centralConnNode,
+        }
+        stDev := 1.5
+        for i := 0; i < numAxonTerminals; i++ {
+            potPos := [3]int{-1, -1, -1}
+            for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0]*2 || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
+                potPos = [3]int{
+                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[0],
+                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[1],
+                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
+                }
+            }
+            potNode := net.FindNode(potPos)
+            if !NodeExistsIn(potNode, nodesToConnect) && potNode != node {
+                nodesToConnect = append(nodesToConnect, potNode)
+            }
+        }
 
+        var excitatory bool
+        toNodes := make(map[*Node]*ConnInfo)
+        for _, node := range nodesToConnect {
+            // should this have a higher probability of being excitatory?
+            if rand.Intn(2) != 0 {
+                excitatory = true
+            }
+            toNodes[node] = &ConnInfo{
+                Strength: RandFloat(0.75, 1.75),
+                Excitatory: excitatory,
+            }
+        }
+
+        node.OutgoingConnection.To = toNodes
+        for _, nodeToConnect := range nodesToConnect {
+            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, node.OutgoingConnection)
+        }
+    })
 }
 
 func (net *Network) Mirror() {
