@@ -223,7 +223,7 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
 
 func (net *Network) ConnectHemispheres() {
     net.ForEachNode(func(node *Node, pos [3]int) {
-        centralConnNode := net.FindNode(pos)
+        centralConnNode := net.FindNode(node.OutgoingConnection.Center)
         // select the X connections here
         numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
         nodesToConnect := []*Node{
