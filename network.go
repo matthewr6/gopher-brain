@@ -250,54 +250,13 @@ func (net *Network) Mirror() {
         actualNode := net.FindLeftHemisphereNode(pos)
 
         newCenter := node.OutgoingConnection.Center
-        // issue lies here?
         newCenter[0] = (net.Dimensions[0]-1) - node.OutgoingConnection.Center[0]
-        // now have to do the "to" stuff
-        centralConnNode := net.FindLeftHemisphereNode(newCenter)
 
-        // redundancy
-        numAxonTerminals := rand.Intn(3) + 1 // todo
-        nodesToConnect := []*Node{
-            centralConnNode,
-        }
-        stDev := 1.5
-        for i := 0; i < numAxonTerminals; i++ {
-            potPos := [3]int{-1, -1, -1}
-            for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0] || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
-                potPos = [3]int{
-                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[0],
-                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[1],
-                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
-                }
-            }
-            potNode := net.FindLeftHemisphereNode(potPos)
-            if !NodeExistsIn(potNode, nodesToConnect) && potNode != actualNode {
-                nodesToConnect = append(nodesToConnect, potNode)
-            }
-        }
-        var excitatory bool
-        toNodes := make(map[*Node]*ConnInfo)
-        for _, connNode := range nodesToConnect {
-            // should this have a higher probability of being excitatory?
-            if rand.Intn(2) != 0 {
-                excitatory = true
-            }
-            toNodes[connNode] = &ConnInfo{
-                Strength: RandFloat(0.75, 1.75),
-                Excitatory: excitatory,
-            }
-        }
         newCenter[0] += net.Dimensions[0]
         newConn := &Connection{
-            To: toNodes,
             Center: newCenter,
         }
         actualNode.OutgoingConnection = newConn
-        for _, nodeToConnect := range nodesToConnect {
-            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
-        }
-        // end redundancy
-        // maybe abstract some stuff in the Connect() function into another function?
     })
     net.Nodes = append(net.RightHemisphere, net.LeftHemisphere...)
     net.ForEachNode(func(node *Node, pos [3]int) {
@@ -326,50 +285,11 @@ func (net *Network) Connect() {
             }
             center = [3]int{potX, potY, potZ}
         }
-        centralConnNode := net.FindRightHemisphereNode(center)
-
-        // select the X connections here
-        numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
-        nodesToConnect := []*Node{
-            centralConnNode,
-        }
-        stDev = 1.5
-        for i := 0; i < numAxonTerminals; i++ {
-            potPos := [3]int{-1, -1, -1}
-            for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0] || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
-                potPos = [3]int{
-                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[0],
-                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[1],
-                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
-                }
-            }
-            potNode := net.FindRightHemisphereNode(potPos)
-            if !NodeExistsIn(potNode, nodesToConnect) && potNode != node {
-                nodesToConnect = append(nodesToConnect, potNode)
-            }
-        }
-
-        var excitatory bool
-        toNodes := make(map[*Node]*ConnInfo)
-        for _, node := range nodesToConnect {
-            // should this have a higher probability of being excitatory?
-            if rand.Intn(2) != 0 {
-                excitatory = true
-            }
-            toNodes[node] = &ConnInfo{
-                Strength: RandFloat(0.75, 1.75),
-                Excitatory: excitatory,
-            }
-        }
 
         newConn := &Connection{
-            To: toNodes,
-            Center: centralConnNode.Position,
+            Center: center,
         }
         node.OutgoingConnection = newConn
-        for _, nodeToConnect := range nodesToConnect {
-            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
-        }
     })
 }
 
