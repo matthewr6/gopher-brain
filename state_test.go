@@ -10,6 +10,7 @@ func TestState(t *testing.T) {
     testingNet := MakeNetwork(NETWORK_SIZE, false)
     testingNet.Connect()
     testingNet.Mirror()
+    testingNet.ConnectHemispheres()
 
     // this is to make sure adding/removing connections works
     for i := 0; i < 100; i++ {
