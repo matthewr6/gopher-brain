@@ -6,6 +6,7 @@ import (
     "time"
     "bufio"
     "strings"
+    "strconv"
     "math/rand"
 
     "github.com/jteeuwen/keyboard/termbox"
@@ -131,7 +132,12 @@ func main() {
         }
     }
 
-    // this is the keyboard sensing stuff
+    framesInput := Prompt("Enter number of frames, or leave blank to run until manually stopped:  ", reader)
+    frames, err := strconv.Atoi(framesInput)
+    if err != nil {
+        frames = 0
+    }
+
     term.Init()
     term.SetCursor(0, 0)
     kb := termbox.New()
@@ -141,7 +147,11 @@ func main() {
     go KeyboardPoll(kb)
     myNet.BindKeyboard(kb)
 
-    myNet.AnimateUntilDone()
+    if frames == 0 {
+        myNet.AnimateUntilDone()
+    } else {
+        myNet.GenerateAnim(frames)
+    }
 
     term.Close()
 
