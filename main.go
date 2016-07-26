@@ -19,6 +19,7 @@ import (
 */
 
 var running = true
+var directory = "."
 
 func main() {
     reader := bufio.NewReader(os.Stdin)
@@ -136,6 +137,14 @@ func main() {
     frames, err := strconv.Atoi(framesInput)
     if err != nil {
         frames = 0
+    }
+
+    directory = Prompt("Enter directory to save frames and state to:  ", reader)
+    if directory == "" {
+        directory = "."
+    }
+    if directory[len(directory)-1] == '/' {
+        directory = directory[0:len(directory)-1]
     }
 
     term.Init()
