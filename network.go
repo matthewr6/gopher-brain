@@ -383,6 +383,10 @@ func (net *Network) GenerateAnim(frames int) {
     for frame := 0; frame < frames; frame++ {
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
+
+        term.SetCursor(0, 0)
+        fmt.Print(frame)
+        term.HideCursor()
     }
 }
 
