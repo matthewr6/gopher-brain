@@ -1,3 +1,5 @@
+![CircleCI status](https://circleci.com/gh/Firedrake969/gopher-brain.svg?style=shield)
+
 ### latest animation
 
 [![Join the chat at https://gitter.im/Firedrake969/gopher-brain](https://badges.gitter.im/Firedrake969/gopher-brain.svg)](https://gitter.im/Firedrake969/gopher-brain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
