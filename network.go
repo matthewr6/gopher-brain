@@ -338,7 +338,7 @@ func (net Network) String() string {
 }
 
 func (net Network) DumpJSON(name string) {
-    f, _ := os.Create(fmt.Sprintf("./frames/net_%v.json", name))
+    f, _ := os.Create(fmt.Sprintf("%v/frames/net_%v.json", directory, name))
     f.WriteString(net.String())
     f.Close()
 }
@@ -383,6 +383,10 @@ func (net *Network) GenerateAnim(frames int) {
     for frame := 0; frame < frames; frame++ {
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
+
+        term.SetCursor(0, 0)
+        fmt.Print(frame)
+        term.HideCursor()
     }
 }
 

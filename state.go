@@ -57,7 +57,7 @@ func (d DisplayNetwork) String() string {
 
 func LoadState(name string) *Network {
     fmt.Println(fmt.Sprintf("Loading state \"%v\"...", name))
-    datafile, err := os.Open(fmt.Sprintf("./state/%v_state.json", name))
+    datafile, err := os.Open(fmt.Sprintf("%v/state/%v_state.json", directory, name))
     if err != nil {
         fmt.Println(err)
     }
@@ -233,7 +233,7 @@ func (net Network) SaveState(name string) {
         }
         dispNet.Nodes = append(dispNet.Nodes, iDim)
     }
-    f, _ := os.Create(fmt.Sprintf("./state/%v_state.json", name))
+    f, _ := os.Create(fmt.Sprintf("%v/state/%v_state.json", directory, name))
     f.WriteString(dispNet.String())
     f.Close()
 }
