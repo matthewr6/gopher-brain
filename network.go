@@ -30,11 +30,11 @@ type Connection struct {
 }
 
 type Node struct {
-    Value int                          `json:"value"` // todo- maybe use a bool of true or false, and rename this "firing"?
-    OutgoingConnection *Connection     `json:"-"`  //which node to send to
-    IncomingConnections []*Connection  `json:"-"`  //which nodes to read from
-    Position [3]int                    `json:"position"`
-    Id string                          `json:"id"` //"x|y|z"
+    Value int                                  `json:"value"` // todo- maybe use a bool of true or false, and rename this "firing"?
+    OutgoingConnection *Connection             `json:"-"`  //which node to send to
+    IncomingConnections map[*Node]*Connection  `json:"-"`  //which nodes to read from
+    Position [3]int                            `json:"position"`
+    Id string                                  `json:"id"` //"x|y|z"
 }
 
 // let's say y=0 is the front of the "brain"
@@ -57,8 +57,7 @@ func (n *Node) Update() {
     // base sum on excitatory/inhibiting
     var sum float64
 
-    somevar := 0 // todo think of a good name for this
-    for _, conn := range n.IncomingConnections {
+    for from, conn := range n.IncomingConnections {
         // let's just wrap it in this for now...
         if conn.To[n].Excitatory {
             sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
@@ -82,22 +81,12 @@ func (n *Node) Update() {
             // max strength?
             conn.To[n].Strength = 2.25
         }
-        // the below has to be at the end
-        // it's not a pretty way to resolve it but it works
-        // maybe use `continue`
-
-        // oh have to delete conn from incomingconnections
-        // since it's still there, but conn.To[n] has already been deleted, it just reads as "nil"
-        // http://stackoverflow.com/questions/5020958/go-what-is-the-fastest-cleanest-way-to-remove-multiple-entries-from-a-slice
         if conn.To[n].Strength < 0.25 {
             // different threshold?
             delete(conn.To, n)
-        } else {
-            n.IncomingConnections[somevar] = conn
-            somevar++
+            delete(n.IncomingConnections, from)
         }
     }
-    n.IncomingConnections = n.IncomingConnections[0:somevar]
 
     if sum >= 1.0 { // do 1 for threshold?
         //things
@@ -149,7 +138,7 @@ func (net *Network) AddConnections(node *Node) {
                 Strength: RandFloat(0.50, 1.50),
                 Excitatory: excitatory,
             }
-            potNode.IncomingConnections = append(potNode.IncomingConnections, node.OutgoingConnection)
+            potNode.IncomingConnections[node] = node.OutgoingConnection
         } 
     }
 }
@@ -260,7 +249,7 @@ func (net *Network) ConnectHemispheres() {
 
         node.OutgoingConnection.To = toNodes
         for _, nodeToConnect := range nodesToConnect {
-            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, node.OutgoingConnection)
+            nodeToConnect.IncomingConnections[node] = node.OutgoingConnection
         }
     })
 }
@@ -276,7 +265,7 @@ func (net *Network) Mirror() {
             for _, rightNode := range rightRow {
                 newNode := &Node{}
                 *newNode = *rightNode
-                newNode.IncomingConnections = []*Connection{}
+                newNode.IncomingConnections = make(map[*Node]*Connection)
                 aRightRow = append(aRightRow, newNode)
             }
             rightPlane = append(rightPlane, aRightRow)
@@ -363,7 +352,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                 jDim = append(jDim, &Node{
                     Value: newValue,
                     Position: [3]int{i, j, k},
-                    IncomingConnections: []*Connection{},
+                    IncomingConnections: make(map[*Node]*Connection),
                     Id: fmt.Sprintf("%v|%v|%v", i, j, k),
                 })
             }

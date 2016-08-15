@@ -80,7 +80,7 @@ func LoadState(name string) *Network {
                 newNode := &Node{
                     Value: importedNet.Nodes[i][j][k].Value,
                     Position: importedNet.Nodes[i][j][k].Position,
-                    IncomingConnections: []*Connection{},
+                    IncomingConnections: make(map[*Node]*Connection),
                     Id: fmt.Sprintf("%v|%v|%v", i, j, k),
                 }
                 jDim = append(jDim, newNode)
@@ -103,7 +103,7 @@ func LoadState(name string) *Network {
             posSlice := StrsToInts(strings.Split(id, "|"))
             nodeToConnect := net.FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]})
             toNodes[nodeToConnect] = connInfo
-            nodeToConnect.IncomingConnections = append(nodeToConnect.IncomingConnections, newConn)
+            nodeToConnect.IncomingConnections[node] = newConn
         }
         newConn.To = toNodes
         node.OutgoingConnection = newConn
@@ -290,29 +290,19 @@ func Test(orig, loaded *Network) bool {
                 }
 
                 // compare incoming connections
+                oIncoming := make(map[string]*ConnInfo)
+                lIncoming := make(map[string]*ConnInfo)
+                for from, conn := range oNode.IncomingConnections {
+                    oIncoming[from.Id] = conn.To[oNode]
+                }
+                for from, conn := range lNode.IncomingConnections {
+                    lIncoming[from.Id] = conn.To[lNode]
+                }
                 // - compare number of incoming connections
                 if (len(oNode.IncomingConnections) != len(lNode.IncomingConnections)) {
                     return false
                 }
-                // - compare incoming connection immediate data
-                // for i := range oNode.IncomingConnections {
-                //     if (oNode.IncomingConnections[i].HoldingVal != lNode.IncomingConnections[i].HoldingVal ||
-                //         oNode.IncomingConnections[i].Center != lNode.IncomingConnections[i].Center) {
-                //         for i := range oNode.IncomingConnections {
-                //             fmt.Println(oNode.IncomingConnections[i].HoldingVal, lNode.IncomingConnections[i].HoldingVal)
-                //         }
-                //         return false
-                //     }
-                // }
                 // - compare incoming connection info
-                oIncoming := []*ConnInfo{}
-                lIncoming := []*ConnInfo{}
-                for _, conn := range oNode.IncomingConnections {
-                    oIncoming = append(oIncoming, conn.To[oNode])
-                }
-                for _, conn := range lNode.IncomingConnections {
-                    lIncoming = append(lIncoming, conn.To[lNode])
-                }
                 if !reflect.DeepEqual(oIncoming, lIncoming) {
                     for i := range oIncoming {
                         fmt.Println(oIncoming[i], lIncoming[i])
