@@ -264,43 +264,59 @@ func Test(orig, loaded *Network) bool {
                 if ((oNode.Value != lNode.Value) ||
                     (oNode.Position != lNode.Position) ||
                     (oNode.Id != lNode.Id)) {
-                    return false
-                }
-                // then compare the input/output connections
-                oConns := []Connection{*oNode.OutgoingConnection}
-                for _, iConn := range oNode.IncomingConnections {
-                    oConns = append(oConns, *iConn)
-                }
-
-                lConns := []Connection{*lNode.OutgoingConnection}
-                for _, lConn := range lNode.IncomingConnections {
-                    lConns = append(lConns, *lConn)
-                }
-
-                if len(oConns) != len(lConns) {
+                    // fmt.Println("here")
                     return false
                 }
 
-                // this should work because slices and arrays are ordered
-                for i := range oConns {
-                    if oConns[i].HoldingVal != lConns[i].HoldingVal {
-                        return false
-                    }
+
+                // compare outgoing connections
+                // - compare immediate connection data
+                if (oNode.OutgoingConnection.HoldingVal != lNode.OutgoingConnection.HoldingVal || 
+                    oNode.OutgoingConnection.Center != lNode.OutgoingConnection.Center) {
+                    return false
                 }
-                // convert the maps to map[string]*ConnInfo to be comparable
-                oConnInfo := map[string]*ConnInfo{}
-                for _, conn := range oConns {
-                    for node, connInfo := range conn.To {
-                        oConnInfo[node.Id] = connInfo
-                    }
+                // - compare To data
+                //   - https://groups.google.com/forum/#!topic/golang-nuts/UWKAOXyMwJM
+                oOutgoingTo := make(map[string]*ConnInfo)
+                lOutgoingTo := make(map[string]*ConnInfo)
+                for node, info := range oNode.OutgoingConnection.To {
+                    oOutgoingTo[node.Id] = info
                 }
-                lConnInfo := map[string]*ConnInfo{}
-                for _, conn := range lConns {
-                    for node, connInfo := range conn.To {
-                        lConnInfo[node.Id] = connInfo
-                    }
+                for node, info := range lNode.OutgoingConnection.To {
+                    lOutgoingTo[node.Id] = info
                 }
-                if !reflect.DeepEqual(oConnInfo, lConnInfo) {
+                if !reflect.DeepEqual(oOutgoingTo, lOutgoingTo) {
+                    return false
+                }
+
+                // compare incoming connections
+                // - compare number of incoming connections
+                if (len(oNode.IncomingConnections) != len(lNode.IncomingConnections)) {
+                    return false
+                }
+                // - compare incoming connection immediate data
+                // for i := range oNode.IncomingConnections {
+                //     if (oNode.IncomingConnections[i].HoldingVal != lNode.IncomingConnections[i].HoldingVal ||
+                //         oNode.IncomingConnections[i].Center != lNode.IncomingConnections[i].Center) {
+                //         for i := range oNode.IncomingConnections {
+                //             fmt.Println(oNode.IncomingConnections[i].HoldingVal, lNode.IncomingConnections[i].HoldingVal)
+                //         }
+                //         return false
+                //     }
+                // }
+                // - compare incoming connection info
+                oIncoming := []*ConnInfo{}
+                lIncoming := []*ConnInfo{}
+                for _, conn := range oNode.IncomingConnections {
+                    oIncoming = append(oIncoming, conn.To[oNode])
+                }
+                for _, conn := range lNode.IncomingConnections {
+                    lIncoming = append(lIncoming, conn.To[lNode])
+                }
+                if !reflect.DeepEqual(oIncoming, lIncoming) {
+                    for i := range oIncoming {
+                        fmt.Println(oIncoming[i], lIncoming[i])
+                    }
                     return false
                 }
             }
