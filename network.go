@@ -143,6 +143,24 @@ func (net *Network) AddConnections(node *Node) {
     }
 }
 
+func (node *Node) UpdateOutgoingCenter() {
+    x := 0
+    y := 0
+    z := 0
+    numOutgoing := len(node.OutgoingConnection.To)
+    if numOutgoing < 0 {
+        for to := range node.OutgoingConnection.To {
+            x += to.Position[0]
+            y += to.Position[1]
+            z += to.Position[2]
+        }
+        x = x / numOutgoing
+        y = y / numOutgoing
+        z = z / numOutgoing
+        node.OutgoingConnection.Center = [3]int{x, y, z}
+    }
+}
+
 // let's see which one causes the most overhead...
 // or it might just be all of them
 func (net *Network) Cycle() {
@@ -164,6 +182,7 @@ func (net *Network) Cycle() {
     // then set all the nodes based on connections
     net.ForEachNode(func(node *Node, pos [3]int) {
         node.Update()
+        node.UpdateOutgoingCenter()
     })
 
 
