@@ -185,7 +185,7 @@ func (net *Network) Cycle() {
 
     // also update nodes that receive sensory information
     for _, sensor := range net.Sensors {
-        sensor.In(sensor.Nodes, sensor.Stimulated)
+        sensor.In(sensor.Nodes)
     }
 
     for _, output := range net.Outputs {

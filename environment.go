@@ -10,9 +10,8 @@ type Sensor struct {
     Nodes []*Node          `json:"nodes"`
     Excitatory bool        `json:"excitatory"` // todo this probably isn't used
     Trigger string         `json:"trigger"`
-    Stimulated bool        `json:"-"`
     Name string            `json:"name"`
-    In func([]*Node, bool) `json:"-"`
+    In func([]*Node)       `json:"-"`
 }
 
 // dang gonna have to do the same saving trick stuff as the Connection type
@@ -78,13 +77,12 @@ func (net *Network) RemoveOutput(name string) {
 // seems bloated
 // todo reorder these args
 // also it's SO LONG AND MESSY :L
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, inputFunc func([]*Node, bool)) *Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, inputFunc func([]*Node)) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         Nodes: []*Node{},
         Excitatory: excitatory,
         Trigger: trigger,
-        Stimulated: false,
         Name: name,
         In: inputFunc,
     }

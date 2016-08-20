@@ -118,12 +118,11 @@ func LoadState(name string) *Network {
             Nodes: nodes,
             Excitatory: importedSensor.Excitatory,
             Trigger: importedSensor.Trigger,
-            Stimulated: false,
             Name: importedSensor.Name,
-            In: func(nodes []*Node, stimulated bool) {
+            In: func(nodes []*Node) {
                 // for simplicity - just continuously stimulate every node
                 for _, node := range nodes {
-                    if stimulated {
+                    if true {
                         node.Value = 1
                     }
                     // let's try removing this for now, see what happens...
