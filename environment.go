@@ -8,8 +8,8 @@ import (
 // sensors feed data to nodes
 type Sensor struct {
     Nodes []*Node          `json:"nodes"`
+    Output *Output         `json:"output"`
     Excitatory bool        `json:"excitatory"` // todo this probably isn't used
-    Trigger string         `json:"trigger"`
     Name string            `json:"name"`
     In func([]*Node)       `json:"-"`
 }
@@ -77,12 +77,11 @@ func (net *Network) RemoveOutput(name string) {
 // seems bloated
 // todo reorder these args
 // also it's SO LONG AND MESSY :L
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, trigger string, inputFunc func([]*Node)) *Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, inputFunc func([]*Node)) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         Nodes: []*Node{},
         Excitatory: excitatory,
-        Trigger: trigger,
         Name: name,
         In: inputFunc,
     }

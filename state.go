@@ -39,7 +39,6 @@ type DisplayConnection struct {
 type DisplaySensor struct {
     Nodes [][3]int    `json:"nodes"`
     Excitatory bool   `json:"excitatory"`
-    Trigger string    `json:"trigger"`
     Name string       `json:"name"`
 }
 
@@ -117,7 +116,6 @@ func LoadState(name string) *Network {
         newSensor := &Sensor{
             Nodes: nodes,
             Excitatory: importedSensor.Excitatory,
-            Trigger: importedSensor.Trigger,
             Name: importedSensor.Name,
             In: func(nodes []*Node) {
                 // for simplicity - just continuously stimulate every node
@@ -179,7 +177,6 @@ func (net Network) SaveState(name string) {
         dispNet.Sensors = append(dispNet.Sensors, &DisplaySensor{
             Nodes: positions,
             Excitatory: sensor.Excitatory,
-            Trigger: sensor.Trigger,
             Name: sensor.Name,
         })
     }

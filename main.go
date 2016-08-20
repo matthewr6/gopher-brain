@@ -41,10 +41,10 @@ func main() {
         fmt.Println("WARNING!  Sensors and outputs will not save properly in this mode!")
         myNet.ClearIO()
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
-        myNet.CreateSensor("left (a)", 1, 50, "y", [3]int{24, 0, 12}, true, "a", func(nodes []*Node) {
+        myNet.CreateSensor("left (a)", 1, 50, "y", [3]int{24, 0, 12}, true, func(nodes []*Node) {
 
         })
-        myNet.CreateSensor("right (d)", 1, 50, "y", [3]int{0, 0, 12}, true, "d", func(nodes []*Node) {
+        myNet.CreateSensor("right (d)", 1, 50, "y", [3]int{0, 0, 12}, true, func(nodes []*Node) {
 
         })
 
@@ -61,7 +61,6 @@ func main() {
         choice = Prompt("\nAdd sensor? [y/n]  ", reader)
         for choice == "y" {
             sensorName := Prompt("    Name:  ", reader)
-            trigger := Prompt("    Trigger [single key]:  ", reader) // should validate to be one key
             plane := Prompt("    Plane [x/y/z/blank]:  ", reader)
             if plane != "x" && plane != "y" && plane != "z" {
                 plane = ""
@@ -73,7 +72,7 @@ func main() {
                 centerArr = StrsToInts(strings.Split(center, ","))
             }
             // todo find numbers and stuff
-            myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, trigger, func(nodes []*Node) {
+            myNet.CreateSensor(sensorName, 1, 50, plane, [3]int{centerArr[0], centerArr[1], centerArr[2]}, true, func(nodes []*Node) {
                 // for simplicity - just continuously stimulate every node
                 for _, node := range nodes {
                     if true {
