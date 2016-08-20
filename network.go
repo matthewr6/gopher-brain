@@ -6,9 +6,6 @@ import (
     "os"
     "strconv"
     "encoding/json"
-
-    "github.com/jteeuwen/keyboard"
-    term "github.com/nsf/termbox-go"
 )
 
 /*
@@ -391,10 +388,6 @@ func (net *Network) GenerateAnim(frames int) {
     for frame := 0; frame < frames; frame++ {
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
-
-        term.SetCursor(0, 0)
-        fmt.Print(frame)
-        term.HideCursor()
     }
 }
 
@@ -405,33 +398,6 @@ func (net *Network) AnimateUntilDone() {
         frameStr := strconv.Itoa(frame)
         net.DumpJSON(frameStr)
         net.Cycle()
-        // should print everything on one line, just because it's simpler
-        // fmt.Print("\r" + frameStr)
-        net.Info(frame)
         frame++
     }
-}
-
-func KeyboardPoll(kb keyboard.Keyboard) {
-    for running {
-        kb.Poll(term.PollEvent())
-    }
-}
-
-func (net Network) Info(frame int) {
-    term.SetCursor(0, 0)
-    fmt.Printf("Frame %v\n", frame)
-    fmt.Print("\n-----SENSORS-----\n")
-    for _, sensor := range net.Sensors {
-        active := "x"
-        if sensor.Stimulated {
-            active = "o"
-        }
-        fmt.Printf("%v: %v\n", sensor.Name, active)
-    }
-    fmt.Print("\n-----OUTPUTS-----\n")
-    for _, output := range net.Outputs {
-        fmt.Printf("%v: %v\n", output.Name, output.Value)
-    }
-    term.HideCursor()
 }

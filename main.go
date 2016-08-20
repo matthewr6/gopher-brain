@@ -8,9 +8,6 @@ import (
     "strings"
     "strconv"
     "math/rand"
-
-    "github.com/jteeuwen/keyboard/termbox"
-    term "github.com/nsf/termbox-go"
 )
 
 /*
@@ -147,22 +144,11 @@ func main() {
         directory = directory[0:len(directory)-1]
     }
 
-    term.Init()
-    term.SetCursor(0, 0)
-    kb := termbox.New()
-    kb.Bind(func() {
-        running = false
-    }, "space")
-    go KeyboardPoll(kb)
-    myNet.BindKeyboard(kb)
-
     if frames == 0 {
         myNet.AnimateUntilDone()
     } else {
         myNet.GenerateAnim(frames)
     }
-
-    term.Close()
 
     fmt.Print("\nSave state?  Enter a name if you wish to save the state:  ")
     fileName, _ = reader.ReadString('\n')

@@ -6,8 +6,6 @@ import (
     "strings"
     "reflect"
     "encoding/json"
-
-    "github.com/jteeuwen/keyboard"
 )
 
 /*
@@ -164,15 +162,6 @@ func LoadState(name string) *Network {
     }
 
     return net
-}
-
-func (net *Network) BindKeyboard(kb keyboard.Keyboard) {
-    for _, sensor := range net.Sensors {
-        s := sensor
-        kb.Bind(func() {
-            s.Stimulated = !s.Stimulated
-        }, sensor.Trigger)
-    }
 }
 
 func (net Network) SaveState(name string) {
