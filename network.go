@@ -36,12 +36,12 @@ type Node struct {
 
 // let's say y=0 is the front of the "brain"
 type Network struct {
-    Nodes [][][]*Node           `json:"nodes"`
-    LeftHemisphere [][][]*Node  `json:"-"`
-    RightHemisphere [][][]*Node  `json:"-"`
-    Dimensions [3]int           `json:"-"`
-    Sensors []*Sensor           `json:"-"`
-    Outputs []*Output           `json:"-"`
+    Nodes [][][]*Node             `json:"nodes"`
+    LeftHemisphere [][][]*Node    `json:"-"`
+    RightHemisphere [][][]*Node   `json:"-"`
+    Dimensions [3]int             `json:"-"`
+    Sensors map[string]*Sensor    `json:"-"`
+    Outputs map[string]*Output    `json:"-"`
 }
 
 func (c Connection) String() string {
@@ -184,12 +184,13 @@ func (net *Network) Cycle() {
 
 
     // also update nodes that receive sensory information
-    for _, sensor := range net.Sensors {
-        sensor.In(sensor.Nodes)
-    }
-
+    // is this the proper order?
     for _, output := range net.Outputs {
         output.Value = output.Out(output.Nodes)
+    }
+
+    for _, sensor := range net.Sensors {
+        sensor.In(sensor.Nodes, sensor.Influences)
     }
 
     // then clear the connections

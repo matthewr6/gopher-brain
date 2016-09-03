@@ -6,15 +6,20 @@ import (
 )
 
 // sensors feed data to nodes
+/*
+    sensor = input
+    one sensor feeds to a set of nodes
+    one output is only influenced by its list of connected nodes
+    one sensor can be influenced by a SET of outputs
+*/
 type Sensor struct {
-    Nodes []*Node          `json:"nodes"`
-    Output *Output         `json:"output"`
-    Excitatory bool        `json:"excitatory"` // todo this probably isn't used
-    Name string            `json:"name"`
-    In func([]*Node)       `json:"-"`
+    Nodes []*Node                   `json:"nodes"`
+    Influences []*Output            `json:"influences"`
+    Name string                     `json:"name"`
+    In func([]*Node, []*Output)     `json:"-"`
 }
 
-// dang gonna have to do the same saving trick stuff as the Connection type
+// do I want to save sensors/outputs?
 type Output struct {
     Nodes map[*Node]*ConnInfo               `json:"nodes"`
     Name string                             `json:"name"`
@@ -38,37 +43,19 @@ func (net *Network) ClearIO() {
 }
 
 func (net *Network) RemoveAllSensors() {
-    net.Sensors = []*Sensor{}
+    net.Sensors = make(map[string]*Sensor)
 }
 
 func (net *Network) RemoveAllOutputs() {
-    net.Outputs = []*Output{}
+    net.Outputs = make(map[string]*Output)
 }
 
 func (net *Network) RemoveSensor(name string) {
-    index := len(net.Sensors)
-    for i, sensor := range net.Sensors {
-        if sensor.Name == name {
-            index = i
-            break
-        }
-    }
-    if index != len(net.Sensors) {
-        net.Sensors = append(net.Sensors[:index], net.Sensors[index+1:]...)
-    }
+    delete(net.Sensors, name)
 }
 
 func (net *Network) RemoveOutput(name string) {
-    index := len(net.Outputs)
-    for i, output := range net.Outputs {
-        if output.Name == name {
-            index = i
-            break
-        }
-    }
-    if index != len(net.Outputs) {
-        net.Outputs = append(net.Outputs[:index], net.Outputs[index+1:]...)
-    }
+    delete(net.Outputs, name)
 }
 
 // todo - there's probably an easier way to do the plane stuff now
@@ -77,11 +64,10 @@ func (net *Network) RemoveOutput(name string) {
 // seems bloated
 // todo reorder these args
 // also it's SO LONG AND MESSY :L
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, excitatory bool, inputFunc func([]*Node)) *Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, inputFunc func([]*Node, []*Output)) *Sensor {
     // radius is basically density...
     sensor := &Sensor{
         Nodes: []*Node{},
-        Excitatory: excitatory,
         Name: name,
         In: inputFunc,
     }
@@ -145,7 +131,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
             }
         }
     }
-    net.Sensors = append(net.Sensors, sensor)
+    net.Sensors[name] = sensor
     return sensor
 }
 
@@ -232,6 +218,6 @@ func (net *Network) CreateOutput(name string, r int, count int, plane string, ce
         }
     }
     output.Nodes = nodeMapping
-    net.Outputs = append(net.Outputs, output)
+    net.Outputs[name] = output
     return output
 }
