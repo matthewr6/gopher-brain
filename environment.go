@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "math/rand"
     "encoding/json"
 )
@@ -64,12 +65,45 @@ func (net *Network) RemoveOutput(name string) {
 // seems bloated
 // todo reorder these args
 // also it's SO LONG AND MESSY :L
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, inputFunc func([]*Node, []*Output)) *Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, outputCount int, inputFunc func([]*Node, []*Output)) [2]*Sensor {
+    secondCenter := center
+    secondCenter[0] = center[0] + net.Dimensions[0]
+    // set random output centers here
+    outputCenters := [][3]int{}
+    for i := 0; i < outputCount; i++ {
+        outputCenters = append(outputCenters, [3]int{
+            rand.Intn(net.Dimensions[0]),
+            rand.Intn(net.Dimensions[1]),
+            rand.Intn(net.Dimensions[2]),
+        })
+    }
+    a := net.CreateIndividualSensor(fmt.Sprintf("%v-one", name), r, count, plane, center, true, outputCenters, inputFunc)
+    b := net.CreateIndividualSensor(fmt.Sprintf("%v-two", name), r, count, plane, secondCenter, false, outputCenters, inputFunc)
+    return [2]*Sensor{a, b}
+}
+
+func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, otherSide bool) []*Output {
+    outputs := []*Output{}
+    // for i := 0; i < outputCenters; i++ {
+    // }
+    for _, center := range outputCenters {
+        outputCenter := center
+        if otherSide {
+            outputCenter[0] = outputCenter[0] + net.Dimensions[0]
+        }
+        fmt.Println(center)
+    }
+    return outputs
+}
+
+func (net *Network) CreateIndividualSensor(name string, r int, count int, plane string, center [3]int, otherSide bool, outputCenters [][3]int, inputFunc func([]*Node, []*Output)) *Sensor {
+    outputs := net.MakeOutputs(name,  outputCenters, otherSide)
     // radius is basically density...
     sensor := &Sensor{
         Nodes: []*Node{},
         Name: name,
         In: inputFunc,
+        Influences: outputs,
     }
     // todo - determine correct coefficient
     stDev := float64(r)
@@ -84,7 +118,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
             for len(sensor.Nodes) < count {
                 potY := int(rand.NormFloat64() * stDev) + center[1]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
-                if potY > 0 && potZ > 0 {
+                if potY > 0 && potZ > 0 && potY < net.Dimensions[1] && potZ < net.Dimensions[2] {
                     potNode := net.FindNode([3]int{potX, potY, potZ})
                     if !NodeExistsIn(potNode, sensor.Nodes) {
                         sensor.Nodes = append(sensor.Nodes, potNode)
@@ -97,7 +131,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
             for len(sensor.Nodes) < count {
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
-                if potX > 0 && potZ > 0 {
+                if potX > 0 && potZ > 0 && potX < net.Dimensions[0]*2 && potZ < net.Dimensions[2] {
                     potNode := net.FindNode([3]int{potX, potY, potZ})
                     if !NodeExistsIn(potNode, sensor.Nodes) {
                         sensor.Nodes = append(sensor.Nodes, potNode)
@@ -110,7 +144,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
             for len(sensor.Nodes) < count {
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potY := int(rand.NormFloat64() * stDev) + center[1]
-                if potX > 0 && potY > 0 {
+                if potX > 0 && potY > 0 && potX < net.Dimensions[0]*2 && potY < net.Dimensions[1] {
                     potNode := net.FindNode([3]int{potX, potY, potZ})
                     if !NodeExistsIn(potNode, sensor.Nodes) {
                         sensor.Nodes = append(sensor.Nodes, potNode)
@@ -135,7 +169,7 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
     return sensor
 }
 
-func (net *Network) CreateOutput(name string, r int, count int, plane string, center [3]int, outputFunc func(map[*Node]*ConnInfo) float64) *Output {
+func (net *Network) CreateIndividualOutput(name string, r int, count int, plane string, center [3]int, outputFunc func(map[*Node]*ConnInfo) float64) *Output {
     // radius is basically density...
     output := &Output{
         Name: name,

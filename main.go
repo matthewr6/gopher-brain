@@ -41,10 +41,8 @@ func main() {
         fmt.Println("WARNING!  Sensors and outputs will not save properly!")
         myNet.ClearIO() // is this needed
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
-        myNet.CreateSensor("left", 1, 50, "y", [3]int{24, 0, 12}, func(nodes []*Node, influences []*Output) {
-
-        })
-        myNet.CreateSensor("right", 1, 50, "y", [3]int{0, 0, 12}, func(nodes []*Node, influences []*Output) {
+        // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
+        myNet.CreateSensor("eye", 1, 50, "y", [3]int{24, 0, 12}, 1, func(nodes []*Node, influences []*Output) {
 
         })
     }
