@@ -298,12 +298,12 @@ func Test(orig, loaded *Network) bool {
     // do I even want to use these?
     // these still use reflect for now
     // compare sensors
-    if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
-        return false
-    }
-    // compare outputs
-    if !reflect.DeepEqual(orig.Outputs, loaded.Outputs) {
-        return false
-    }
+    // if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
+    //     return false
+    // }
+    // // compare outputs
+    // if !reflect.DeepEqual(orig.Outputs, loaded.Outputs) {
+    //     return false
+    // }
     return true
 }
