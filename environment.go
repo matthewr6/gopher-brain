@@ -91,8 +91,17 @@ func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int
         if otherSide {
             outputCenter[0] = outputCenter[0] + net.Dimensions[0]
         }
-        newOutput := net.CreateIndividualOutput(fmt.Sprintf("%v-%v", sensorName, idx), r, count, "", outputCenter, func(conns map[*Node]*ConnInfo) float64 {
-            return 0.0 // finish this
+        newOutput := net.CreateIndividualOutput(fmt.Sprintf("%v-%v", sensorName, idx), r, count, "", outputCenter, func(nodes map[*Node]*ConnInfo) float64 {
+            // todo - I really should have a specified ConnInfo for the output
+            var sum float64
+            for node, connInfo := range nodes {
+                if connInfo.Excitatory {
+                    sum += float64(node.Value) * connInfo.Strength
+                } else {
+                    sum -= float64(node.Value) * connInfo.Strength
+                }
+            }
+            return sum
         })
         outputs = append(outputs, newOutput)
     }
