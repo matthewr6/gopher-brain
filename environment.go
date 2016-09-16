@@ -169,7 +169,7 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
             potX := int(rand.NormFloat64() * stDev) + center[0]
             potY := int(rand.NormFloat64() * stDev) + center[1]
             potZ := int(rand.NormFloat64() * stDev) + center[2]
-            if potX >= 0 && potY >= 0 && potZ >= 0 && potX < net.Dimensions[0] && potY < net.Dimensions[1] && potZ < net.Dimensions[2] {
+            if potX >= 0 && potY >= 0 && potZ >= 0 && potX < (net.Dimensions[0]*2) && potY < net.Dimensions[1] && potZ < net.Dimensions[2] {
                 potNode := net.FindNode([3]int{potX, potY, potZ})
                 if !NodeExistsIn(potNode, sensor.Nodes) {
                     sensor.Nodes = append(sensor.Nodes, potNode)
