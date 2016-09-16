@@ -82,22 +82,25 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
     return [2]*Sensor{a, b}
 }
 
-func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, otherSide bool) []*Output {
+func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int, count int, otherSide bool) []*Output {
     outputs := []*Output{}
     // for i := 0; i < outputCenters; i++ {
     // }
-    for _, center := range outputCenters {
+    for idx, center := range outputCenters {
         outputCenter := center
         if otherSide {
             outputCenter[0] = outputCenter[0] + net.Dimensions[0]
         }
-        fmt.Println(center)
+        newOutput := net.CreateIndividualOutput(fmt.Sprintf("%v-%v", sensorName, idx), r, count, "", outputCenter, func(conns map[*Node]*ConnInfo) float64 {
+            return 0.0 // finish this
+        })
+        outputs = append(outputs, newOutput)
     }
     return outputs
 }
 
 func (net *Network) CreateIndividualSensor(name string, r int, count int, plane string, center [3]int, otherSide bool, outputCenters [][3]int, inputFunc func([]*Node, []*Output)) *Sensor {
-    outputs := net.MakeOutputs(name,  outputCenters, otherSide)
+    outputs := net.MakeOutputs(name,  outputCenters, r, count, otherSide)
     // radius is basically density...
     sensor := &Sensor{
         Nodes: []*Node{},
