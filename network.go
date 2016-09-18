@@ -322,10 +322,10 @@ func (net *Network) Connect() {
             for potX < 0 || potX >= net.Dimensions[0] {
                 potX = int(rand.NormFloat64() * stDev) + node.Position[0]
             }
-            for potY < 0 || potY >= net.Dimensions[0] {
+            for potY < 0 || potY >= net.Dimensions[1] {
                 potY = int(rand.NormFloat64() * stDev) + node.Position[1]
             }
-            for potZ < 0 || potZ >= net.Dimensions[0] {
+            for potZ < 0 || potZ >= net.Dimensions[2] {
                 potZ = int(rand.NormFloat64() * stDev) + node.Position[2]
             }
             center = [3]int{potX, potY, potZ}
