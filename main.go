@@ -27,7 +27,7 @@ func main() {
     var myNet *Network
     _, err := os.Stat(fmt.Sprintf("./state/%v_state.json", fileName))
     if fileName == "" || err != nil {
-        NETWORK_SIZE := [3]int{25, 25, 25}
+        NETWORK_SIZE := [3]int{12, 25, 25}
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
         myNet.Mirror()
@@ -42,8 +42,10 @@ func main() {
         myNet.ClearIO() // is this needed
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
         // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
-        myNet.CreateSensor("eye", 1, 50, "y", [3]int{24, 0, 12}, 2, func(nodes []*Node, influences []*Output) {
-
+        myNet.CreateSensor("eye", 1, 50, "y", [3]int{11, 0, 12}, 2, func(nodes []*Node, influences []*Output) {
+            for _, node := range nodes {
+                node.Value = 1
+            }
         })
     }
 
