@@ -18,6 +18,7 @@ type Sensor struct {
     Influences []*Output            `json:"influences"`
     Name string                     `json:"name"`
     In func([]*Node, []*Output)     `json:"-"`
+    Center [3]int                   `json:"center"`
 }
 
 // do I want to save sensors/outputs?
@@ -116,6 +117,7 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
         Name: name,
         In: inputFunc,
         Influences: outputs,
+        Center: center,
     }
     // todo - determine correct coefficient
     stDev := float64(r)
