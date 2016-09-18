@@ -67,7 +67,7 @@ func (net *Network) RemoveOutput(name string) {
 // also it's SO LONG AND MESSY :L
 func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, outputCount int, inputFunc func([]*Node, []*Output)) [2]*Sensor {
     secondCenter := center
-    secondCenter[0] = (net.Dimensions[0]*2) - center[0]
+    secondCenter[0] = (net.Dimensions[0]*2) - center[0] - 1
     // set random output centers here
     outputCenters := [][3]int{}
     for i := 0; i < outputCount; i++ {
@@ -89,7 +89,7 @@ func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int
     for idx, center := range outputCenters {
         outputCenter := center
         if otherSide {
-            outputCenter[0] = (net.Dimensions[0]*2) - outputCenter[0]
+            outputCenter[0] = (net.Dimensions[0]*2) - outputCenter[0] - 1
         }
         newOutput := net.CreateIndividualOutput(fmt.Sprintf("%v-%v", sensorName, idx), r, count, "", outputCenter, func(nodes map[*Node]*ConnInfo) float64 {
             // todo - I really should have a specified ConnInfo for the output
