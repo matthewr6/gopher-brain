@@ -12,8 +12,14 @@ import matplotlib.pyplot as plt
 
 COLOR_MAP = cm.plasma
 
+path = '.'
+if len(sys.argv) == 3:
+    path = sys.argv[2]
+    if path[-1] == '/':
+        path = path[:-1]
+
 for num in range(0, int(sys.argv[1])):
-    with open('frames/net_{num}.json'.format(num=num)) as data_file:   
+    with open('{path}/frames/net_{num}.json'.format(path=path, num=num)) as data_file:   
         node_grid = json.load(data_file)['nodes']
 
     def randrange(n, vmin, vmax):
