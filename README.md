@@ -1,12 +1,13 @@
 ![CircleCI status](https://circleci.com/gh/Firedrake969/gopher-brain.svg?style=shield)
 
-### latest animation
-
 [![Join the chat at https://gitter.im/Firedrake969/gopher-brain](https://badges.gitter.im/Firedrake969/gopher-brain.svg)](https://gitter.im/Firedrake969/gopher-brain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+### Latest animation
+(that I've bothered to upload)
 
 ![Latest image](/latest.gif)
 
-### how to make things happen
+### How to run
 
 - `cd` into the root of the project
 - `go build`
@@ -18,7 +19,12 @@
 - `cd` into the `frames` directory
 - `ffmpeg -framerate Y -i net_%01d.png anim.gif`, Y being fps
 
-Modify `main.go` to create sensors for the state of the net/brain/whatever
+Modify `main.go` to create sensors for the state of the net/brain/whatever.
 
-#### personal notes/links
-potentially - save sensor/output centers (and possibly nodes?) but not the functions, and have user input functions?  that would be after this branch is merged though.
+### Cross-compiling
+
+http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
+
+`env GOOS=<your os> GOARCH=<your architecture> go build`
+
+https://golang.org/doc/install/source#environment
