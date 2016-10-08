@@ -185,9 +185,9 @@ func (net *Network) Cycle() {
 
     // also update nodes that receive sensory information
     // is this the proper order?
-    // for _, output := range net.Outputs {
-    //     output.Value = output.Out(output.Nodes)
-    // }
+    for _, output := range net.Outputs {
+        output.Value = output.Out(output.Nodes)
+    }
 
     for _, sensor := range net.Sensors {
         sensor.In(sensor.Nodes, sensor.Influences)

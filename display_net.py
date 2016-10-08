@@ -42,7 +42,7 @@ for num in range(0, int(sys.argv[1])):
                 zs = np.append(zs, node['position'][2])
                 values = np.append(values, node['value'])
 
-    colors = COLOR_MAP(values/max(values))
+    colors = COLOR_MAP(values/1)
 
     colmap = cm.ScalarMappable(cmap=COLOR_MAP)
     colmap.set_array(values)
