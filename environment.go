@@ -93,7 +93,6 @@ func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int
             outputCenter[0] = (net.Dimensions[0]*2) - outputCenter[0] - 1
         }
         newOutput := net.CreateIndividualOutput(fmt.Sprintf("%v-%v", sensorName, idx), r, count, "", outputCenter, func(nodes map[*Node]*ConnInfo) float64 {
-            // todo - I really should have a specified ConnInfo for the output
             var sum float64
             for node, connInfo := range nodes {
                 if connInfo.Excitatory {
