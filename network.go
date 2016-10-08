@@ -6,9 +6,6 @@ import (
     "os"
     "strconv"
     "encoding/json"
-
-    "github.com/jteeuwen/keyboard"
-    term "github.com/nsf/termbox-go"
 )
 
 /*
@@ -39,12 +36,12 @@ type Node struct {
 
 // let's say y=0 is the front of the "brain"
 type Network struct {
-    Nodes [][][]*Node           `json:"nodes"`
-    LeftHemisphere [][][]*Node  `json:"-"`
-    RightHemisphere [][][]*Node  `json:"-"`
-    Dimensions [3]int           `json:"-"`
-    Sensors []*Sensor           `json:"-"`
-    Outputs []*Output           `json:"-"`
+    Nodes [][][]*Node             `json:"nodes"`
+    LeftHemisphere [][][]*Node    `json:"-"`
+    RightHemisphere [][][]*Node   `json:"-"`
+    Dimensions [3]int             `json:"-"`
+    Sensors map[string]*Sensor    `json:"-"`
+    Outputs map[string]*Output    `json:"-"`
 }
 
 func (c Connection) String() string {
@@ -187,12 +184,13 @@ func (net *Network) Cycle() {
 
 
     // also update nodes that receive sensory information
-    for _, sensor := range net.Sensors {
-        sensor.In(sensor.Nodes, sensor.Stimulated)
-    }
+    // is this the proper order?
+    // for _, output := range net.Outputs {
+    //     output.Value = output.Out(output.Nodes)
+    // }
 
-    for _, output := range net.Outputs {
-        output.Value = output.Out(output.Nodes)
+    for _, sensor := range net.Sensors {
+        sensor.In(sensor.Nodes, sensor.Influences)
     }
 
     // then clear the connections
@@ -324,10 +322,10 @@ func (net *Network) Connect() {
             for potX < 0 || potX >= net.Dimensions[0] {
                 potX = int(rand.NormFloat64() * stDev) + node.Position[0]
             }
-            for potY < 0 || potY >= net.Dimensions[0] {
+            for potY < 0 || potY >= net.Dimensions[1] {
                 potY = int(rand.NormFloat64() * stDev) + node.Position[1]
             }
-            for potZ < 0 || potZ >= net.Dimensions[0] {
+            for potZ < 0 || potZ >= net.Dimensions[2] {
                 potZ = int(rand.NormFloat64() * stDev) + node.Position[2]
             }
             center = [3]int{potX, potY, potZ}
@@ -365,7 +363,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                     if randTest < 0.5 {
                         newValue = 0
                     } else {
-                        newValue = 1
+                        newValue = 0//1
                     }
                 }
                 jDim = append(jDim, &Node{
@@ -391,10 +389,6 @@ func (net *Network) GenerateAnim(frames int) {
     for frame := 0; frame < frames; frame++ {
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
-
-        term.SetCursor(0, 0)
-        fmt.Print(frame)
-        term.HideCursor()
     }
 }
 
@@ -405,33 +399,6 @@ func (net *Network) AnimateUntilDone() {
         frameStr := strconv.Itoa(frame)
         net.DumpJSON(frameStr)
         net.Cycle()
-        // should print everything on one line, just because it's simpler
-        // fmt.Print("\r" + frameStr)
-        net.Info(frame)
         frame++
     }
-}
-
-func KeyboardPoll(kb keyboard.Keyboard) {
-    for running {
-        kb.Poll(term.PollEvent())
-    }
-}
-
-func (net Network) Info(frame int) {
-    term.SetCursor(0, 0)
-    fmt.Printf("Frame %v\n", frame)
-    fmt.Print("\n-----SENSORS-----\n")
-    for _, sensor := range net.Sensors {
-        active := "x"
-        if sensor.Stimulated {
-            active = "o"
-        }
-        fmt.Printf("%v: %v\n", sensor.Name, active)
-    }
-    fmt.Print("\n-----OUTPUTS-----\n")
-    for _, output := range net.Outputs {
-        fmt.Printf("%v: %v\n", output.Name, output.Value)
-    }
-    term.HideCursor()
 }

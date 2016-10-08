@@ -21,4 +21,4 @@
 Modify `main.go` to create sensors for the state of the net/brain/whatever
 
 #### personal notes/links
-http://biology.stackexchange.com/questions/5306/how-do-neurons-form-new-connections-in-brain-plasticity
+potentially - save sensor/output centers (and possibly nodes?) but not the functions, and have user input functions?  that would be after this branch is merged though.

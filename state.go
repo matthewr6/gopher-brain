@@ -6,8 +6,6 @@ import (
     "strings"
     "reflect"
     "encoding/json"
-
-    "github.com/jteeuwen/keyboard"
 )
 
 /*
@@ -41,7 +39,6 @@ type DisplayConnection struct {
 type DisplaySensor struct {
     Nodes [][3]int    `json:"nodes"`
     Excitatory bool   `json:"excitatory"`
-    Trigger string    `json:"trigger"`
     Name string       `json:"name"`
 }
 
@@ -111,68 +108,56 @@ func LoadState(name string) *Network {
 
     // set sensors
     // this is also inefficient
-    for _, importedSensor := range importedNet.Sensors {
-        nodes := []*Node{}
-        for _, nodePos := range importedSensor.Nodes {
-            nodes = append(nodes, net.FindNode(nodePos))
-        }
-        newSensor := &Sensor{
-            Nodes: nodes,
-            Excitatory: importedSensor.Excitatory,
-            Trigger: importedSensor.Trigger,
-            Stimulated: false,
-            Name: importedSensor.Name,
-            In: func(nodes []*Node, stimulated bool) {
-                // for simplicity - just continuously stimulate every node
-                for _, node := range nodes {
-                    if stimulated {
-                        node.Value = 1
-                    }
-                    // let's try removing this for now, see what happens...
-                    // else {
-                    //     node.Value = 0
-                    // }
-                }
-            },
-        }
-        net.Sensors = append(net.Sensors, newSensor)
-    }
+    // for _, importedSensor := range importedNet.Sensors {
+    //     nodes := []*Node{}
+    //     for _, nodePos := range importedSensor.Nodes {
+    //         nodes = append(nodes, net.FindNode(nodePos))
+    //     }
+    //     newSensor := &Sensor{
+    //         Nodes: nodes,
+    //         Name: importedSensor.Name,
+    //         In: func(nodes []*Node, influences []*Output) {
+    //             // for simplicity - just continuously stimulate every node
+    //             for _, node := range nodes {
+    //                 if true {
+    //                     node.Value = 1
+    //                 }
+    //                 // let's try removing this for now, see what happens...
+    //                 // else {
+    //                 //     node.Value = 0
+    //                 // }
+    //             }
+    //         },
+    //     }
+    //     net.Sensors = append(net.Sensors, newSensor)
+    // }
 
-    for _, importedOutput := range importedNet.Outputs {
-        nodes := make(map[*Node]*ConnInfo)
-        for id, connInfo := range importedOutput.Nodes {
-            posSlice := StrsToInts(strings.Split(id, "|"))
-            node := net.FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]})
-            nodes[node] = connInfo
-        }
-        newOutput := &Output{
-            Nodes: nodes,
-            Name: importedOutput.Name,
-            Out: func(nodes map[*Node]*ConnInfo) float64 {
-                var sum float64
-                for node, connInfo := range nodes {
-                    if connInfo.Excitatory {
-                        sum += float64(node.Value) * connInfo.Strength
-                    } else {
-                        sum -= float64(node.Value) * connInfo.Strength
-                    }
-                }
-                return sum
-            },
-        }
-        net.Outputs = append(net.Outputs, newOutput)
-    }
+    // for _, importedOutput := range importedNet.Outputs {
+    //     nodes := make(map[*Node]*ConnInfo)
+    //     for id, connInfo := range importedOutput.Nodes {
+    //         posSlice := StrsToInts(strings.Split(id, "|"))
+    //         node := net.FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]})
+    //         nodes[node] = connInfo
+    //     }
+    //     newOutput := &Output{
+    //         Nodes: nodes,
+    //         Name: importedOutput.Name,
+    //         Out: func(nodes map[*Node]*ConnInfo) float64 {
+    //             var sum float64
+    //             for node, connInfo := range nodes {
+    //                 if connInfo.Excitatory {
+    //                     sum += float64(node.Value) * connInfo.Strength
+    //                 } else {
+    //                     sum -= float64(node.Value) * connInfo.Strength
+    //                 }
+    //             }
+    //             return sum
+    //         },
+    //     }
+    //     net.Outputs = append(net.Outputs, newOutput)
+    // }
 
     return net
-}
-
-func (net *Network) BindKeyboard(kb keyboard.Keyboard) {
-    for _, sensor := range net.Sensors {
-        s := sensor
-        kb.Bind(func() {
-            s.Stimulated = !s.Stimulated
-        }, sensor.Trigger)
-    }
 }
 
 func (net Network) SaveState(name string) {
@@ -190,8 +175,6 @@ func (net Network) SaveState(name string) {
         }
         dispNet.Sensors = append(dispNet.Sensors, &DisplaySensor{
             Nodes: positions,
-            Excitatory: sensor.Excitatory,
-            Trigger: sensor.Trigger,
             Name: sensor.Name,
         })
     }
@@ -312,14 +295,15 @@ func Test(orig, loaded *Network) bool {
             }
         }
     }
+    // do I even want to use these?
     // these still use reflect for now
     // compare sensors
-    if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
-        return false
-    }
-    // compare outputs
-    if !reflect.DeepEqual(orig.Outputs, loaded.Outputs) {
-        return false
-    }
+    // if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
+    //     return false
+    // }
+    // // compare outputs
+    // if !reflect.DeepEqual(orig.Outputs, loaded.Outputs) {
+    //     return false
+    // }
     return true
 }
