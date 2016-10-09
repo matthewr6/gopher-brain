@@ -27,7 +27,7 @@ type Connection struct {
 }
 
 type Node struct {
-    Value int                                  `json:"value"` // todo- maybe use a bool of true or false, and rename this "firing"?
+    Value int                                  `json:"value"`
     OutgoingConnection *Connection             `json:"-"`  //which node to send to
     IncomingConnections map[*Node]*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                            `json:"position"`
@@ -126,7 +126,7 @@ func (net *Network) AddConnections(node *Node) {
     // could merge this into the above loop...
     for _, potNode := range possibleExtensions {
         _, exists := node.OutgoingConnection.To[potNode]
-        if potNode.Value != 0 && !exists { // todo doesthis check work?
+        if potNode.Value != 0 && !exists {
             excitatory := false
             if rand.Intn(2) != 0 {
                 excitatory = true

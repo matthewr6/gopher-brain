@@ -60,16 +60,9 @@ func (net *Network) RemoveOutput(name string) {
     delete(net.Outputs, name)
 }
 
-// todo - there's probably an easier way to do the plane stuff now
-
-// do I even need the plane stuff
-// seems bloated
-// todo reorder these args
-// also it's SO LONG AND MESSY :L
 func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, outputCount int, inputFunc func([]*Node, []*Output)) [2]*Sensor {
     secondCenter := center
     secondCenter[0] = (net.Dimensions[0]*2) - center[0] - 1
-    // set random output centers here
     outputCenters := [][3]int{}
     for i := 0; i < outputCount; i++ {
         outputCenters = append(outputCenters, [3]int{
@@ -85,8 +78,6 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
 
 func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int, count int, otherSide bool) []*Output {
     outputs := []*Output{}
-    // for i := 0; i < outputCenters; i++ {
-    // }
     for idx, center := range outputCenters {
         outputCenter := center
         if otherSide {
