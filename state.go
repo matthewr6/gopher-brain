@@ -311,6 +311,17 @@ func Test(orig, loaded *Network) bool {
             }
         }
     }
+
+    // to compare
+    // sensors
+    //     - influence names
+    //     - node positions
+    //     - names (compare *based on* names)
+    //     - centers
+    // outputs
+    //     - names (compare based on names)
+    //     - nodes (compare node positions and conninfo stuff)
+    //     - values
     // these still use reflect for now
     // compare sensors
     // if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
