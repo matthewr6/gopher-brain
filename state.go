@@ -123,26 +123,6 @@ func (net Network) SaveState(name string) {
         Outputs: make(map[string]*DisplayOutput),
         Dimensions: net.Dimensions,
     }
-    // for _, sensor := range net.Sensors {
-    //     positions := [][3]int{}
-    //     for _, sensoryNode := range sensor.Nodes {
-    //         positions = append(positions, sensoryNode.Position)
-    //     }
-    //     dispNet.Sensors = append(dispNet.Sensors, &DisplaySensor{
-    //         Nodes: positions,
-    //         Name: sensor.Name,
-    //     })
-    // }
-    // for _, output := range net.Outputs {
-    //     nodeMap := make(map[string]*ConnInfo)
-    //     for node, connInfo := range output.Nodes {
-    //         nodeMap[node.Id] = connInfo
-    //     }
-    //     dispNet.Outputs = append(dispNet.Outputs, &DisplayOutput{
-    //         Nodes: nodeMap,
-    //         Name: output.Name,
-    //     })
-    // }
     for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*DisplayNode{}
         for j := 0; j < net.Dimensions[1]; j++ {
@@ -172,10 +152,6 @@ func (net Network) SaveState(name string) {
         dispNet.Nodes = append(dispNet.Nodes, iDim)
     }
 
-    // WORKING
-
-    // do outputs first so you can later reference the outputs when building the sensor
-    //wait
     // do we even need to reference the outputs when saving a state?   based on the way the outputs are created, it's possible that we only need to reference the outputs when building the sensors when we load the sensors into the working net
     for _, output := range net.Outputs {
         nodeMap := make(map[string]*ConnInfo)
@@ -203,8 +179,6 @@ func (net Network) SaveState(name string) {
             Influences: influenceNames,
         }
     }
-
-    // END WORKING
 
     f, _ := os.Create(fmt.Sprintf("%v/state/%v_state.json", directory, name))
     f.WriteString(dispNet.String())
