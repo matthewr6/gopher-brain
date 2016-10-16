@@ -322,6 +322,29 @@ func Test(orig, loaded *Network) bool {
     //     - names (compare based on names)
     //     - nodes (compare node positions and conninfo stuff)
     //     - values
+    for sensorName, oSensor := range orig.Sensors {
+        lSensor, exists := loaded.Sensors[sensorName]
+        if !exists {
+            return false
+        }
+        if ((oSensor.Center != lSensor.Center) ||
+            (len(oSensor.Nodes) != len(lSensor.Nodes)) ||
+            (len(oSensor.Influences) != len(lSensor.Influences))) {
+            return false
+        }
+        // todo - check node positions and influence names
+    }
+    for outputName, oOutput := range orig.Outputs {
+        lOutput, exists := loaded.Outputs[outputName]
+        if !exists {
+            return false
+        }
+        if ((len(oOutput.Nodes) != len(lOutput.Nodes)) ||
+            (oOutput.Value != lOutput.Value)) {
+            return false
+        }
+        // todo - check node positions and conninfo data
+    }
     // these still use reflect for now
     // compare sensors
     // if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
