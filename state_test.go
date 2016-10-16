@@ -6,7 +6,7 @@ import (
 )
 
 func TestState(t *testing.T) {
-    NETWORK_SIZE := [3]int{10, 10, 10}
+    NETWORK_SIZE := [3]int{25, 25, 25}
     testingNet := MakeNetwork(NETWORK_SIZE, false)
     testingNet.Connect()
     testingNet.Mirror()
@@ -17,31 +17,11 @@ func TestState(t *testing.T) {
         testingNet.Cycle()
     }
 
-    // testingNet.CreateSensor("aa", 1, 50, "", [3]int{24, 0, 0}, true, "a", func(nodes []*Node, stimulated bool) {
-    //     for _, node := range nodes {
-    //         if stimulated {
-    //             node.Value = 1
-    //         }
-    //     }
-    // })
-    // testingNet.CreateSensor("bb", 1, 50, "", [3]int{0, 0, 0}, true, "b", func(nodes []*Node, stimulated bool) {
-    //     for _, node := range nodes {
-    //         if stimulated {
-    //             node.Value = 1
-    //         }
-    //     }
-    // })
-    // testingNet.CreateOutput("output", 1, 50,"", [3]int{12, 1, 1}, func(nodes []*Node) float64 {
-    //     var sum float64
-    //     for _, node := range nodes {
-    //         if node.OutgoingConnection.To[node].Excitatory {
-    //             sum += float64(node.Value) * node.OutgoingConnection.To[node].Strength
-    //         } else {
-    //             sum -= float64(node.Value) * node.OutgoingConnection.To[node].Strength
-    //         }
-    //     }
-    //     return sum
-    // })
+    testingNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences []*Output) {
+        for _, node := range nodes {
+            node.Value = 1
+        }
+    })
 
     testingNet.SaveState("test")
     loadedNet := LoadState("test")
