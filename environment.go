@@ -14,11 +14,11 @@ import (
     one sensor can be influenced by a SET of outputs
 */
 type Sensor struct {
-    Nodes []*Node                   `json:"nodes"`
-    Influences []*Output            `json:"influences"`
-    Name string                     `json:"name"`
-    In func([]*Node, []*Output)     `json:"-"`
-    Center [3]int                   `json:"center"`
+    Nodes []*Node                            `json:"nodes"`
+    Influences map[string]*Output            `json:"influences"`
+    Name string                              `json:"name"`
+    In func([]*Node, map[string]*Output)     `json:"-"`
+    Center [3]int                            `json:"center"`
 }
 
 type Output struct {
@@ -59,7 +59,7 @@ func (net *Network) RemoveOutput(name string) {
     delete(net.Outputs, name)
 }
 
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, outputCount int, inputFunc func([]*Node, []*Output)) [2]*Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, outputCount int, inputFunc func([]*Node, map[string]*Output)) [2]*Sensor {
     secondCenter := center
     secondCenter[0] = (net.Dimensions[0]*2) - center[0] - 1
     outputCenters := [][3]int{}
@@ -75,8 +75,8 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
     return [2]*Sensor{a, b}
 }
 
-func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int, count int, otherSide bool) []*Output {
-    outputs := []*Output{}
+func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int, count int, otherSide bool) map[string]*Output {
+    outputs := make(map[string]*Output)
     for idx, center := range outputCenters {
         outputCenter := center
         if otherSide {
@@ -93,12 +93,12 @@ func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int
             }
             return sum
         })
-        outputs = append(outputs, newOutput)
+        outputs[newOutput.Name] = newOutput
     }
     return outputs
 }
 
-func (net *Network) CreateIndividualSensor(name string, r int, count int, plane string, center [3]int, otherSide bool, outputCenters [][3]int, inputFunc func([]*Node, []*Output)) *Sensor {
+func (net *Network) CreateIndividualSensor(name string, r int, count int, plane string, center [3]int, otherSide bool, outputCenters [][3]int, inputFunc func([]*Node, map[string]*Output)) *Sensor {
     outputs := net.MakeOutputs(name,  outputCenters, r, count, otherSide)
     // radius is basically density...
     sensor := &Sensor{

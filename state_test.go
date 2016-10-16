@@ -17,7 +17,7 @@ func TestState(t *testing.T) {
         testingNet.Cycle()
     }
 
-    testingNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences []*Output) {
+    testingNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences map[string]*Output) {
         for _, node := range nodes {
             node.Value = 1
         }

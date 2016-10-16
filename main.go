@@ -42,7 +42,7 @@ func main() {
         myNet.ClearIO() // is this needed
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
         // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
-        myNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences []*Output) {
+        myNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences map[string]*Output) {
             for _, node := range nodes {
                 node.Value = 1
             }

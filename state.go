@@ -196,7 +196,6 @@ func (net Network) SaveState(name string) {
             Nodes: positions,
             Name: sensor.Name,
             Center: sensor.Center,
-            InfluenceCount: len(sensor.Influences), // todo - should sensor influences be a map, since outputs are already a map for networks?
         }
     }
 
