@@ -17,3 +17,11 @@ would have to check the same node coordinates in save_test.go; however, would no
 also display existing sensors (not outputs) to user on load so that user can cancel/restart based on that information
 
 after custom functions are loaded, runs cript to prune sensors (and their corresponding outputs) that don't have their functions set
+
+as of commit `2411ad5b16` - make tests more in depth, allow users to set custom functions on loaded sensors, and prune unused sensors and their corresponding outputs
+
+for the latter two - use regex
+sensor format is always `<name>-(one|two)`
+output format is always `<name>-(one|two)-<d>` where `d` is the number of the sensor
+
+for both, look specifically for the first part - the `name`
