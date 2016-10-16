@@ -192,10 +192,15 @@ func (net Network) SaveState(name string) {
         for _, sensoryNode := range sensor.Nodes {
             positions = append(positions, sensoryNode.Position)
         }
+        influenceNames := []string{}
+        for _, influence := range sensor.Influences {
+            influenceNames = append(influenceNames, influence.Name)
+        }
         dispNet.Sensors[sensor.Name] = &DisplaySensor{
             Nodes: positions,
             Name: sensor.Name,
             Center: sensor.Center,
+            Influences: influenceNames,
         }
     }
 
