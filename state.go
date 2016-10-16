@@ -152,6 +152,13 @@ func LoadState(name string) *Network {
             Influences: make(map[string]*Output),
             Center: importedSensor.Center,
         }
+        for _, influenceName := range importedSensor.Influences {
+            newSensor.Influences[influenceName] = net.Outputs[influenceName]
+        }
+        for _, nodePos := range importedSensor.Nodes {
+            newSensor.Nodes = append(newSensor.Nodes, net.FindNode(nodePos))
+        }
+        net.Sensors[importedSensor.Name] = newSensor
     }
 
     // END WORKING
