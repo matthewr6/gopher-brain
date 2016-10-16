@@ -18,7 +18,7 @@ also display existing sensors (not outputs) to user on load so that user can can
 
 after custom functions are loaded, runs cript to prune sensors (and their corresponding outputs) that don't have their functions set
 
-as of commit `2411ad5b16` - make tests more in depth, allow users to set custom functions on loaded sensors, and prune unused sensors and their corresponding outputs
+as of commit `2411ad5b16` - make tests more in depth, allow users to set custom functions on loaded sensors, and prune unused sensors and their corresponding outputs (after any user custom stuff is set)
 
 for the latter two - use regex
 sensor format is always `<name>-(one|two)`
