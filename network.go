@@ -381,6 +381,8 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
     return &Network {
         Dimensions: dimensions,
         RightHemisphere: nodes,
+        Sensors: make(map[string]*Sensor),
+        Outputs: make(map[string]*Output),
     }
 }
 
