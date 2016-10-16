@@ -62,6 +62,16 @@ func (d DisplayNetwork) String() string {
     return string(jsonRep)
 }
 
+func (d DisplayOutput) String() string {
+    jsonRep, _ := json.MarshalIndent(d, "", "    ")
+    return string(jsonRep)
+}
+
+func (d DisplaySensor) String() string {
+    jsonRep, _ := json.MarshalIndent(d, "", "    ")
+    return string(jsonRep)
+}
+
 func LoadState(name string) *Network {
     fmt.Println(fmt.Sprintf("Loading state \"%v\"...", name))
     datafile, err := os.Open(fmt.Sprintf("%v/state/%v_state.json", directory, name))
@@ -76,6 +86,8 @@ func LoadState(name string) *Network {
     net := &Network{
         Nodes: [][][]*Node{},
         Dimensions: importedNet.Dimensions,
+        Sensors: make(map[string]*Sensor),
+        Outputs: make(map[string]*Output),
     }
     for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*Node{}
@@ -110,6 +122,39 @@ func LoadState(name string) *Network {
         newConn.To = toNodes
         node.OutgoingConnection = newConn
     })
+
+    // WORKING
+
+    // first, load outputs
+    for _, importedOutput := range importedNet.Outputs {
+        newOutput := &Output{
+            Name: importedOutput.Name,
+            Nodes: make(map[*Node]*ConnInfo),
+            Value: importedOutput.Value,
+        }
+        for id, info := range importedOutput.Nodes {
+            pos := StrsToInts(strings.Split(id, "|"))
+            node := net.FindNode([3]int{pos[0], pos[1], pos[2]})
+            newConnInfo := &ConnInfo{
+                Excitatory: info.Excitatory,
+                Strength: info.Strength,
+            }
+            newOutput.Nodes[node] = newConnInfo
+        }
+        net.Outputs[importedOutput.Name] = newOutput
+    }
+
+    // then load sensors
+    for _, importedSensor := range importedNet.Sensors {
+        newSensor := &Sensor{
+            Name: importedSensor.Name,
+            Nodes: []*Node{},
+            Influences: make(map[string]*Output),
+            Center: importedSensor.Center,
+        }
+    }
+
+    // END WORKING
 
     return net
 }
