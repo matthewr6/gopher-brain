@@ -21,7 +21,6 @@ type Sensor struct {
     Center [3]int                   `json:"center"`
 }
 
-// do I want to save sensors/outputs?
 type Output struct {
     Nodes map[*Node]*ConnInfo               `json:"nodes"`
     Name string                             `json:"name"`

@@ -36,15 +36,25 @@ type DisplayConnection struct {
     Center [3]int           `json:"center"`
 }
 
+// // do I want to save sensors/outputs?
+// type Output struct {
+//     Nodes map[*Node]*ConnInfo               `json:"nodes"`
+//     Name string                             `json:"name"`
+//     Value float64                           `json:"value"`
+//     Out func(map[*Node]*ConnInfo) float64   `json:"-"`
+// }
+
 type DisplaySensor struct {
-    Nodes [][3]int    `json:"nodes"`
-    Excitatory bool   `json:"excitatory"`
-    Name string       `json:"name"`
+    Nodes [][3]int        `json:"nodes"`
+    Influences []string   `json:"influences"`
+    Center [3]int         `json:"center"`
+    Name string           `json:"name"`
 }
 
 type DisplayOutput struct {
     Nodes map[string]*ConnInfo    `json:"nodes"` // why pointers?  oh well it works so yeah
     Name string                   `json:"name"`
+    Value float64                 `json:"value"`
 }
 
 func (d DisplayNetwork) String() string {
@@ -67,8 +77,6 @@ func LoadState(name string) *Network {
         Nodes: [][][]*Node{},
         Dimensions: importedNet.Dimensions,
     }
-    // set nodes
-    // this looks good
     for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*Node{}
         for j := 0; j < net.Dimensions[1]; j++ {
@@ -86,9 +94,6 @@ func LoadState(name string) *Network {
         }
         net.Nodes = append(net.Nodes, iDim)
     }
-    // set connections
-    // this part is super inefficient
-    // still should optimize
     importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
@@ -105,57 +110,6 @@ func LoadState(name string) *Network {
         newConn.To = toNodes
         node.OutgoingConnection = newConn
     })
-
-    // set sensors
-    // this is also inefficient
-    // for _, importedSensor := range importedNet.Sensors {
-    //     nodes := []*Node{}
-    //     for _, nodePos := range importedSensor.Nodes {
-    //         nodes = append(nodes, net.FindNode(nodePos))
-    //     }
-    //     newSensor := &Sensor{
-    //         Nodes: nodes,
-    //         Name: importedSensor.Name,
-    //         In: func(nodes []*Node, influences []*Output) {
-    //             // for simplicity - just continuously stimulate every node
-    //             for _, node := range nodes {
-    //                 if true {
-    //                     node.Value = 1
-    //                 }
-    //                 // let's try removing this for now, see what happens...
-    //                 // else {
-    //                 //     node.Value = 0
-    //                 // }
-    //             }
-    //         },
-    //     }
-    //     net.Sensors = append(net.Sensors, newSensor)
-    // }
-
-    // for _, importedOutput := range importedNet.Outputs {
-    //     nodes := make(map[*Node]*ConnInfo)
-    //     for id, connInfo := range importedOutput.Nodes {
-    //         posSlice := StrsToInts(strings.Split(id, "|"))
-    //         node := net.FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]})
-    //         nodes[node] = connInfo
-    //     }
-    //     newOutput := &Output{
-    //         Nodes: nodes,
-    //         Name: importedOutput.Name,
-    //         Out: func(nodes map[*Node]*ConnInfo) float64 {
-    //             var sum float64
-    //             for node, connInfo := range nodes {
-    //                 if connInfo.Excitatory {
-    //                     sum += float64(node.Value) * connInfo.Strength
-    //                 } else {
-    //                     sum -= float64(node.Value) * connInfo.Strength
-    //                 }
-    //             }
-    //             return sum
-    //         },
-    //     }
-    //     net.Outputs = append(net.Outputs, newOutput)
-    // }
 
     return net
 }
@@ -295,7 +249,6 @@ func Test(orig, loaded *Network) bool {
             }
         }
     }
-    // do I even want to use these?
     // these still use reflect for now
     // compare sensors
     // if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
