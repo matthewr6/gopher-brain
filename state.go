@@ -349,17 +349,17 @@ func Test(orig, loaded *Network) bool {
             (oOutput.Value != lOutput.Value)) {
             return false
         }
-        // todo - check node positions and conninfo data?
-        // how? it's a map from nodes to conninfo
+        oOutputNodes := make(map[string]float64)
+        lOutputNodes := make(map[string]float64)
+        for node, info := range oOutput.Nodes {
+            oOutputNodes[node.Id] = info.Strength
+        }
+        for node, info := range lOutput.Nodes {
+            lOutputNodes[node.Id] = info.Strength
+        }
+        if !reflect.DeepEqual(oOutputNodes, lOutputNodes) {
+            return false
+        }
     }
-    // these still use reflect for now
-    // compare sensors
-    // if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
-    //     return false
-    // }
-    // // compare outputs
-    // if !reflect.DeepEqual(orig.Outputs, loaded.Outputs) {
-    //     return false
-    // }
     return true
 }
