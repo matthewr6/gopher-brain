@@ -75,6 +75,17 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
     return [2]*Sensor{a, b}
 }
 
+func (net *Network) UpdateSensor(name string, inputFunc func([]*Node, map[string]*Output)) [2]*Sensor {
+    if _, ok := net.Sensors[name]; !ok {
+        return [2]*Sensor{nil, nil}
+    }
+    a := net.Sensors[fmt.Sprintf("%v-one", name)]
+    b := net.Sensors[fmt.Sprintf("%v-two", name)]
+    a.In = inputFunc
+    b.In = inputFunc
+    return [2]*Sensor{a, b}
+}
+
 func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int, count int, otherSide bool) map[string]*Output {
     outputs := make(map[string]*Output)
     for idx, center := range outputCenters {

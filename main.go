@@ -36,7 +36,16 @@ func main() {
         myNet = LoadState(fileName)
     }
     var mode string
-    mode = Prompt("Add the custom things? [y/n]  ", reader)
+    tracker := make(map[string]bool)
+    fmt.Println("Currently has the following sensors:")
+    for name := range myNet.Sensors {
+        baseName := strings.Split(name, "-")[0]
+        if !tracker[baseName] {
+            fmt.Println(baseName)
+        }
+        tracker[baseName] = true
+    }
+    mode = Prompt("Add/modify the custom things? [y/n]  ", reader)
     if mode == "y" {
         fmt.Println("WARNING!  Sensors and outputs will not save properly!")
         myNet.ClearIO() // is this needed

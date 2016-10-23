@@ -18,10 +18,18 @@ also display existing sensors (not outputs) to user on load so that user can can
 
 after custom functions are loaded, runs cript to prune sensors (and their corresponding outputs) that don't have their functions set
 
-as of commit `2411ad5b16` - make tests more in depth, allow users to set custom functions on loaded sensors, and prune unused sensors and their corresponding outputs (after any user custom stuff is set)
+as of commit `2411ad5b16`:
+- allow users to set custom functions on loaded sensors
+- prune unused sensors and their corresponding outputs (after any user custom stuff is set)
+- make tests more in depth
 
-for the latter two - use regex
+for the first two - use regex
 sensor format is always `<name>-(one|two)`
 output format is always `<name>-(one|two)-<d>` where `d` is the number of the sensor
+
+`[a-zA-Z]+-(one|two)`
+`[a-zA-Z]+-(one|two)-(\d+)`
+
+would regex be needed, or can I just split the string on hyphens and grab the first item of the list?
 
 for both, look specifically for the first part - the `name`
