@@ -36,18 +36,30 @@ func main() {
         myNet = LoadState(fileName)
     }
     var mode string
-    mode = Prompt("Add the custom things? [y/n]  ", reader)
+    tracker := make(map[string]bool)
+    fmt.Printf("Currently has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
+    fmt.Println("Sensor names:")
+    for name := range myNet.Sensors {
+        baseName := strings.Split(name, "-")[0]
+        if !tracker[baseName] {
+            fmt.Println(baseName)
+        }
+        tracker[baseName] = true
+    }
+    mode = Prompt("Add/modify the custom things? [y/n]  ", reader)
     if mode == "y" {
         fmt.Println("WARNING!  Sensors and outputs will not save properly!")
         myNet.ClearIO() // is this needed
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
         // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
-        myNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences []*Output) {
+        myNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences map[string]*Output) {
             for _, node := range nodes {
                 node.Value = 1
             }
         })
     }
+    myNet.PruneUnusedSensors()
+    fmt.Printf("Now has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
 
     framesInput := Prompt("Enter number of frames, or leave blank to run until manually stopped:  ", reader)
     frames, err := strconv.Atoi(framesInput)

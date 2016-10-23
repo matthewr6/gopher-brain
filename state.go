@@ -16,10 +16,10 @@ import (
 // still have to reconcile the updated network.go stuff
 
 type DisplayNetwork struct {
-    Nodes [][][]*DisplayNode   `json:"nodes"`
-    Dimensions [3]int          `json:"dimensions"`
-    Sensors []*DisplaySensor   `json:"sensors"`
-    Outputs []*DisplayOutput   `json:"outputs"`
+    Nodes [][][]*DisplayNode            `json:"nodes"`
+    Dimensions [3]int                   `json:"dimensions"`
+    Sensors map[string]*DisplaySensor   `json:"sensors"`
+    Outputs map[string]*DisplayOutput   `json:"outputs"`
     // Connections []*DisplayConnection `json:"connections"`
 }
 
@@ -36,18 +36,38 @@ type DisplayConnection struct {
     Center [3]int           `json:"center"`
 }
 
+// // do I want to save sensors/outputs?
+// type Output struct {
+//     Nodes map[*Node]*ConnInfo               `json:"nodes"`
+//     Name string                             `json:"name"`
+//     Value float64                           `json:"value"`
+//     Out func(map[*Node]*ConnInfo) float64   `json:"-"`
+// }
+
 type DisplaySensor struct {
-    Nodes [][3]int    `json:"nodes"`
-    Excitatory bool   `json:"excitatory"`
-    Name string       `json:"name"`
+    Nodes [][3]int        `json:"nodes"`
+    Influences []string   `json:"influences"`
+    Center [3]int         `json:"center"`
+    Name string           `json:"name"`
 }
 
 type DisplayOutput struct {
     Nodes map[string]*ConnInfo    `json:"nodes"` // why pointers?  oh well it works so yeah
     Name string                   `json:"name"`
+    Value float64                 `json:"value"`
 }
 
 func (d DisplayNetwork) String() string {
+    jsonRep, _ := json.MarshalIndent(d, "", "    ")
+    return string(jsonRep)
+}
+
+func (d DisplayOutput) String() string {
+    jsonRep, _ := json.MarshalIndent(d, "", "    ")
+    return string(jsonRep)
+}
+
+func (d DisplaySensor) String() string {
     jsonRep, _ := json.MarshalIndent(d, "", "    ")
     return string(jsonRep)
 }
@@ -66,9 +86,9 @@ func LoadState(name string) *Network {
     net := &Network{
         Nodes: [][][]*Node{},
         Dimensions: importedNet.Dimensions,
+        Sensors: make(map[string]*Sensor),
+        Outputs: make(map[string]*Output),
     }
-    // set nodes
-    // this looks good
     for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*Node{}
         for j := 0; j < net.Dimensions[1]; j++ {
@@ -86,9 +106,6 @@ func LoadState(name string) *Network {
         }
         net.Nodes = append(net.Nodes, iDim)
     }
-    // set connections
-    // this part is super inefficient
-    // still should optimize
     importedNet.ForEachINode(func(importedNode *DisplayNode, pos [3]int) {
         newConn := &Connection{
             HoldingVal: importedNode.OutgoingConnection.HoldingVal,
@@ -106,56 +123,46 @@ func LoadState(name string) *Network {
         node.OutgoingConnection = newConn
     })
 
-    // set sensors
-    // this is also inefficient
-    // for _, importedSensor := range importedNet.Sensors {
-    //     nodes := []*Node{}
-    //     for _, nodePos := range importedSensor.Nodes {
-    //         nodes = append(nodes, net.FindNode(nodePos))
-    //     }
-    //     newSensor := &Sensor{
-    //         Nodes: nodes,
-    //         Name: importedSensor.Name,
-    //         In: func(nodes []*Node, influences []*Output) {
-    //             // for simplicity - just continuously stimulate every node
-    //             for _, node := range nodes {
-    //                 if true {
-    //                     node.Value = 1
-    //                 }
-    //                 // let's try removing this for now, see what happens...
-    //                 // else {
-    //                 //     node.Value = 0
-    //                 // }
-    //             }
-    //         },
-    //     }
-    //     net.Sensors = append(net.Sensors, newSensor)
-    // }
+    // WORKING
 
-    // for _, importedOutput := range importedNet.Outputs {
-    //     nodes := make(map[*Node]*ConnInfo)
-    //     for id, connInfo := range importedOutput.Nodes {
-    //         posSlice := StrsToInts(strings.Split(id, "|"))
-    //         node := net.FindNode([3]int{posSlice[0], posSlice[1], posSlice[2]})
-    //         nodes[node] = connInfo
-    //     }
-    //     newOutput := &Output{
-    //         Nodes: nodes,
-    //         Name: importedOutput.Name,
-    //         Out: func(nodes map[*Node]*ConnInfo) float64 {
-    //             var sum float64
-    //             for node, connInfo := range nodes {
-    //                 if connInfo.Excitatory {
-    //                     sum += float64(node.Value) * connInfo.Strength
-    //                 } else {
-    //                     sum -= float64(node.Value) * connInfo.Strength
-    //                 }
-    //             }
-    //             return sum
-    //         },
-    //     }
-    //     net.Outputs = append(net.Outputs, newOutput)
-    // }
+    // first, load outputs
+    // todo - load function in this as well?
+    for _, importedOutput := range importedNet.Outputs {
+        newOutput := &Output{
+            Name: importedOutput.Name,
+            Nodes: make(map[*Node]*ConnInfo),
+            Value: importedOutput.Value,
+        }
+        for id, info := range importedOutput.Nodes {
+            pos := StrsToInts(strings.Split(id, "|"))
+            node := net.FindNode([3]int{pos[0], pos[1], pos[2]})
+            newConnInfo := &ConnInfo{
+                Excitatory: info.Excitatory,
+                Strength: info.Strength,
+            }
+            newOutput.Nodes[node] = newConnInfo
+        }
+        net.Outputs[importedOutput.Name] = newOutput
+    }
+
+    // then load sensors
+    for _, importedSensor := range importedNet.Sensors {
+        newSensor := &Sensor{
+            Name: importedSensor.Name,
+            Nodes: []*Node{},
+            Influences: make(map[string]*Output),
+            Center: importedSensor.Center,
+        }
+        for _, influenceName := range importedSensor.Influences {
+            newSensor.Influences[influenceName] = net.Outputs[influenceName]
+        }
+        for _, nodePos := range importedSensor.Nodes {
+            newSensor.Nodes = append(newSensor.Nodes, net.FindNode(nodePos))
+        }
+        net.Sensors[importedSensor.Name] = newSensor
+    }
+
+    // END WORKING
 
     return net
 }
@@ -165,28 +172,9 @@ func (net Network) SaveState(name string) {
     os.Mkdir("state", 755)
     dispNet := DisplayNetwork{
         Nodes: [][][]*DisplayNode{},
-        Sensors: []*DisplaySensor{},
+        Sensors: make(map[string]*DisplaySensor),
+        Outputs: make(map[string]*DisplayOutput),
         Dimensions: net.Dimensions,
-    }
-    for _, sensor := range net.Sensors {
-        positions := [][3]int{}
-        for _, sensoryNode := range sensor.Nodes {
-            positions = append(positions, sensoryNode.Position)
-        }
-        dispNet.Sensors = append(dispNet.Sensors, &DisplaySensor{
-            Nodes: positions,
-            Name: sensor.Name,
-        })
-    }
-    for _, output := range net.Outputs {
-        nodeMap := make(map[string]*ConnInfo)
-        for node, connInfo := range output.Nodes {
-            nodeMap[node.Id] = connInfo
-        }
-        dispNet.Outputs = append(dispNet.Outputs, &DisplayOutput{
-            Nodes: nodeMap,
-            Name: output.Name,
-        })
     }
     for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*DisplayNode{}
@@ -216,6 +204,35 @@ func (net Network) SaveState(name string) {
         }
         dispNet.Nodes = append(dispNet.Nodes, iDim)
     }
+
+    // do we even need to reference the outputs when saving a state?   based on the way the outputs are created, it's possible that we only need to reference the outputs when building the sensors when we load the sensors into the working net
+    for _, output := range net.Outputs {
+        nodeMap := make(map[string]*ConnInfo)
+        for node, connInfo := range output.Nodes {
+            nodeMap[node.Id] = connInfo
+        }
+        dispNet.Outputs[output.Name] = &DisplayOutput{
+            Nodes: nodeMap,
+            Name: output.Name,
+        }
+    }
+    for _, sensor := range net.Sensors {
+        positions := [][3]int{}
+        for _, sensoryNode := range sensor.Nodes {
+            positions = append(positions, sensoryNode.Position)
+        }
+        influenceNames := []string{}
+        for _, influence := range sensor.Influences {
+            influenceNames = append(influenceNames, influence.Name)
+        }
+        dispNet.Sensors[sensor.Name] = &DisplaySensor{
+            Nodes: positions,
+            Name: sensor.Name,
+            Center: sensor.Center,
+            Influences: influenceNames,
+        }
+    }
+
     f, _ := os.Create(fmt.Sprintf("%v/state/%v_state.json", directory, name))
     f.WriteString(dispNet.String())
     f.Close()
@@ -295,15 +312,54 @@ func Test(orig, loaded *Network) bool {
             }
         }
     }
-    // do I even want to use these?
-    // these still use reflect for now
-    // compare sensors
-    // if !reflect.DeepEqual(orig.Sensors, loaded.Sensors) {
-    //     return false
-    // }
-    // // compare outputs
-    // if !reflect.DeepEqual(orig.Outputs, loaded.Outputs) {
-    //     return false
-    // }
+
+    // to compare
+    // sensors
+    //     - influence names
+    //     - node positions
+    //     - names (compare *based on* names)
+    //     - centers
+    // outputs
+    //     - names (compare based on names)
+    //     - nodes (compare node positions and conninfo stuff)
+    //     - values
+    for sensorName, oSensor := range orig.Sensors {
+        lSensor, exists := loaded.Sensors[sensorName]
+        if !exists {
+            return false
+        }
+        if ((oSensor.Center != lSensor.Center) ||
+            (len(oSensor.Nodes) != len(lSensor.Nodes)) ||
+            (len(oSensor.Influences) != len(lSensor.Influences))) {
+            return false
+        }
+        for idx, oNode := range oSensor.Nodes {
+            lNode := lSensor.Nodes[idx]
+            if oNode.Id != lNode.Id {
+                return false
+            }
+        }
+    }
+    for outputName, oOutput := range orig.Outputs {
+        lOutput, exists := loaded.Outputs[outputName]
+        if !exists {
+            return false
+        }
+        if ((len(oOutput.Nodes) != len(lOutput.Nodes)) ||
+            (oOutput.Value != lOutput.Value)) {
+            return false
+        }
+        oOutputNodes := make(map[string]float64)
+        lOutputNodes := make(map[string]float64)
+        for node, info := range oOutput.Nodes {
+            oOutputNodes[node.Id] = info.Strength
+        }
+        for node, info := range lOutput.Nodes {
+            lOutputNodes[node.Id] = info.Strength
+        }
+        if !reflect.DeepEqual(oOutputNodes, lOutputNodes) {
+            return false
+        }
+    }
     return true
 }

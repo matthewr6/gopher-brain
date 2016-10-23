@@ -40,8 +40,8 @@ type Network struct {
     LeftHemisphere [][][]*Node    `json:"-"`
     RightHemisphere [][][]*Node   `json:"-"`
     Dimensions [3]int             `json:"-"`
-    Sensors map[string]*Sensor    `json:"-"`
-    Outputs map[string]*Output    `json:"-"`
+    Sensors map[string]*Sensor    `json:"sensors"`
+    Outputs map[string]*Output    `json:"outputs"`
 }
 
 func (c Connection) String() string {
@@ -381,6 +381,8 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
     return &Network {
         Dimensions: dimensions,
         RightHemisphere: nodes,
+        Sensors: make(map[string]*Sensor),
+        Outputs: make(map[string]*Output),
     }
 }
 
