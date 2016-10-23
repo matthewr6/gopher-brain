@@ -1,90 +1,92 @@
-package main
+// idk what to do here right now
 
-import (
-    "os"
-    "fmt"
-    "time"
-    "bufio"
-    "strings"
-    "strconv"
-    "math/rand"
-)
+// package main
 
-/*
-    & is "address of"
-    * is "value at address"
-*/
+// import (
+//     "os"
+//     "fmt"
+//     "time"
+//     "bufio"
+//     "strings"
+//     "strconv"
+//     "math/rand"
+// )
 
-var running = true
-var directory = "."
+// /*
+//     & is "address of"
+//     * is "value at address"
+// */
 
-func main() {
-    reader := bufio.NewReader(os.Stdin)
-    fileName := Prompt("Enter state name to load state, or leave blank to create a new network:  ", reader)
+// var running = true
+// var directory = "."
 
-    rand.Seed(time.Now().UTC().UnixNano())
+// func main() {
+//     reader := bufio.NewReader(os.Stdin)
+//     fileName := Prompt("Enter state name to load state, or leave blank to create a new network:  ", reader)
 
-    var myNet *Network
-    _, err := os.Stat(fmt.Sprintf("./state/%v_state.json", fileName))
-    if fileName == "" || err != nil {
-        NETWORK_SIZE := [3]int{12, 25, 25}
-        myNet = MakeNetwork(NETWORK_SIZE, false)
-        myNet.Connect()
-        myNet.Mirror()
-        myNet.ConnectHemispheres()
-    } else {
-        myNet = LoadState(fileName)
-    }
-    var mode string
-    tracker := make(map[string]bool)
-    fmt.Printf("Currently has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
-    fmt.Println("Sensor names:")
-    for name := range myNet.Sensors {
-        baseName := strings.Split(name, "-")[0]
-        if !tracker[baseName] {
-            fmt.Println(baseName)
-        }
-        tracker[baseName] = true
-    }
-    mode = Prompt("Add/modify the custom things? [y/n]  ", reader)
-    if mode == "y" {
-        fmt.Println("WARNING!  Sensors and outputs will not save properly!")
-        myNet.ClearIO() // is this needed
-        // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
-        // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
-        myNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences map[string]*Output) {
-            for _, node := range nodes {
-                node.Value = 1
-            }
-        })
-    }
-    myNet.PruneUnusedSensors()
-    fmt.Printf("Now has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
+//     rand.Seed(time.Now().UTC().UnixNano())
 
-    framesInput := Prompt("Enter number of frames, or leave blank to run until manually stopped:  ", reader)
-    frames, err := strconv.Atoi(framesInput)
-    if err != nil {
-        frames = 0
-    }
+//     var myNet *Network
+//     _, err := os.Stat(fmt.Sprintf("./state/%v_state.json", fileName))
+//     if fileName == "" || err != nil {
+//         NETWORK_SIZE := [3]int{12, 25, 25}
+//         myNet = MakeNetwork(NETWORK_SIZE, false)
+//         myNet.Connect()
+//         myNet.Mirror()
+//         myNet.ConnectHemispheres()
+//     } else {
+//         myNet = LoadState(fileName)
+//     }
+//     var mode string
+//     tracker := make(map[string]bool)
+//     fmt.Printf("Currently has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
+//     fmt.Println("Sensor names:")
+//     for name := range myNet.Sensors {
+//         baseName := strings.Split(name, "-")[0]
+//         if !tracker[baseName] {
+//             fmt.Println(baseName)
+//         }
+//         tracker[baseName] = true
+//     }
+//     mode = Prompt("Add/modify the custom things? [y/n]  ", reader)
+//     if mode == "y" {
+//         fmt.Println("WARNING!  Sensors and outputs will not save properly!")
+//         myNet.ClearIO() // is this needed
+//         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
+//         // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
+//         myNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences map[string]*Output) {
+//             for _, node := range nodes {
+//                 node.Value = 1
+//             }
+//         })
+//     }
+//     myNet.PruneUnusedSensors()
+//     fmt.Printf("Now has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
 
-    directory = Prompt("Enter directory to save frames and state to:  ", reader)
-    if directory == "" {
-        directory = "."
-    }
-    if directory[len(directory)-1] == '/' {
-        directory = directory[0:len(directory)-1]
-    }
+//     framesInput := Prompt("Enter number of frames, or leave blank to run until manually stopped:  ", reader)
+//     frames, err := strconv.Atoi(framesInput)
+//     if err != nil {
+//         frames = 0
+//     }
 
-    if frames == 0 {
-        myNet.AnimateUntilDone()
-    } else {
-        myNet.GenerateAnim(frames)
-    }
+//     directory = Prompt("Enter directory to save frames and state to:  ", reader)
+//     if directory == "" {
+//         directory = "."
+//     }
+//     if directory[len(directory)-1] == '/' {
+//         directory = directory[0:len(directory)-1]
+//     }
 
-    fmt.Print("\nSave state?  Enter a name if you wish to save the state:  ")
-    fileName, _ = reader.ReadString('\n')
-    fileName = strings.TrimSpace(fileName)
-    if fileName != "" {
-        myNet.SaveState(fileName)
-    }
-}
+//     if frames == 0 {
+//         myNet.AnimateUntilDone()
+//     } else {
+//         myNet.GenerateAnim(frames)
+//     }
+
+//     fmt.Print("\nSave state?  Enter a name if you wish to save the state:  ")
+//     fileName, _ = reader.ReadString('\n')
+//     fileName = strings.TrimSpace(fileName)
+//     if fileName != "" {
+//         myNet.SaveState(fileName)
+//     }
+// }
