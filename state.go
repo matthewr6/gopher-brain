@@ -333,7 +333,12 @@ func Test(orig, loaded *Network) bool {
             (len(oSensor.Influences) != len(lSensor.Influences))) {
             return false
         }
-        // todo - check node positions and influence names
+        for idx, oNode := range oSensor.Nodes {
+            lNode := lSensor.Nodes[idx]
+            if oNode.Id != lNode.Id {
+                return false
+            }
+        }
     }
     for outputName, oOutput := range orig.Outputs {
         lOutput, exists := loaded.Outputs[outputName]
@@ -344,7 +349,8 @@ func Test(orig, loaded *Network) bool {
             (oOutput.Value != lOutput.Value)) {
             return false
         }
-        // todo - check node positions and conninfo data
+        // todo - check node positions and conninfo data?
+        // how? it's a map from nodes to conninfo
     }
     // these still use reflect for now
     // compare sensors
