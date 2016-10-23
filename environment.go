@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "strings"
     "math/rand"
     "encoding/json"
 )
@@ -84,6 +85,23 @@ func (net *Network) UpdateSensor(name string, inputFunc func([]*Node, map[string
     a.In = inputFunc
     b.In = inputFunc
     return [2]*Sensor{a, b}
+}
+
+func (net *Network) PruneUnusedSensors() {
+    for name, sensor := range net.Sensors {
+        if sensor.In == nil {
+            net.RemoveOutputs(name)
+            delete(net.Sensors, name)
+        }
+    }
+}
+
+func (net *Network) RemoveOutputs(sensorName string) {
+    for outputName := range net.Outputs {
+        if strings.Contains(outputName, sensorName) {
+            delete(net.Outputs, outputName)
+        }
+    }
 }
 
 func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int, count int, otherSide bool) map[string]*Output {

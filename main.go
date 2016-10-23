@@ -37,7 +37,8 @@ func main() {
     }
     var mode string
     tracker := make(map[string]bool)
-    fmt.Println("Currently has the following sensors:")
+    fmt.Printf("Currently has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
+    fmt.Println("Sensor names:")
     for name := range myNet.Sensors {
         baseName := strings.Split(name, "-")[0]
         if !tracker[baseName] {
@@ -57,6 +58,8 @@ func main() {
             }
         })
     }
+    myNet.PruneUnusedSensors()
+    fmt.Printf("Now has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
 
     framesInput := Prompt("Enter number of frames, or leave blank to run until manually stopped:  ", reader)
     frames, err := strconv.Atoi(framesInput)

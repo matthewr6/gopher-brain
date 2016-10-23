@@ -126,6 +126,7 @@ func LoadState(name string) *Network {
     // WORKING
 
     // first, load outputs
+    // todo - load function in this as well?
     for _, importedOutput := range importedNet.Outputs {
         newOutput := &Output{
             Name: importedOutput.Name,
