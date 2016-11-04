@@ -386,14 +386,3 @@ func (net *Network) GenerateAnim(frames int) {
         net.Cycle()
     }
 }
-
-func (net *Network) AnimateUntilDone() {
-    os.Mkdir("frames", 755)
-    frame := 0
-    for running {
-        frameStr := strconv.Itoa(frame)
-        net.DumpJSON(frameStr)
-        net.Cycle()
-        frame++
-    }
-}
