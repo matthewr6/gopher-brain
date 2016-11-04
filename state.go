@@ -126,12 +126,22 @@ func LoadState(name string) *Network {
     // WORKING
 
     // first, load outputs
-    // todo - load function in this as well?
     for _, importedOutput := range importedNet.Outputs {
         newOutput := &Output{
             Name: importedOutput.Name,
             Nodes: make(map[*Node]*ConnInfo),
             Value: importedOutput.Value,
+            Out: func(nodes map[*Node]*ConnInfo) float64 {
+                var sum float64
+                for node, connInfo := range nodes {
+                    if connInfo.Excitatory {
+                        sum += float64(node.Value) * connInfo.Strength
+                    } else {
+                        sum -= float64(node.Value) * connInfo.Strength
+                    }
+                }
+                return sum
+            },
         }
         for id, info := range importedOutput.Nodes {
             pos := StrsToInts(strings.Split(id, "|"))
