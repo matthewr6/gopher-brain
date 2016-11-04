@@ -137,12 +137,12 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
         Influences: outputs,
         Center: center,
     }
-    // todo - determine correct coefficient
+    // todo - MAGIC # - determine correct coefficient
     stDev := float64(r)
     // plane is which dimension should stay the same - name the variable in a better way?
     if (plane != "") {
         if (plane == "x" || plane == "y" || plane == "z") {
-            // todo - also this coefficient
+            // todo - MAGIC # - also this coefficient
             stDev = float64(r * 2)
         }
         if (plane == "x") {
@@ -207,7 +207,7 @@ func (net *Network) CreateIndividualOutput(name string, r int, count int, plane 
         Name: name,
         Out: outputFunc,
     }
-    // todo - determine correct coefficient
+    // todo - MAGIC # - determine correct coefficient
     stDev := float64(r)
 
     // set up nodes
@@ -215,7 +215,7 @@ func (net *Network) CreateIndividualOutput(name string, r int, count int, plane 
     // plane is which dimension should stay the same - name the variable in a better way?
     if (plane != "") {
         if (plane == "x" || plane == "y" || plane == "z") {
-            // todo - also this coefficient
+            // todo - MAGIC # - also this coefficient
             stDev = float64(r * 2)
         }
         if (plane == "x") {

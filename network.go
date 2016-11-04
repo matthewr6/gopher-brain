@@ -63,7 +63,7 @@ func (n *Node) Update() {
         }
 
         // reassess connections here
-        // todo - calculate how much to increase/decrease connection strength by
+        // todo - MAGIC # - calculate how much to increase/decrease connection strength by
         // https://www.reddit.com/r/askscience/comments/1bb5br/what_physically_happens_when_neural_connections/
         if conn.HoldingVal == 0 {
             // the previous node *didn't* fire
@@ -73,7 +73,7 @@ func (n *Node) Update() {
             conn.To[n].Strength += 0.05
         }
 
-        // todo - thresholds
+        // todo - MAGIC # - thresholds
         if conn.To[n].Strength > 2.25 {
             // max strength?
             conn.To[n].Strength = 2.25
@@ -105,9 +105,10 @@ func (net *Network) AddConnections(node *Node) {
     center := node.OutgoingConnection.Center
     possibleExtensions := []*Node{}
     numPossible := rand.Intn(15 - 5) + 5 // 10 to 15
-    stDev := 3.0 // todo, what number?
+    // todo - MAGIC # - what number?
+    stDev := 3.0
     for i := 0; i < numPossible; i++ {
-        // todo - wrapper function for this since it's used so much
+        // todo - POSSIBLE - wrapper function for this since it's used so much
         potX := int(rand.NormFloat64() * stDev) + center[0]
         potY := int(rand.NormFloat64() * stDev) + center[1]
         potZ := int(rand.NormFloat64() * stDev) + center[2]
@@ -123,6 +124,7 @@ func (net *Network) AddConnections(node *Node) {
         potCenter := [3]int{potX, potY, potZ}
         possibleExtensions = append(possibleExtensions, net.FindNode(potCenter))
     }
+    // todo - POSSIBLE
     // could merge this into the above loop...
     for _, potNode := range possibleExtensions {
         _, exists := node.OutgoingConnection.To[potNode]
@@ -165,9 +167,6 @@ func (net *Network) Cycle() {
     // first, set all the connections based on their nodes
 
     net.ForEachNode(func(node *Node, pos [3]int) {
-        // todo - search for nodes to connect to?
-        // what should this be on, the node or the connection?
-        // also make sure the order is good
         if node.Value != 0 {
             net.AddConnections(node)
         }
@@ -184,7 +183,6 @@ func (net *Network) Cycle() {
 
 
     // also update nodes that receive sensory information
-    // is this the proper order?
     for _, output := range net.Outputs {
         output.Value = output.Out(output.Nodes)
     }
@@ -192,12 +190,6 @@ func (net *Network) Cycle() {
     for _, sensor := range net.Sensors {
         sensor.In(sensor.Nodes, sensor.Influences)
     }
-
-    // then clear the connections
-    // do I still need this? doubtful
-    // for _, node := range net.Nodes {
-    //     node.OutgoingConnection.HoldingVal = 0
-    // }
 }
 
 func (n Node) String() string {
@@ -231,7 +223,8 @@ func (net *Network) ConnectHemispheres() {
     net.ForEachNode(func(node *Node, pos [3]int) {
         centralConnNode := net.FindNode(node.OutgoingConnection.Center)
         // select the X connections here
-        numAxonTerminals := rand.Intn(3) + 1 // TODO - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
+        // TODO - MAGIC # - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
+        numAxonTerminals := rand.Intn(3) + 1
         nodesToConnect := []*Node{
             centralConnNode,
         }
