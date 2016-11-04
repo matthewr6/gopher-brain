@@ -123,8 +123,6 @@ func LoadState(name string) *Network {
         node.OutgoingConnection = newConn
     })
 
-    // WORKING
-
     // first, load outputs
     for _, importedOutput := range importedNet.Outputs {
         newOutput := &Output{
@@ -171,8 +169,6 @@ func LoadState(name string) *Network {
         }
         net.Sensors[importedSensor.Name] = newSensor
     }
-
-    // END WORKING
 
     return net
 }
