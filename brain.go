@@ -57,7 +57,6 @@ func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor) {
     mode = Prompt("Add/modify the custom things? [y/n]  ", reader)
     if mode == "y" {
         fmt.Println("WARNING!  Sensors and outputs will not save properly!")
-        myNet.ClearIO() // is this needed
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
         // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
         for _, constructor := range CONSTRUCTORS {
