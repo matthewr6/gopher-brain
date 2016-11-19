@@ -17,7 +17,17 @@ import (
 
 var directory = "."
 
-func Brain(NETWORK_SIZE [3]int) {
+type SensorConstructor struct {
+    Name string
+    R int
+    Count int
+    Plane string
+    Center [3]int
+    OutputCount int
+    InputFunc func([]*Node, map[string]*Output)
+}
+
+func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor) {
     reader := bufio.NewReader(os.Stdin)
     fileName := Prompt("Enter state name to load state, or leave blank to create a new network:  ", reader)
 
@@ -50,11 +60,9 @@ func Brain(NETWORK_SIZE [3]int) {
         myNet.ClearIO() // is this needed
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
         // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
-        myNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences map[string]*Output) {
-            for _, node := range nodes {
-                node.Value = 1
-            }
-        })
+        for _, constructor := range CONSTRUCTORS {
+            myNet.CreateSensor(constructor.Name, constructor.R, constructor.Count, constructor.Plane, constructor.Center, constructor.OutputCount, constructor.InputFunc)
+        }
     }
     myNet.PruneUnusedSensors()
     fmt.Printf("Now has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
