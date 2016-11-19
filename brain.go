@@ -1,4 +1,4 @@
-package main
+package brain
 
 import (
     "os"
@@ -15,10 +15,19 @@ import (
     * is "value at address"
 */
 
-var running = true
 var directory = "."
 
-func main() {
+type SensorConstructor struct {
+    Name string
+    R int
+    Count int
+    Plane string
+    Center [3]int
+    OutputCount int
+    InputFunc func([]*Node, map[string]*Output)
+}
+
+func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor) {
     reader := bufio.NewReader(os.Stdin)
     fileName := Prompt("Enter state name to load state, or leave blank to create a new network:  ", reader)
 
@@ -27,7 +36,6 @@ func main() {
     var myNet *Network
     _, err := os.Stat(fmt.Sprintf("./state/%v_state.json", fileName))
     if fileName == "" || err != nil {
-        NETWORK_SIZE := [3]int{12, 25, 25}
         myNet = MakeNetwork(NETWORK_SIZE, false)
         myNet.Connect()
         myNet.Mirror()
@@ -49,14 +57,11 @@ func main() {
     mode = Prompt("Add/modify the custom things? [y/n]  ", reader)
     if mode == "y" {
         fmt.Println("WARNING!  Sensors and outputs will not save properly!")
-        myNet.ClearIO() // is this needed
         // let's pretend the front x/z plane (y = 1) is "front" with left being x = 25
         // maybe you should only create sensors, and specify # of corresponding outputs - and then the createSensor generates the outputs automatically
-        myNet.CreateSensor("eye", 1, 9, "y", [3]int{8, 0, 12}, 2, func(nodes []*Node, influences map[string]*Output) {
-            for _, node := range nodes {
-                node.Value = 1
-            }
-        })
+        for _, constructor := range CONSTRUCTORS {
+            myNet.CreateSensor(constructor.Name, constructor.R, constructor.Count, constructor.Plane, constructor.Center, constructor.OutputCount, constructor.InputFunc)
+        }
     }
     myNet.PruneUnusedSensors()
     fmt.Printf("Now has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
@@ -74,12 +79,8 @@ func main() {
     if directory[len(directory)-1] == '/' {
         directory = directory[0:len(directory)-1]
     }
-
-    if frames == 0 {
-        myNet.AnimateUntilDone()
-    } else {
-        myNet.GenerateAnim(frames)
-    }
+    
+    myNet.GenerateAnim(frames)
 
     fmt.Print("\nSave state?  Enter a name if you wish to save the state:  ")
     fileName, _ = reader.ReadString('\n')

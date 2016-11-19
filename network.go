@@ -1,4 +1,4 @@
-package main
+package brain
 
 import (
     "fmt"
@@ -384,16 +384,5 @@ func (net *Network) GenerateAnim(frames int) {
     for frame := 0; frame < frames; frame++ {
         net.DumpJSON(strconv.Itoa(frame))
         net.Cycle()
-    }
-}
-
-func (net *Network) AnimateUntilDone() {
-    os.Mkdir("frames", 755)
-    frame := 0
-    for running {
-        frameStr := strconv.Itoa(frame)
-        net.DumpJSON(frameStr)
-        net.Cycle()
-        frame++
     }
 }
