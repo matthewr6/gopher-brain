@@ -1,0 +1,4 @@
+test:
+  override:
+    - rm -r example/*
+    - go test -bench .

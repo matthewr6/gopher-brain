@@ -1,7 +1,7 @@
 package main
 
 // import "github.com/firedrake969/gopher-brain"
-import "github.com/firedrake969/gopher-brain"
+import ".."
 
 func main() {
     brain.Brain([3]int{12, 25, 25}, []brain.SensorConstructor{
