@@ -29,6 +29,7 @@ type SensorConstructor struct {
 
 func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor) {
     reader := bufio.NewReader(os.Stdin)
+    // todo - directory name to load state from
     fileName := Prompt("Enter state name to load state, or leave blank to create a new network:  ", reader)
 
     rand.Seed(time.Now().UTC().UnixNano())
