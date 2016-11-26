@@ -9,17 +9,20 @@
 
 ### How to run
 
-- `cd` into the root of the project
+- `cd` into `example/`
 - `go build`
-- `gopher-brain`
+- `./example`
 - Enter a string if you'd like to load a preexisting state, or leave the prompt blank if you want to create a fresh state.
 - Hit space whenever you'd like to end the simulation
 - Enter a string if you'd like to save the current state, or leave the prompt blank if you don't want to save the current state.
+- `cd ..`
 - `python display_net.py X`
 - `cd` into the `frames` directory
 - `ffmpeg -framerate Y -i net_%01d.png anim.gif`, Y being fps
+- to convert to a video, `ffmpeg -f gif -i anim.gif anim.mp4`
+- to make a video directly, `ffmpeg -framerate Y -i net_%01d.png anim.mp4`
 
-Modify `main.go` to create sensors for the state of the net/brain/whatever.
+Modify `example/.go` to create sensors for the state of the net/brain/whatever.
 
 ### Cross-compiling
 

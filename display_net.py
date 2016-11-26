@@ -55,5 +55,5 @@ for num in range(0, int(sys.argv[1])):
     ax.set_zlabel('Z')
 
 
-    plt.savefig('frames/net_{num}.png'.format(num=num))
+    plt.savefig('{path}/frames/net_{num}.png'.format(path=path, num=num))
     plt.close()
