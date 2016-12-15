@@ -45,7 +45,7 @@ func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor) *Network {
     }
     tracker := make(map[string]bool)
     fmt.Printf("Currently has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
-    if len(myNet.Sensor) > 0 {
+    if len(myNet.Sensors) > 0 {
         fmt.Println("Sensor names:")
         for name := range myNet.Sensors {
             baseName := strings.Split(name, "-")[0]
