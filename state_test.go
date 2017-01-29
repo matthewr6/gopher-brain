@@ -23,8 +23,8 @@ func TestState(t *testing.T) {
         testingNet.Cycle()
     }
 
-    testingNet.SaveState("test")
-    loadedNet := LoadState("test")
+    testingNet.SaveState("test", ".")
+    loadedNet := LoadState("test", ".")
     fmt.Println("Finished loading state.")
     same := Test(testingNet, loadedNet)
     if !same {

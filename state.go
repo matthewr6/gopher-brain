@@ -72,7 +72,7 @@ func (d DisplaySensor) String() string {
     return string(jsonRep)
 }
 
-func LoadState(name string) *Network {
+func LoadState(name string, directory string) *Network {
     fmt.Println(fmt.Sprintf("Loading state \"%v\"...", name))
     datafile, err := os.Open(fmt.Sprintf("%v/state/%v_state.json", directory, name))
     if err != nil {
@@ -173,7 +173,7 @@ func LoadState(name string) *Network {
     return net
 }
 
-func (net Network) SaveState(name string) {
+func (net Network) SaveState(name string, directory string) {
     fmt.Println(fmt.Sprintf("Saving state \"%v\"...", name))
     os.Mkdir("state", 755)
     dispNet := DisplayNetwork{

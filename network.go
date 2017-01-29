@@ -336,7 +336,7 @@ func (net Network) String() string {
     return string(jsonRep)
 }
 
-func (net Network) DumpJSON(name string) {
+func (net Network) DumpJSON(name string, directory string) {
     f, _ := os.Create(fmt.Sprintf("%v/frames/net_%v.json", directory, name))
     f.WriteString(net.String())
     f.Close()
@@ -379,10 +379,10 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
     }
 }
 
-func (net *Network) GenerateAnim(frames int) {
+func (net *Network) GenerateAnim(frames int, directory string) {
     os.Mkdir("frames", 755)
     for frame := 0; frame < frames; frame++ {
-        net.DumpJSON(strconv.Itoa(frame))
+        net.DumpJSON(strconv.Itoa(frame), directory)
         net.Cycle()
     }
 }
