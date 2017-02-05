@@ -1,8 +1,8 @@
 package main
 
-// import "github.com/firedrake969/gopher-brain"
+// import ".."
 import (
-    ".."
+    "github.com/firedrake969/gopher-brain"
 
     "os"
     "fmt"
