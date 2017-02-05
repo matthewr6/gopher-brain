@@ -11,6 +11,8 @@ import (
     "strconv"
 )
 
+var directory = ""
+
 func main() {
     reader := bufio.NewReader(os.Stdin)
 
@@ -44,12 +46,12 @@ func main() {
         directory = directory[0:len(directory)-1]
     }
     
-    myNet.GenerateAnim(frames)
+    myNet.GenerateAnim(frames, directory)
 
     fmt.Print("\nSave state?  Enter a name if you wish to save the state:  ")
     fileName, _ := reader.ReadString('\n')
     fileName = strings.TrimSpace(fileName)
     if fileName != "" {
-        myNet.SaveState(fileName)
+        myNet.SaveState(fileName, directory)
     }
 }
