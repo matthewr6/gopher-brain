@@ -63,8 +63,7 @@ func (n *Node) Update() {
         }
 
         // reassess connections here
-        // todo - MAGIC # - calculate how much to increase/decrease connection strength by
-        // https://www.reddit.com/r/askscience/comments/1bb5br/what_physically_happens_when_neural_connections/
+        // magic - calculate how much to increase/decrease connection strength by
         if conn.HoldingVal == 0 {
             // the previous node *didn't* fire
             conn.To[n].Strength -= 0.05
@@ -73,22 +72,16 @@ func (n *Node) Update() {
             conn.To[n].Strength += 0.05
         }
 
-        // todo - MAGIC # - thresholds
         if conn.To[n].Strength > 2.25 {
-            // max strength?
             conn.To[n].Strength = 2.25
         }
         if conn.To[n].Strength < 0.25 {
-            // different threshold?
             delete(conn.To, n)
             delete(n.IncomingConnections, from)
         }
     }
 
-    if sum >= 1.0 { // do 1 for threshold?
-        //things
-        //accept the value
-        //or else just stay at 0
+    if sum >= 1.0 { // magic
         n.Value = 1
     }
 
@@ -104,28 +97,27 @@ func RandFloat(min, max float64) float64 {
 func (net *Network) AddConnections(node *Node) {
     center := node.OutgoingConnection.Center
     possibleExtensions := []*Node{}
-    numPossible := rand.Intn(15 - 5) + 5 // 10 to 15
-    // todo - MAGIC # - what number?
-    stDev := 3.0
+    numPossible := rand.Intn(15 - 5) + 5 // magic - 10 to 15
+    stDev := 3.0 // magic
     for i := 0; i < numPossible; i++ {
-        // todo - POSSIBLE - wrapper function for this since it's used so much
-        potX := int(rand.NormFloat64() * stDev) + center[0]
-        potY := int(rand.NormFloat64() * stDev) + center[1]
-        potZ := int(rand.NormFloat64() * stDev) + center[2]
-        for potX < 0 || potX >= (net.Dimensions[0] * 2) {
-            potX = int(rand.NormFloat64() * stDev) + center[0]
+        potCenter := node.Position
+        for potCenter == node.Position {
+            potX := int(rand.NormFloat64() * stDev) + center[0]
+            potY := int(rand.NormFloat64() * stDev) + center[1]
+            potZ := int(rand.NormFloat64() * stDev) + center[2]
+            for potX < 0 || potX >= (net.Dimensions[0] * 2) {
+                potX = int(rand.NormFloat64() * stDev) + center[0]
+            }
+            for potY < 0 || potY >= net.Dimensions[1] {
+                potY = int(rand.NormFloat64() * stDev) + center[1]
+            }
+            for potZ < 0 || potZ >= net.Dimensions[2] {
+                potZ = int(rand.NormFloat64() * stDev) + center[2]
+            }
+            potCenter = [3]int{potX, potY, potZ}
         }
-        for potY < 0 || potY >= net.Dimensions[1] {
-            potY = int(rand.NormFloat64() * stDev) + center[1]
-        }
-        for potZ < 0 || potZ >= net.Dimensions[2] {
-            potZ = int(rand.NormFloat64() * stDev) + center[2]
-        }
-        potCenter := [3]int{potX, potY, potZ}
         possibleExtensions = append(possibleExtensions, net.FindNode(potCenter))
     }
-    // todo - POSSIBLE
-    // could merge this into the above loop...
     for _, potNode := range possibleExtensions {
         _, exists := node.OutgoingConnection.To[potNode]
         if potNode.Value != 0 && !exists {
@@ -192,6 +184,12 @@ func (net *Network) Cycle() {
     }
 }
 
+////////////////////////////////////////////////////////////////////
+//                                                                //
+//                  Mostly generation stuff past here             //
+//                                                                //
+////////////////////////////////////////////////////////////////////
+
 func (n Node) String() string {
     jsonRep, _ := json.MarshalIndent(n, "", "    ")
     return string(jsonRep)
@@ -223,7 +221,7 @@ func (net *Network) ConnectHemispheres() {
     net.ForEachNode(func(node *Node, pos [3]int) {
         centralConnNode := net.FindNode(node.OutgoingConnection.Center)
         // select the X connections here
-        // TODO - MAGIC # - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
+        // magic - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
         numAxonTerminals := rand.Intn(3) + 1
         nodesToConnect := []*Node{
             centralConnNode,
