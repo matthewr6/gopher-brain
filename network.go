@@ -54,24 +54,33 @@ func (n *Node) Update() {
     // base sum on excitatory/inhibiting
     var sum float64
 
+    // first calculate sum
     for from, conn := range n.IncomingConnections {
-        // let's just wrap it in this for now...
         if conn.To[n].Excitatory {
             sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
         } else {
             sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
         }
+    }
 
-        // reassess connections here
-        // magic - calculate how much to increase/decrease connection strength by
-        if conn.HoldingVal == 0 {
-            // the previous node *didn't* fire
-            conn.To[n].Strength -= 0.05
+    if sum >= 1.0 { // magic
+        n.Value = 1
+    }
+
+    // then, based on whether it fired, prune/strengthen connections
+    // magic numbers.
+    for from, conn := range n.IncomingConnections {
+        // adjusting
+        if conn.HoldingVal == n.Value { // nodes worked in conjunction...
+            if n.Value == 1 { // and both fired (if neither fired, don't adjust connection)
+                conn.To[n].Strength += 0.05
+            }
         } else {
-            // the previous node *did* fire
-            conn.To[n].Strength += 0.05
+            // the nodes didn't fire together
+            conn.To[n].Strength -= 0.05
         }
 
+        // pruning
         if conn.To[n].Strength > 2.25 {
             conn.To[n].Strength = 2.25
         }
@@ -79,10 +88,6 @@ func (n *Node) Update() {
             delete(conn.To, n)
             delete(n.IncomingConnections, from)
         }
-    }
-
-    if sum >= 1.0 { // magic
-        n.Value = 1
     }
 
 }
@@ -250,7 +255,7 @@ func (net *Network) ConnectHemispheres() {
                 excitatory = true
             }
             toNodes[node] = &ConnInfo{
-                Strength: RandFloat(0.75, 1.75),
+                Strength: RandFloat(0.75, 1.75), // magic numbers
                 Excitatory: excitatory,
             }
         }
