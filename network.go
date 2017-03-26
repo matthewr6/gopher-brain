@@ -54,24 +54,37 @@ func (n *Node) Update() {
     // base sum on excitatory/inhibiting
     var sum float64
 
-    for from, conn := range n.IncomingConnections {
-        // let's just wrap it in this for now...
+    // first calculate sum
+    for _, conn := range n.IncomingConnections {
         if conn.To[n].Excitatory {
             sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
         } else {
             sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
         }
+    }
 
-        // reassess connections here
-        // magic - calculate how much to increase/decrease connection strength by
-        if conn.HoldingVal == 0 {
-            // the previous node *didn't* fire
-            conn.To[n].Strength -= 0.05
+    if sum >= 1.0 { // magic
+        n.Value = 1
+    }
+
+    // then, based on whether it fired, prune/strengthen connections
+    // magic numbers.
+    // additive or multiplicative?
+    for from, conn := range n.IncomingConnections {
+        // adjusting
+        if conn.HoldingVal == n.Value { // nodes worked in conjunction...
+            if n.Value == 1 { // and both fired (if neither fired, decay a little bit)
+                conn.To[n].Strength += 0.05
+            } else {
+                // decay a little bit
+                conn.To[n].Strength -= 0.02
+            }
         } else {
-            // the previous node *did* fire
-            conn.To[n].Strength += 0.05
+            // the nodes didn't fire together
+            conn.To[n].Strength -= 0.05
         }
 
+        // pruning
         if conn.To[n].Strength > 2.25 {
             conn.To[n].Strength = 2.25
         }
@@ -79,10 +92,6 @@ func (n *Node) Update() {
             delete(conn.To, n)
             delete(n.IncomingConnections, from)
         }
-    }
-
-    if sum >= 1.0 { // magic
-        n.Value = 1
     }
 
 }
@@ -122,11 +131,12 @@ func (net *Network) AddConnections(node *Node) {
         _, exists := node.OutgoingConnection.To[potNode]
         if potNode.Value != 0 && !exists {
             excitatory := false
-            if rand.Intn(2) != 0 {
+            if rand.Intn(5) != 0 {
+                // https://www.quora.com/Are-there-more-excitatory-neurons-or-inhibitory-neurons-in-the-brain-Why
                 excitatory = true
             }
             node.OutgoingConnection.To[potNode] = &ConnInfo{
-                Strength: RandFloat(0.50, 1.50),
+                Strength: RandFloat(0.25, 0.75),
                 Excitatory: excitatory,
             }
             potNode.IncomingConnections[node] = node.OutgoingConnection
@@ -221,12 +231,12 @@ func (net *Network) ConnectHemispheres() {
     net.ForEachNode(func(node *Node, pos [3]int) {
         centralConnNode := net.FindNode(node.OutgoingConnection.Center)
         // select the X connections here
-        // magic - HOW MANY POSSIBLE "TO" NEURONS - 3 max seems good
+        // magic - HOW MANY POSSIBLE "TO" NEURONS
         numAxonTerminals := rand.Intn(3) + 1
         nodesToConnect := []*Node{
             centralConnNode,
         }
-        stDev := 1.5
+        stDev := 1.5 // magic - maybe be a factor of the Connect() stDev?
         for i := 0; i < numAxonTerminals; i++ {
             potPos := [3]int{-1, -1, -1}
             for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0]*2 || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
@@ -246,11 +256,12 @@ func (net *Network) ConnectHemispheres() {
         toNodes := make(map[*Node]*ConnInfo)
         for _, node := range nodesToConnect {
             // should this have a higher probability of being excitatory?
-            if rand.Intn(2) != 0 {
+            if rand.Intn(5) != 0 {
+                // https://www.quora.com/Are-there-more-excitatory-neurons-or-inhibitory-neurons-in-the-brain-Why
                 excitatory = true
             }
             toNodes[node] = &ConnInfo{
-                Strength: RandFloat(0.75, 1.75),
+                Strength: RandFloat(0.25, 0.75), // magic numbers
                 Excitatory: excitatory,
             }
         }
@@ -278,7 +289,6 @@ func (net *Network) Mirror() {
             }
             rightPlane = append(rightPlane, aRightRow)
         }
-        // leftHemisphere = append(leftHemisphere, net.RightHemisphere[i])
         leftHemisphere = append(leftHemisphere, rightPlane)
     }
     net.LeftHemisphere = leftHemisphere
@@ -304,7 +314,7 @@ func (net *Network) Mirror() {
 func (net *Network) Connect() {
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
         // get the closest nodes and select one randomly to connect to
-        stDev := 3.0 // what should it be?
+        stDev := 4.0 // magic
         center := node.Position
         for center == node.Position {
             potX := int(rand.NormFloat64() * stDev) + node.Position[0]
