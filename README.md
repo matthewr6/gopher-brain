@@ -5,6 +5,28 @@ see page 2 of https://pdfs.semanticscholar.org/a4af/fbdf337df0aef29f68364bf9f463
 
 no phase for neuron growth, probably, but phases for higher synaptic creation/deletions
 
+neuron death just means it doesn't output to anything - `suggesting
+that a result of the link pruning is a reduction in the
+number of effective neurons in the system.`
+
+```
+1.) Rapid growth of the number of neurons before birth.
+2.) Rapid growth of the number of axons before birth.
+3.) Slow synaptogenesis which starts before birth
+and continues until puberty.
+4.) Very rapid axon loss starting at birth.
+5.) Slow apoptose of neurons until puberty.
+6.) Slow synapse elimination starting in the
+middle of the critical phases and continuing
+through the remaining life
+
+Two essential principles of this algorithm are *timing* and
+*initial overproduction* and *subsequent elimination*.
+```
+that's three but whatever.
+
+synapse elimination --> decline in memory/skills?
+
 # stuff that's more important
 ![CircleCI status](https://circleci.com/gh/Firedrake969/gopher-brain.svg?style=shield)
 
