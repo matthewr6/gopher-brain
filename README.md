@@ -1,3 +1,11 @@
+# stuff part 1
+
+note - "phases" for growth
+see page 2 of https://pdfs.semanticscholar.org/a4af/fbdf337df0aef29f68364bf9f46338576eaa.pdf
+
+no phase for neuron growth, probably, but phases for higher synaptic creation/deletions
+
+# stuff that's more important
 ![CircleCI status](https://circleci.com/gh/Firedrake969/gopher-brain.svg?style=shield)
 
 [![Join the chat at https://gitter.im/Firedrake969/gopher-brain](https://badges.gitter.im/Firedrake969/gopher-brain.svg)](https://gitter.im/Firedrake969/gopher-brain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

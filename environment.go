@@ -275,7 +275,7 @@ func (net *Network) CreateIndividualOutput(name string, r int, count int, plane 
     nodeMapping := make(map[*Node]*ConnInfo)
     var excitatory bool
     for _, node := range nodes {
-        if rand.Intn(2) != 0 {
+        if rand.Intn(5) != 0 {
             excitatory = true
         }
         nodeMapping[node] = &ConnInfo{
