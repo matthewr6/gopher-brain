@@ -24,9 +24,11 @@
 
 \newpage
 
-\section*{Abstract}
+\section*{Abstract} \label{abstract}
 
-\section{Introduction}
+Yet to be written.
+
+\section{Introduction} \label{intro}
 
 From a computational standpoint, each neuron in the brain can be described as an individual agent \cite{agentbased}.  Thus, we can potentially model a neural system around agent-based modeling.  Additionally, it has been established that we can use a simple form of learning \cite{agentbased} to assist in this model.  However, this only answers the question of continual learning.  From a biological standpoint, we can see that multiple organisms have a "critical phase" for learning \cite{neurodev} and have distinct rates of synaptogenesis and synaptic pruning throughout their lifetimes.  Additionally, organisms may combine various environmental factors into their decision making - "senses".  Here, we explore the interplay between multiple inputs and synaptic modification.
 
@@ -36,11 +38,11 @@ Throughout this paper, we refer to both "neurons" and "nodes", defined as the sa
 
 \newpage
 
-\section{Simulation}
+\section{Simulation} \label{simulation}
 
 First, we developed an appropriate simulation using a custom agent-based model, which is described here.  Once that was completed, we translated that into its equivalent mathematical models, discussed in Section 3.
 
-\subsection{Setup}
+\subsection{Setup} \label{setup}
 
 We begin by generating a three-dimensional grid of nodes given a set $\left\{x_0, y_0, z_0\right\}$.  Connections are generated randomly, with each node creating an axon with a center of some distance away from the node (see section 3).  This procedure creates one hemisphere.
 
@@ -48,23 +50,23 @@ To create the other hemisphere, we then create a grid using this set's dimension
 
 To create synapses, we repeat the process we devised in generating axon centers (again, see section 3).  However, we choose a smaller standard deviation.  We create synapses on the axons of all nodes in this way.  Due to the symmetric axon centers but asymmetric synapses, the two halves of the network are then similar, but not the same.
 
-\subsection{Firing cycle}
+\subsection{Firing cycle} \label{cycle}
 
 During each cycle, two primary events take place.  First, nodes have the potential to generate new synapses around their axon centers if both the originator node and the potential node to connect to both have fired on the previous cycle.  Once the nodes have created their new synapses (if any), each node runs a simple algorithm to determine whether it should fire.  Once it fires or not, it then analyzes each of its outgoing synapses, adjusting the weights based on the combination of firing neurons.  This process is highly similar to Hebbian learning.  However, there are multiple major differences, primarily regarding connections (described in the next section).
 
-\subsection{Connections}
+\subsection{Connections} \label{simconnections}
 
 As alluded to previously, one node always has exactly one axon.  However, one axon may have many synapses, and those synapses then each connect to exactly one other node.  Nodes may not connect to themselves.  Axons also may move when generating new synapses to be in the center of the nodes they connect to.
 
 These connection details are where this model differs from a standard Hebbian learning model.  First, when one node fires, it may influence muliple nodes at once, all with different signal strengths, and those individual synapses are modified (but still connected to those individual nodes).  Second, synapses may be destroyed if their strength is too weak, or created at random between two nodes that happened to fire together.  Third, the generation of synapses and axons is spatial, so a given node will tend to connect with nodes that are close to itself.
 
-\subsection{Sensors and Outputs}
+\subsection{Sensors and Outputs} \label{simio}
 
 We call any external input to the network a "sensor".  To generate a sensor, we pick a center and create a probability sphere in which affected nodes may be located, much like axon centers and synapses are generated.  We expect some outside program to do the input processing, as it's not up to the network what happens with its outputs.  Output neuron clusters are generated in the same way, and for now, just have their individual values to the sum of their neurons.  However, each neuron does have a separate synapse on the axon specifically for the output(s) it's tied to, so the output neurons do affect the output value with different strengths.
 
 \newpage
 
-\section{Formalization and Abstraction}
+\section{Formalization and Abstraction} \label{formal}
 
 A partial definition of our developed system has been designed within the program as a matrix of arrays
 
@@ -91,7 +93,7 @@ Where $n_n$ is the $n^{th}$ node and $w_{ij}$ is the weight of the connection fr
 
 Within our simulation, each node stores its value and its axon, and each axon in turn stores an array of nodes it's connected to.  Due to this, we could in theory generate a complete adjacency matrix; however, at the scale we work at (often tens of thousands of nodes, caused by the three dimensions), this is impractical.
 
-\subsection{Axons and Synapses}
+\subsection{Axons and Synapses} \label{connections}
 
 To generalize, we may create a three-dimensional "probability sphere" with a normal Gaussian distribution around the center as follows
 $$\left\{\mathcal{N}(center_x, \sigma^{2}), \mathcal{N}(center_y, \sigma^{2}), \mathcal{N}(center_z, \sigma^{2})\right\}$$
@@ -99,7 +101,7 @@ We define $\sigma_{axon\_distribution} > \sigma_{synapse\_distribution}$ so that
 
 Any time a new synapse is created, we update the axon center to reflect the addition of the synapse by setting the center to be the average of the centers of the nodes it connects to.  Generally, $c_i = \frac{1}{p}\sum c_{ki}$ where $c_i$ is the $i^{th}$ component of the center point for any given dimensionality and $c_{ki}$ is the $i^{th}$ component of the $k^{th}$ node's center.
 
-\subsection{Neurons}
+\subsection{Neurons} \label{neurons}
 
 We define the sum of a neuron to be
 $$n_{nv} \propto \sum (n_{ie} * n_{iv} * n_{inw})$$
@@ -108,7 +110,7 @@ Nodes either fire as 1 or 0, and we define a node as "firing" as soon as $n_{nv}
 
 Once we determine which nodes have fired, we can then modify connections based on the firing status of various nodes.  Our devised formula for this is
 $$
-\Delta w_ij =
+\Delta w_{ij} =
 \begin{cases}
 g, n_i = n_j = 1\\
 -l, n_i \neq n_j\\
@@ -120,7 +122,7 @@ Where $g$ is the growth factor or function, $l$ is the loss factor or function, 
 
 Additionally, we choose to have endpoints such that $w_{ij} \in [c_0, c_1]$ so that no single connection becomes overly strong or weak.  Because $c_0$ is defined as the minimum strength, we remove any connections $w_{ij} < c_0$.
 
-\subsection{Sensors and Outputs}
+\subsection{Sensors and Outputs} \label{formalio}
 
 Much like neuron sums, we can define the sum of a given output $o$ to be
 
@@ -139,8 +141,7 @@ where $o_s$ is the final output value,  $n_{iv}$ is the value of the $i^{th}$ ne
         \node[main node] (n0) [above left of=output] {$n_0$};
         \node[main node] (n1) [left of=output] {$n_1$};
         \node[main node] (n2) [below left of=output] {$n_2$};
-        \begin{scope}[>={Stealth[black]},
-                    every node/.style={fill=white,circle}]
+        \begin{scope}[>={Stealth[black]}]
             \path [->] (n0) edge node {$w_{0}$} (output);
             \path [->] (n1) edge node {$w_{1}$} (output);
             \path [->] (n2) edge node {$w_{2}$} (output);
@@ -151,7 +152,25 @@ where $o_s$ is the final output value,  $n_{iv}$ is the value of the $i^{th}$ ne
 
 In our model, outputs are generated the same way synapse clusters are.  We pick a center and pick $n$ nodes around the center based on a three-dimensional Gaussian distribution with standard deviation $\sigma_o$.
 
-Sensors are
+Sensors allow us to define any function that affect the neurons that are part of the given sensors, defining $n_{iv} = s(n_i)$ where $n_i$ is the $i$th node and $n_{iv}$ is the $i$th node's value.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+                        thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+        \node[main node] (sensor) {$s$};
+        \node[main node] (n0) [above right of=output] {$n_0$};
+        \node[main node] (n1) [right of=output] {$n_1$};
+        \node[main node] (n2) [below right of=output] {$n_2$};
+        \begin{scope}[>={Stealth[black]}]
+            \path [->] (sensor) edge node {$s(n_0)$} (n0);
+            \path [->] (sensor) edge node {$s(n_1)$} (n1);
+            \path [->] (sensor) edge node {$s(n_2)$} (n2);
+        \end{scope}
+    \end{tikzpicture}
+    \caption{Example Sensor} \label{fig:Sensor}
+\end{figure}
 
 \begin{figure}[H]
     \centering
@@ -186,19 +205,23 @@ Overall, we may consider the relationship between outputs $o$, inputs $i$, the e
 
 \newpage
 
-\section{Discussion}
+\section{Results} \label{results}
 
-\subsection{Symmetry}
+As many of our networks had at least 8000 nodes, and many runs generated at least 900 frames, it is impractical to share all node values and output values throughout every frame from every experimental run.  However, in sections \ref{outputvals} and \ref{graphs}, we provide graphs of output values over time.  Additionally, the source of our simulation is available to inspect and build at \url{https://github.com/firedrake969/gopher-brain} (with a web interface available at \url{https://github.com/firedrake969/brain-socket}).  Please note that all graphs in this section are displayed in a larger format in section \ref{graphs}.
+
+\section{Discussion} \label{discussion}
+
+\subsection{Symmetry} \label{symmetry}
 
 We acknowledge that hemispheres are not symmetric \cite{hemisphereasymmetry}; however, newer research has discovered that the asymmetry in organic brains may be due to different growth rates \cite{hemispheredev} and hypothesized that more bilateral pathways may be advantageous \cite{recallasymmetry}.  Due to this newer research, we believe that our model is reasonably accurate with regards to symmetry.  Specifically, only inputs, outputs, and axon centers are symmetric, and axon centers change over time as new synapses are formed or old synapses are pruned, which eventually causes the hemispheres to lose their starting symmetry.
 
-\subsection{Difference from RNNs}
+\subsection{Difference from RNNs} \label{rnndiff}
 
 As alluded to in our introduction, we believe this network to be unique from Recurrent Neural Networks (RNNs).  In organic brains, outputs (primarily muscle motion) are essentially "processed" by the outside world, and fed back into the brain in the form of senses.  We can describe these multiple senses as multiple inputs in our model, with the key difference from RNNs being the variety of combinations of both inputs and outputs.  Then, we can define inputs, not necessarily distinct, arbitrarily, without being bounded by a certain input layer or a certain output layer.
 
 Previous research has explored multidimensional RNNs \cite{dimensionalrnn} (as opposed to traditional, one-dimensional RNNs).  However, the problem at hand was that one-dimensional RNNs require one-dimensional inputs, while multidimensional RNNs may take multidimensional inputs.  But, it is known that humans receive two-dimensional images on their retinas and, from that image (generally), are able to produce three-dimensional images, signifying a automatic dimensional transformation.
 
-\subsection{Memory and Signal Looping}
+\subsection{Memory and Signal Looping} \label{looping}
 
 \begin{figure}[H]
     \centering
@@ -214,8 +237,7 @@ Previous research has explored multidimensional RNNs \cite{dimensionalrnn} (as o
         \node[main node] (inputtwo) [below left of=left] {$i_1$};
         \node[main node] (output) [right of=right] {$o$};
 
-        \begin{scope}[>={Stealth[black]},
-                    every node/.style={fill=white,circle}]
+        \begin{scope}[>={Stealth[black]}]
             \path [->] (left) edge node {$w_{ab}$} (top);
             \path [->] (left) edge node {$w_{ac}$} (bottom);
             \path [->] (top) edge node {$w_{bd}$} (right);
@@ -243,8 +265,7 @@ For instance, we can imagine a scenario in which nodes $i_0$ and $i_1$ are firin
         \node[main node] (left) {$a$};
         \node[main node] (right) [left of=top] {$d$};
 
-        \begin{scope}[>={Stealth[black]},
-                    every node/.style={fill=white,circle}]
+        \begin{scope}[>={Stealth[black]}]
             \path [->] (right) edge[bend right=20] node {} (left);
             \path [->] (left) edge[bend right=20] node {} (right);
         \end{scope}
@@ -264,8 +285,7 @@ For instance, we can imagine a scenario in which nodes $i_0$ and $i_1$ are firin
         \node[main node] (inputzero) [above left of=left] {$i_0$};
         \node[main node] (output) [right of=right] {$o$};
 
-        \begin{scope}[>={Stealth[black]},
-                    every node/.style={fill=white,circle}]
+        \begin{scope}[>={Stealth[black]}]
             \path [->] (inputzero) edge node {} (top);
             \path [->] (top) edge node {} (right);
             \path [->] (right) edge node {} (output);
@@ -280,7 +300,7 @@ Then, with this signal looping between neurons, we can cause a signal from eithe
 
 Due to this generalization, we can argue that the network has a sort of "memory" - after receiving a set of inputs, the system may generate the same, or similar, output after receiving one (or part) of the same set of inputs; that is, once the input set $m$ is received and outputs $o$, $m_0$ can be received where $m_0 \subseteq m$ and the subsequent output is $o_0 \simeq o$.  As described previously, this is distinct from RNNs as it can combine distinct inputs.  This concept has previously been explored in a biological setting \cite{synapsememory}.
 
-\subsection{Priming}
+\subsection{Priming} \label{priming}
 
 We provide a function, callable at any time, that randomizes the values of all nodes, with a 50\% chance of any given node being in an active state.  This randomization, or priming, does not take into account hemisphere symmetry.  However, it is still useful in that we may randomize initially to determine both the interplay of sensor inputs on a chaotic network and the lack of any inputs on a chaotic network.
 
@@ -290,11 +310,11 @@ We provide a function, callable at any time, that randomizes the values of all n
     % \label{fig:unprimed_sensoroutput_graph}
 \end{figure}
 
-This figure illustrates the values of various outputs without any sensory input, over 900 cycles (note that there are two pink lines).  Visually, we can see that the values of the outputs have high fluctuation within the first 100 frames, and then settle into repetitions  between two values.
+This figure illustrates the values of various outputs without any sensory input, over 900 cycles (note that there are two pink lines).  Visually, we can see that the values of the outputs have high fluctuation within the first 100 frames, and then settle into repetitions  between two values.  Although originally chaotic, a stable point is eventually reached with a lack of any input.
 
 The drawback of randomizing the entire network is that it's random - there's no symmetry between hemispheres, much less any order.  We chose to randomize the entire network because we can allow the network to cycle until we feel that the output values have begun looping within a set range.  However, it's possible that we may not need to randomize this in the future if we decide to create numerous sensors, feeding to different areas in the network, allowing for much more input at any given time.
 
-\subsection{Output Values}
+\subsection{Output Values} \label{outputvals}
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{../visualizations/8knodes_unrandomized.png}
@@ -321,25 +341,51 @@ In another exploration, we created another network with the same number of senso
     % \label{fig:unprimed_sensoroutput_graph}
 \end{figure}
 
-Another run, we randomized the network, with each space between the dotted lines indicating a set of input values was held constant (only changing at the dotted lines).  We can see that in the first 200 cycles, the output values lessened, until the inputs were initially activated.  This network, being different from the previous network, had less chaotic patterns in the graph.  However, we suspect that the major changes (deviating from the standard cycling) past cycle 200 are primarily due to the propagation of input data, as seen more clearly in Figures 5 and 6.
+Another run, we randomized the network, with each space between the dotted lines indicating a set of input values was held constant (only changing at the dotted lines).  We can see that in the first 200 cycles, the output values lessened, until the inputs were initially activated.  This network, being different from the previous network, had less chaotic patterns in the graph.  However, we suspect that the major changes (deviating from the standard cycling) past cycle 200 are primarily due to the propagation of input data, as seen more clearly in Figures 5 and 6.  Once the input data were modified, it appeared as if the average output value also changed as long as the input data then remained constant, regardless of whether inputs were turned on or off.  Note that this change in output values occurred for both inputs that were turned on and inputs that were turned off.
 
 Given these graphs, we may see, purely visually, that sensors do not affect their outputs immediately; there is always a nonzero time between sensor toggling and outputs being changed.  We propose that is it possible to use Granger causality analysis to analyze this behavior, as it has been shown to be successful, in some cases, in neuroscience \cite{neurocausality, netcausality}.  It would then be possible to establish a link between input values and output behavior, especially useful in cases of a primed network where it may not be easy to visually determine when or how sensors affect outputs.
 
-% symmetrically priming?
+Interestingly, these graphs somewhat resemble "brain waves" (e.g. EEG graphs), or neural oscillations, which have been observed in human brains and have been implicated in memory \cite{oscillationmemory} as well as low-level functions such as a "gating function" \cite{oscillations}.  In section \ref{looping}, we have discovered a similar process as occurs the described "gating function", which may be extended to act as an actual "gating function" due to signals from inhibitory neurons.  For example, consider the following figure where - denotes an inhibitory connection and + denotes an excitatory connection.
 
-\newpage
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+                        thick,main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
 
-\section{Conclusion}
+        \node[main node] (n1) {$n_1$};
+        \node[main node] (n0) [left of=n1] {$n_0$};
+        \node[main node] (n2) [right of=n1] {$n_2$};
+        \node[main node] (i0) [left of=n0] {$i_0$};
+        \node[main node] (i1) [below of=n1] {$i_1$};
+        \node[main node] (o) [right of=n2] {$o$};
 
-\subsection{Future Work}
+        \begin{scope}[>={Stealth[black]}]
+            \path [->] (i0) edge node {-} (n0);
+            \path [->] (n0) edge[bend left=20] node {+} (n1);
+            \path [->] (n1) edge[bend left=20] node {+} (n0);
+            \path [->] (n1) edge node {-} (n2);
+            \path [->] (i1) edge node {+} (n2);
+            \path [->] (n2) edge node {} (o);
+        \end{scope}
+    \end{tikzpicture}
+    \caption{Gating} \label{fig:Gating}
+\end{figure}
+
+If a loop already exists between $n_0$ and $n_1$, and $i_1$ excites $n_2$, it is entirely possible that the value of the output $o$ remains zero.  However, if $i_0$ inhibits $n_0$ while $i_1$ excites $n_2$, it is also possible that the value of the output $o$ is nonzero.  This would be caused by the inhibition of $n_0$ breaking the loop with $n_1$, causing $n_2$ to lose its inhibitory influence and allowing it to fire when excited.
+
+
+\subsection{Future Work} \label{future}
 
 At the moment, our simulation runs in $\mathbb{R}^3$ space.  However, it is entirely possible that we may run it in $\mathbb{R}^n$ space for any $n \in \mathbb{N}$, given our method of node positioning and connection generation.  However, we postulate that this system is ineffective for $n=1$ and potentially $n=2$, as a higher $n$ allows for a higher level of complexity (e.g. more complex pattern combinations).  However, this causes a network to grow in complexity exponentially, so ideally we would have some faster or optimized method of computing cycles.
 
-One drawback of the current model is that it has a heavy reliance on magic numbers, as illustrated by the large number of arbitrary constants throughout this paper.  Further research into how synapses grow, change, and die throughout an organism's lifetime is necessary to refine these constants, along with the more general concept of how axons grow and "seek" targets.
+A known flaw of the model is that organic neurons may have varied firing rates \cite{firingrates}, while our simulation has constant firing rates.  However, this is merely an engineering problem that has not been implemented due to potential efficiency issues.  Future iterations should ideally implement varied neuron firing rates.
+
+Furthermore, one drawback of the current model is that it has a heavy reliance on magic numbers, as illustrated by the large number of arbitrary constants throughout this paper.  Further research into how synapses grow, change, and die throughout an organism's lifetime is necessary to refine these constants, along with the more general concept of how axons grow and "seek" targets (likely more complex than a simple probability sphere).  Additionally, our priming method (section \ref{priming}) is primarily designed to explore the effect of chaotic preexisting patterns on input/output patterns, as opposed to modeling the initial brain state; however, we also have proposed, in the same section, the possibility that we may not require priming at all.  Again, further research must be done to determine how to effectively initialize the signals in the network.  Another drawback is that we do not take into account synaptic fatigue \cite{synapticfatigue}, which may be easily implemented in a rudimentary way by setting a neuron's "neurotransmitter count" and decreasing it by some number $n_l$ every time it fires, and then increasing it by some number $n_i < n_l$ every cycle.
+
 
 \newpage
 
-\section{Graphs and Data}
+\section{Graphs and Data} \label{graphs}
 
 \begin{figure}[H]
     \centering
