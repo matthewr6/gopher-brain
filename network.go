@@ -23,7 +23,7 @@ type ConnInfo struct {
 type Connection struct {
     To map[*Node]*ConnInfo  `json:"to"`
     HoldingVal int          `json:"holding"`
-    Center [3]int           `json:"center"`
+    Center [3]int           `json:"center"` // todo - maybe float and then round when generating?
 }
 
 type Node struct {
@@ -70,6 +70,7 @@ func (n *Node) Update() {
     // then, based on whether it fired, prune/strengthen connections
     // magic numbers.
     // additive or multiplicative?
+    // maybe as a fraction/percent of distance from some constant (0.5?  0.75)
     for from, conn := range n.IncomingConnections {
         // adjusting
         if conn.HoldingVal == n.Value { // nodes worked in conjunction...
@@ -207,13 +208,13 @@ func (n Node) String() string {
 
 // is this still needed?
 // for cool viz, sure
-func (net *Network) RandomizeValues() {
+func (net *Network) RandomizeValues(probOn float32) {
     net.ForEachNode(func(node *Node, pos [3]int) {
         temp := rand.Float32()
-        if temp < 0.5 {
-            node.Value = 0
-        } else {
+        if temp < probOn {
             node.Value = 1
+        } else {
+            node.Value = 0
         }
     })
 }

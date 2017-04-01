@@ -2,3 +2,8 @@
 net_*
 anim.gif
 *_state.json
+
+writing/*
+!writing/gopher-brain.bib
+!writing/gopher-brain.pdf
+!writing/gopher-brain.tex
