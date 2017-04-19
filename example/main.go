@@ -30,7 +30,7 @@ func main() {
                 }
             },
         },
-    })
+    }, false)
 
     framesInput := brain.Prompt("Enter number of frames, or leave blank to run until manually stopped:  ", reader)
     frames, err := strconv.Atoi(framesInput)
