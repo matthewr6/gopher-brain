@@ -22,10 +22,10 @@ type SensorConstructor struct {
     InputFunc func([]*Node, map[string]*Output)
 }
 
-func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor) *Network {
+func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor, prime bool) *Network {
     rand.Seed(time.Now().UTC().UnixNano())
 
-    var myNet = MakeNetwork(NETWORK_SIZE, false)
+    var myNet = MakeNetwork(NETWORK_SIZE, prime)
     myNet.Connect()
     myNet.Mirror()
     myNet.ConnectHemispheres()

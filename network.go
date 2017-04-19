@@ -63,7 +63,7 @@ func (n *Node) Update() {
         }
     }
 
-    if sum >= 1.0 { // magic
+    if sum >= FIRING_THRESHOLD {
         n.Value = 1
     }
 
@@ -75,21 +75,21 @@ func (n *Node) Update() {
         // adjusting
         if conn.HoldingVal == n.Value { // nodes worked in conjunction...
             if n.Value == 1 { // and both fired (if neither fired, decay a little bit)
-                conn.To[n].Strength += 0.05
+                conn.To[n].Strength += CONN_WEIGHT_INCREASE
             } else {
                 // decay a little bit
-                conn.To[n].Strength -= 0.02
+                conn.To[n].Strength -= CONN_WEIGHT_DECAY
             }
         } else {
             // the nodes didn't fire together
-            conn.To[n].Strength -= 0.05
+            conn.To[n].Strength -= CONN_WEIGHT_DECREASE
         }
 
         // pruning
-        if conn.To[n].Strength > 2.25 {
-            conn.To[n].Strength = 2.25
+        if conn.To[n].Strength > MAX_CONN_WEIGHT {
+            conn.To[n].Strength = MAX_CONN_WEIGHT
         }
-        if conn.To[n].Strength < 0.25 {
+        if conn.To[n].Strength < MIN_CONN_WEIGHT {
             delete(conn.To, n)
             delete(n.IncomingConnections, from)
         }
@@ -108,7 +108,7 @@ func (net *Network) AddConnections(node *Node) {
     center := node.OutgoingConnection.Center
     possibleExtensions := []*Node{}
     numPossible := rand.Intn(15 - 5) + 5 // magic - 10 to 15
-    stDev := 3.0 // magic
+    stDev := DYNAMIC_SYNAPSE_PROB_SPHERE
     for i := 0; i < numPossible; i++ {
         potCenter := node.Position
         for potCenter == node.Position {
@@ -132,7 +132,7 @@ func (net *Network) AddConnections(node *Node) {
         _, exists := node.OutgoingConnection.To[potNode]
         if potNode.Value != 0 && !exists {
             excitatory := false
-            if rand.Intn(5) != 0 {
+            if rand.Intn(INVERSE_INHIBITORY_PROB) != 0 {
                 // https://www.quora.com/Are-there-more-excitatory-neurons-or-inhibitory-neurons-in-the-brain-Why
                 excitatory = true
             }
@@ -233,11 +233,11 @@ func (net *Network) ConnectHemispheres() {
         centralConnNode := net.FindNode(node.OutgoingConnection.Center)
         // select the X connections here
         // magic - HOW MANY POSSIBLE "TO" NEURONS
-        numAxonTerminals := rand.Intn(3) + 1
+        numAxonTerminals := rand.Intn(INITIAL_SYNAPSE_COUNT) + 1
         nodesToConnect := []*Node{
             centralConnNode,
         }
-        stDev := 1.5 // magic - maybe be a factor of the Connect() stDev?
+        stDev := DYNAMIC_SYNAPSE_PROB_SPHERE
         for i := 0; i < numAxonTerminals; i++ {
             potPos := [3]int{-1, -1, -1}
             for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0]*2 || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
@@ -257,7 +257,7 @@ func (net *Network) ConnectHemispheres() {
         toNodes := make(map[*Node]*ConnInfo)
         for _, node := range nodesToConnect {
             // should this have a higher probability of being excitatory?
-            if rand.Intn(5) != 0 {
+            if rand.Intn(INVERSE_INHIBITORY_PROB) != 0 {
                 // https://www.quora.com/Are-there-more-excitatory-neurons-or-inhibitory-neurons-in-the-brain-Why
                 excitatory = true
             }
@@ -315,7 +315,7 @@ func (net *Network) Mirror() {
 func (net *Network) Connect() {
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
         // get the closest nodes and select one randomly to connect to
-        stDev := 4.0 // magic
+        stDev := AXON_PROB_SPHERE
         center := node.Position
         for center == node.Position {
             potX := int(rand.NormFloat64() * stDev) + node.Position[0]
