@@ -42,6 +42,7 @@ type Network struct {
     Dimensions [3]int             `json:"-"`
     Sensors map[string]*Sensor    `json:"-"`
     Outputs map[string]*Output    `json:"-"`
+    Frames int                    `json:"-"`
 }
 
 func (c Connection) String() string {
@@ -193,6 +194,8 @@ func (net *Network) Cycle() {
     for _, sensor := range net.Sensors {
         sensor.In(sensor.Nodes, sensor.Influences)
     }
+    
+    net.Frames++
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -385,6 +388,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
         RightHemisphere: nodes,
         Sensors: make(map[string]*Sensor),
         Outputs: make(map[string]*Output),
+        Frames: 0,
     }
 }
 

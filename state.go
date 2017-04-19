@@ -21,6 +21,7 @@ type DisplayNetwork struct {
     Sensors map[string]*DisplaySensor   `json:"sensors"`
     Outputs map[string]*DisplayOutput   `json:"outputs"`
     // Connections []*DisplayConnection `json:"connections"`
+    Frames int                          `json:"frames"`
 }
 
 type DisplayNode struct {
@@ -88,6 +89,7 @@ func LoadState(name string, directory string) *Network {
         Dimensions: importedNet.Dimensions,
         Sensors: make(map[string]*Sensor),
         Outputs: make(map[string]*Output),
+        Frames: importedNet.Frames,
     }
     for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*Node{}
@@ -181,6 +183,7 @@ func (net Network) SaveState(name string, directory string) {
         Sensors: make(map[string]*DisplaySensor),
         Outputs: make(map[string]*DisplayOutput),
         Dimensions: net.Dimensions,
+        Frames: net.Frames,
     }
     for i := 0; i < (net.Dimensions[0]*2); i++ {
         iDim := [][]*DisplayNode{}
@@ -258,6 +261,9 @@ func Test(orig, loaded *Network) bool {
     // don't need to compare left/right hemis
     // compare dimensions
     if orig.Dimensions != loaded.Dimensions {
+        return false
+    }
+    if orig.Frames != loaded.Frames {
         return false
     }
     // compare nodes

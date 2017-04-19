@@ -6,7 +6,7 @@ import (
 )
 
 func TestState(t *testing.T) {
-    NETWORK_SIZE := [3]int{25, 25, 25}
+    NETWORK_SIZE := [3]int{12, 25, 25}
     testingNet := MakeNetwork(NETWORK_SIZE, false)
     testingNet.Connect()
     testingNet.Mirror()
