@@ -334,7 +334,13 @@ func SumCenterVectors(centers [][3]int, node Node) [3]int {
         if CENTER_RADIUS == d {
             factor = 1.0
         } else {
-            factor = 1/(CENTER_RADIUS - d) * CENTER_VECTOR_FACTOR
+            factor = CENTER_RADIUS/(CENTER_RADIUS - d) * CENTER_VECTOR_FACTOR
+        }
+        if factor > d {
+            factor = d
+        }
+        if factor < -d {
+            factor = -d * CENTER_VECTOR_FACTOR
         }
         for i := 0; i < 3; i++ {
             final[i] += int(baseVector[i]/baseMagnitude * factor)
