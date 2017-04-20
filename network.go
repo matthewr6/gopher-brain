@@ -233,6 +233,7 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
 
 func (net *Network) ConnectHemispheres() {
     net.ForEachNode(func(node *Node, pos [3]int) {
+        // fmt.Println(node.OutgoingConnection.Center)
         centralConnNode := net.FindNode(node.OutgoingConnection.Center)
         // select the X connections here
         // magic - HOW MANY POSSIBLE "TO" NEURONS
@@ -315,7 +316,42 @@ func (net *Network) Mirror() {
     })
 }
 
+func SumCenterVectors(centers [][3]int, node Node) [3]int {
+    final := [3]int{0, 0, 0}
+    for _, center := range centers {
+        // n - p
+        // vector pointing from the center to the node (ie away from center)
+        baseVector := [3]float64{float64(node.Position[0] - center[0]), float64(node.Position[1] - center[1]), float64(node.Position[2] - center[2])}
+        baseMagnitude := FloatDist(baseVector, [3]float64{0.0, 0.0, 0.0})
+        // unit vectorizing
+        // d
+        d := IntDist(node.Position, center)
+        // C = CENTER_RADIUS
+        // d - C is distance from node to outer shell
+        // d - C > 0 if the node is outside the shell - so make baseVector * negative to point from node to center
+        //       < 0 if node is inside shell - baseVector * positive to point from node away from center
+        var factor float64
+        if CENTER_RADIUS == d {
+            factor = 1.0
+        } else {
+            factor = 1/(CENTER_RADIUS - d) * CENTER_VECTOR_FACTOR
+        }
+        for i := 0; i < 3; i++ {
+            final[i] += int(baseVector[i]/baseMagnitude * factor)
+        }
+        if center == node.Position {
+            final = [3]int{0, 0, 0}
+        }
+    }
+    return final
+}
+
 func (net *Network) Connect() {
+    centers := [][3]int{}
+    for i := 0; i < NUMBER_OF_CENTERS; i++ {
+        centers = append(centers, [3]int{rand.Intn(net.Dimensions[0]), rand.Intn(net.Dimensions[1]), rand.Intn(net.Dimensions[2])})
+    }
+
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
         // get the closest nodes and select one randomly to connect to
         stDev := AXON_PROB_SPHERE
@@ -336,11 +372,24 @@ func (net *Network) Connect() {
             center = [3]int{potX, potY, potZ}
         }
 
+        influenceVector := SumCenterVectors(centers, *node)
+        // fmt.Println(influenceVector, node.Position)
+        for i := 0; i < 3; i++ {
+            center[i] += influenceVector[i]
+            if center[i] < 0 {
+                center[i] = 0
+            }
+            if center[i] > net.Dimensions[i] - 1 {
+                center[i] = net.Dimensions[i] - 1
+            }
+        }
+
         newConn := &Connection{
             Center: center,
         }
         node.OutgoingConnection = newConn
     })
+    // fmt.Println(centers)
 }
 
 func (net Network) String() string {
