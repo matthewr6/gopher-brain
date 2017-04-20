@@ -337,6 +337,7 @@ func (net *Network) Connect() {
     for i := 0; i < NUMBER_OF_CENTERS; i++ {
         centers = append(centers, [3]int{rand.Intn(net.Dimensions[0]), rand.Intn(net.Dimensions[1]), rand.Intn(net.Dimensions[2])})
     }
+    // fmt.Println(centers)
 
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
         // get the closest nodes and select one randomly to connect to
@@ -359,6 +360,7 @@ func (net *Network) Connect() {
         }
 
         influenceVector := SumCenterVectors(centers, *node)
+        // fmt.Println(influenceVector, node.Position)
         for i := 0; i < 3; i++ {
             center[i] += influenceVector[i]
             if center[i] < 0 {
@@ -374,6 +376,7 @@ func (net *Network) Connect() {
         }
         node.OutgoingConnection = newConn
     })
+    // fmt.Println(centers)
 }
 
 func (net Network) String() string {
