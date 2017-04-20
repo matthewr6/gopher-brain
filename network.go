@@ -322,6 +322,8 @@ func SumCenterVectors(centers [][3]int, node Node) [3]int {
         // n - p
         // vector pointing from the center to the node (ie away from center)
         baseVector := [3]float64{float64(node.Position[0] - center[0]), float64(node.Position[1] - center[1]), float64(node.Position[2] - center[2])}
+        baseMagnitude := FloatDist(baseVector, [3]float64{0.0, 0.0, 0.0})
+        // unit vectorizing
         // d
         d := IntDist(node.Position, center)
         // C = CENTER_RADIUS
@@ -335,7 +337,10 @@ func SumCenterVectors(centers [][3]int, node Node) [3]int {
             factor = 1/(CENTER_RADIUS - d) * CENTER_VECTOR_FACTOR
         }
         for i := 0; i < 3; i++ {
-            final[i] += int(baseVector[i] * factor)
+            final[i] += int(baseVector[i]/baseMagnitude * factor)
+        }
+        if center == node.Position {
+            final = [3]int{0, 0, 0}
         }
     }
     return final
@@ -368,6 +373,7 @@ func (net *Network) Connect() {
         }
 
         influenceVector := SumCenterVectors(centers, *node)
+        // fmt.Println(influenceVector, node.Position)
         for i := 0; i < 3; i++ {
             center[i] += influenceVector[i]
             if center[i] < 0 {
@@ -383,6 +389,7 @@ func (net *Network) Connect() {
         }
         node.OutgoingConnection = newConn
     })
+    // fmt.Println(centers)
 }
 
 func (net Network) String() string {
