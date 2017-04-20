@@ -5,6 +5,7 @@ import (
     "bufio"
     "strings"
     "fmt"
+    "math"
 )
 
 func StrsToInts(strings []string) []int {
@@ -14,6 +15,14 @@ func StrsToInts(strings []string) []int {
         retval = append(retval, j)
     }
     return retval
+}
+
+func IntDist(p1 [3]int, p2 [3]int) float64 {
+    sum := 0
+    for i := 0; i < 3; i++ {
+        sum += (p1[i]-p2[i])*(p1[i]-p2[i])
+    }
+    return math.Sqrt(float64(sum))
 }
 
 func Prompt(message string, reader *bufio.Reader) string {
