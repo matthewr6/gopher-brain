@@ -420,10 +420,10 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                 var randTest float32
                 if !blank {
                     randTest = rand.Float32()
-                    if randTest < 0.5 {
-                        newValue = 0
+                    if randTest < PROB_INITIAL_ON {
+                        newValue = 1
                     } else {
-                        newValue = 0//1
+                        newValue = 0
                     }
                 }
                 jDim = append(jDim, &Node{
