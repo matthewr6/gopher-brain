@@ -32,6 +32,7 @@ type Node struct {
     IncomingConnections map[*Node]*Connection  `json:"-"`  //which nodes to read from
     Position [3]int                            `json:"position"`
     Id string                                  `json:"id"` //"x|y|z"
+    FiringRate float64                         `json:"firingRate"`
 }
 
 // let's say y=0 is the front of the "brain"
@@ -53,7 +54,7 @@ func (c Connection) String() string {
 func (n *Node) Update() {
     // calculate if it's going to fire or not - calculate sum and then set to 1, 0
     // base sum on excitatory/inhibiting
-    var sum float64
+    sum := 0.0
 
     // first calculate sum
     for _, conn := range n.IncomingConnections {
@@ -64,8 +65,23 @@ func (n *Node) Update() {
         }
     }
 
+    sum *= n.FiringRate // should I round this
+
     if sum >= FIRING_THRESHOLD {
         n.Value = 1
+    } else {
+        n.Value = 0
+    }
+
+    if n.Value == 1 {
+        n.FiringRate += RATE_INCREASE // should i factor these constants based on the sum
+        // should I have a max firing rate
+        n.Value = 1
+    } else {
+        n.FiringRate -= RATE_DECREASE
+        if n.FiringRate < 1.0 {
+            n.FiringRate = 1.0 // should I set this to something lower like 0.75 or something
+        }
     }
 
     // then, based on whether it fired, prune/strengthen connections
@@ -175,9 +191,7 @@ func (net *Network) Cycle() {
             net.AddConnections(node)
         }
         node.OutgoingConnection.HoldingVal = node.Value
-        node.Value = 0
-    })
-    
+    })    
 
     // then set all the nodes based on connections
     net.ForEachNode(func(node *Node, pos [3]int) {
@@ -431,6 +445,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
                     Position: [3]int{i, j, k},
                     IncomingConnections: make(map[*Node]*Connection),
                     Id: fmt.Sprintf("%v|%v|%v", i, j, k),
+                    FiringRate: 1.0,
                 })
             }
             iDim = append(iDim, jDim)
