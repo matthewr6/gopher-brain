@@ -20,3 +20,4 @@ const PROB_INITIAL_ON = 0.25
 
 const RATE_INCREASE = 0.2
 const RATE_DECREASE = 0.5
+const RATE_MIN = 1.0
