@@ -13,8 +13,6 @@ import (
     * is "value at address"
 */
 
-// http://www.scientificamerican.com/article/ask-the-brains-aug-08/
-
 type ConnInfo struct {
     Excitatory bool  `json:"excitatory"`
     Strength float64 `json:"strength"`
@@ -35,7 +33,6 @@ type Node struct {
     FiringRate float64                         `json:"firingRate"`
 }
 
-// let's say y=0 is the front of the "brain"
 type Network struct {
     Nodes [][][]*Node             `json:"nodes"`
     LeftHemisphere [][][]*Node    `json:"-"`
@@ -52,11 +49,8 @@ func (c Connection) String() string {
 }
 
 func (n *Node) Update() {
-    // calculate if it's going to fire or not - calculate sum and then set to 1, 0
-    // base sum on excitatory/inhibiting
     sum := 0.0
 
-    // first calculate sum
     for _, conn := range n.IncomingConnections {
         if conn.To[n].Excitatory {
             sum = sum + (conn.HoldingVal * conn.To[n].Strength)
@@ -90,19 +84,16 @@ func (n *Node) Update() {
         // adjusting
         together := (conn.HoldingVal != 0 && n.Value != 0) ||
                     (conn.HoldingVal == 0 && n.Value == 0)
-        if together { // nodes worked in conjunction...
-            if n.Value == 1 { // and both fired (if neither fired, decay a little bit)
+        if together {
+            if n.Value == 1 {
                 conn.To[n].Strength += CONN_WEIGHT_INCREASE
             } else {
-                // decay a little bit
                 conn.To[n].Strength -= CONN_WEIGHT_DECAY
             }
         } else {
-            // the nodes didn't fire together
             conn.To[n].Strength -= CONN_WEIGHT_DECREASE
         }
 
-        // pruning
         if conn.To[n].Strength > MAX_CONN_WEIGHT {
             conn.To[n].Strength = MAX_CONN_WEIGHT
         }
@@ -180,12 +171,7 @@ func (node *Node) UpdateOutgoingCenter() {
     }
 }
 
-// let's see which one causes the most overhead...
-// or it might just be all of them
 func (net *Network) Cycle() {
-    // fake concurrency
-    // first, set all the connections based on their nodes
-
     net.ForEachNode(func(node *Node, pos [3]int) {
         if node.Value != 0 {
             net.AddConnections(node)
@@ -193,14 +179,11 @@ func (net *Network) Cycle() {
         node.OutgoingConnection.HoldingVal = float64(node.Value) * node.FiringRate
     })    
 
-    // then set all the nodes based on connections
     net.ForEachNode(func(node *Node, pos [3]int) {
         node.Update()
         node.UpdateOutgoingCenter()
     })
 
-
-    // also update nodes that receive sensory information
     for _, output := range net.Outputs {
         output.Value = output.Out(output.Nodes)
     }
@@ -212,19 +195,12 @@ func (net *Network) Cycle() {
     net.Frames++
 }
 
-////////////////////////////////////////////////////////////////////
-//                                                                //
-//                  Mostly generation stuff past here             //
-//                                                                //
-////////////////////////////////////////////////////////////////////
-
 func (n Node) String() string {
     jsonRep, _ := json.MarshalIndent(n, "", "    ")
     return string(jsonRep)
 }
 
-// is this still needed?
-// for cool viz, sure
+// UNUSED
 func (net *Network) RandomizeValues(probOn float32) {
     net.ForEachNode(func(node *Node, pos [3]int) {
         temp := rand.Float32()
@@ -247,10 +223,7 @@ func NodeExistsIn(node *Node, nodes []*Node) bool {
 
 func (net *Network) ConnectHemispheres() {
     net.ForEachNode(func(node *Node, pos [3]int) {
-        // fmt.Println(node.OutgoingConnection.Center)
         centralConnNode := net.FindNode(node.OutgoingConnection.Center)
-        // select the X connections here
-        // magic - HOW MANY POSSIBLE "TO" NEURONS
         numAxonTerminals := rand.Intn(INITIAL_SYNAPSE_COUNT) + 1
         nodesToConnect := []*Node{
             centralConnNode,
@@ -274,9 +247,7 @@ func (net *Network) ConnectHemispheres() {
         var excitatory bool
         toNodes := make(map[*Node]*ConnInfo)
         for _, node := range nodesToConnect {
-            // should this have a higher probability of being excitatory?
             if rand.Intn(INVERSE_INHIBITORY_PROB) != 0 {
-                // https://www.quora.com/Are-there-more-excitatory-neurons-or-inhibitory-neurons-in-the-brain-Why
                 excitatory = true
             }
             toNodes[node] = &ConnInfo{
@@ -293,10 +264,8 @@ func (net *Network) ConnectHemispheres() {
 }
 
 func (net *Network) Mirror() {
-    // invert in x direction
     leftHemisphere := [][][]*Node{}
     for i := len(net.RightHemisphere)-1; i >= 0; i-- {
-        // POINTER CRAPS - NODES
         rightPlane := [][]*Node{}
         for _, rightRow := range net.RightHemisphere[i] {
             aRightRow := []*Node{}
@@ -373,7 +342,6 @@ func (net *Network) Connect() {
     }
 
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
-        // get the closest nodes and select one randomly to connect to
         stDev := AXON_PROB_SPHERE
         center := node.Position
         for center == node.Position {
@@ -393,7 +361,6 @@ func (net *Network) Connect() {
         }
 
         influenceVector := SumCenterVectors(centers, *node)
-        // fmt.Println(influenceVector, node.Position)
         for i := 0; i < 3; i++ {
             center[i] += influenceVector[i]
             if center[i] < 0 {
@@ -409,7 +376,6 @@ func (net *Network) Connect() {
         }
         node.OutgoingConnection = newConn
     })
-    // fmt.Println(centers)
 }
 
 func (net Network) String() string {

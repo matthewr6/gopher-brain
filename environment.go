@@ -7,13 +7,6 @@ import (
     "encoding/json"
 )
 
-// sensors feed data to nodes
-/*
-    sensor = input
-    one sensor feeds to a set of nodes
-    one output is only influenced by its list of connected nodes
-    one sensor can be influenced by a SET of outputs
-*/
 type Sensor struct {
     Nodes []*Node                            `json:"nodes"`
     Influences map[string]*Output            `json:"influences"`
@@ -129,7 +122,6 @@ func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int
 
 func (net *Network) CreateIndividualSensor(name string, r int, count int, plane string, center [3]int, otherSide bool, outputCenters [][3]int, inputFunc func([]*Node, map[string]*Output)) *Sensor {
     outputs := net.MakeOutputs(name,  outputCenters, r, count, otherSide)
-    // radius is basically density...
     sensor := &Sensor{
         Nodes: []*Node{},
         Name: name,
@@ -137,12 +129,9 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
         Influences: outputs,
         Center: center,
     }
-    // todo - MAGIC # - determine correct coefficient
     stDev := float64(r)
-    // plane is which dimension should stay the same - name the variable in a better way?
     if (plane != "") {
         if (plane == "x" || plane == "y" || plane == "z") {
-            // todo - MAGIC # - also this coefficient
             stDev = float64(r * 2)
         }
         if (plane == "x") {
@@ -202,20 +191,15 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
 }
 
 func (net *Network) CreateIndividualOutput(name string, r int, count int, plane string, center [3]int, outputFunc func(map[*Node]*ConnInfo) float64) *Output {
-    // radius is basically density...
     output := &Output{
         Name: name,
         Out: outputFunc,
     }
-    // todo - MAGIC # - determine correct coefficient
     stDev := float64(r)
 
-    // set up nodes
     nodes := []*Node{}
-    // plane is which dimension should stay the same - name the variable in a better way?
     if (plane != "") {
         if (plane == "x" || plane == "y" || plane == "z") {
-            // todo - MAGIC # - also this coefficient
             stDev = float64(r * 2)
         }
         if (plane == "x") {
@@ -271,7 +255,6 @@ func (net *Network) CreateIndividualOutput(name string, r int, count int, plane 
         }
     }
 
-    // iterate through nodes
     nodeMapping := make(map[*Node]*ConnInfo)
     var excitatory bool
     for _, node := range nodes {

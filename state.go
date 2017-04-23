@@ -13,14 +13,11 @@ import (
     * is "value at address"
 */
 
-// still have to reconcile the updated network.go stuff
-
 type DisplayNetwork struct {
     Nodes [][][]*DisplayNode            `json:"nodes"`
     Dimensions [3]int                   `json:"dimensions"`
     Sensors map[string]*DisplaySensor   `json:"sensors"`
     Outputs map[string]*DisplayOutput   `json:"outputs"`
-    // Connections []*DisplayConnection `json:"connections"`
     Frames int                          `json:"frames"`
 }
 
@@ -33,18 +30,10 @@ type DisplayNode struct {
 }
 
 type DisplayConnection struct {
-    To map[string]*ConnInfo `json:"to"` // shouldn't need a display struct for this, also idk why it's *ConnInfo instead of ConnInfo but hey it works
+    To map[string]*ConnInfo `json:"to"`
     HoldingVal float64      `json:"holdingVal"`
     Center [3]int           `json:"center"`
 }
-
-// // do I want to save sensors/outputs?
-// type Output struct {
-//     Nodes map[*Node]*ConnInfo               `json:"nodes"`
-//     Name string                             `json:"name"`
-//     Value float64                           `json:"value"`
-//     Out func(map[*Node]*ConnInfo) float64   `json:"-"`
-// }
 
 type DisplaySensor struct {
     Nodes [][3]int        `json:"nodes"`
@@ -54,7 +43,7 @@ type DisplaySensor struct {
 }
 
 type DisplayOutput struct {
-    Nodes map[string]*ConnInfo    `json:"nodes"` // why pointers?  oh well it works so yeah
+    Nodes map[string]*ConnInfo    `json:"nodes"`
     Name string                   `json:"name"`
     Value float64                 `json:"value"`
 }
@@ -127,7 +116,6 @@ func LoadState(name string, directory string) *Network {
         node.OutgoingConnection = newConn
     })
 
-    // first, load outputs
     for _, importedOutput := range importedNet.Outputs {
         newOutput := &Output{
             Name: importedOutput.Name,
@@ -157,7 +145,6 @@ func LoadState(name string, directory string) *Network {
         net.Outputs[importedOutput.Name] = newOutput
     }
 
-    // then load sensors
     for _, importedSensor := range importedNet.Sensors {
         newSensor := &Sensor{
             Name: importedSensor.Name,
@@ -217,7 +204,6 @@ func (net Network) SaveState(name string, directory string) {
         dispNet.Nodes = append(dispNet.Nodes, iDim)
     }
 
-    // do we even need to reference the outputs when saving a state?   based on the way the outputs are created, it's possible that we only need to reference the outputs when building the sensors when we load the sensors into the working net
     for _, output := range net.Outputs {
         nodeMap := make(map[string]*ConnInfo)
         for node, connInfo := range output.Nodes {
@@ -262,37 +248,28 @@ func (impNet DisplayNetwork) ForEachINode(handler func(*DisplayNode, [3]int)) {
 }
 
 func Test(orig, loaded *Network) bool {
-    // don't need to compare left/right hemis
-    // compare dimensions
     if orig.Dimensions != loaded.Dimensions {
         return false
     }
     if orig.Frames != loaded.Frames {
         return false
     }
-    // compare nodes
     for i := range orig.Nodes {
         for j := range orig.Nodes[i] {
             for k := range orig.Nodes[i][j] {
                 oNode := orig.Nodes[i][j][k]
                 lNode := loaded.Nodes[i][j][k]
-                // first compare value, position, id
                 if ((oNode.Value != lNode.Value) ||
                     (oNode.Position != lNode.Position) ||
                     (oNode.Id != lNode.Id)) {
-                    // fmt.Println("here")
                     return false
                 }
 
 
-                // compare outgoing connections
-                // - compare immediate connection data
                 if (oNode.OutgoingConnection.HoldingVal != lNode.OutgoingConnection.HoldingVal || 
                     oNode.OutgoingConnection.Center != lNode.OutgoingConnection.Center) {
                     return false
                 }
-                // - compare To data
-                //   - https://groups.google.com/forum/#!topic/golang-nuts/UWKAOXyMwJM
                 oOutgoingTo := make(map[string]*ConnInfo)
                 lOutgoingTo := make(map[string]*ConnInfo)
                 for node, info := range oNode.OutgoingConnection.To {
@@ -305,7 +282,6 @@ func Test(orig, loaded *Network) bool {
                     return false
                 }
 
-                // compare incoming connections
                 oIncoming := make(map[string]*ConnInfo)
                 lIncoming := make(map[string]*ConnInfo)
                 for from, conn := range oNode.IncomingConnections {
@@ -314,11 +290,9 @@ func Test(orig, loaded *Network) bool {
                 for from, conn := range lNode.IncomingConnections {
                     lIncoming[from.Id] = conn.To[lNode]
                 }
-                // - compare number of incoming connections
                 if (len(oNode.IncomingConnections) != len(lNode.IncomingConnections)) {
                     return false
                 }
-                // - compare incoming connection info
                 if !reflect.DeepEqual(oIncoming, lIncoming) {
                     for i := range oIncoming {
                         fmt.Println(oIncoming[i], lIncoming[i])
@@ -329,16 +303,6 @@ func Test(orig, loaded *Network) bool {
         }
     }
 
-    // to compare
-    // sensors
-    //     - influence names
-    //     - node positions
-    //     - names (compare *based on* names)
-    //     - centers
-    // outputs
-    //     - names (compare based on names)
-    //     - nodes (compare node positions and conninfo stuff)
-    //     - values
     for sensorName, oSensor := range orig.Sensors {
         lSensor, exists := loaded.Sensors[sensorName]
         if !exists {
