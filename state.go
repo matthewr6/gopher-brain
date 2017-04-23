@@ -29,6 +29,7 @@ type DisplayNode struct {
     Position [3]int                         `json:"position"`
     OutgoingConnection *DisplayConnection   `json:"axon"`
     Id string                               `json:"id"`
+    FiringRate float64                      `json:"firingrate"`
 }
 
 type DisplayConnection struct {
@@ -99,6 +100,7 @@ func LoadState(name string, directory string) *Network {
                 newNode := &Node{
                     Value: importedNet.Nodes[i][j][k].Value,
                     Position: importedNet.Nodes[i][j][k].Position,
+                    FiringRate: importedNet.Nodes[i][j][k].FiringRate,
                     IncomingConnections: make(map[*Node]*Connection),
                     Id: fmt.Sprintf("%v|%v|%v", i, j, k),
                 }
@@ -206,6 +208,7 @@ func (net Network) SaveState(name string, directory string) {
                     Position: node.Position,
                     OutgoingConnection: dispConn,
                     Id: node.Id,
+                    FiringRate: node.FiringRate,
                 }
                 jDim = append(jDim, dispNode)
             }
@@ -223,6 +226,7 @@ func (net Network) SaveState(name string, directory string) {
         dispNet.Outputs[output.Name] = &DisplayOutput{
             Nodes: nodeMap,
             Name: output.Name,
+            Value: output.Value,
         }
     }
     for _, sensor := range net.Sensors {
@@ -359,6 +363,7 @@ func Test(orig, loaded *Network) bool {
         }
         if ((len(oOutput.Nodes) != len(lOutput.Nodes)) ||
             (oOutput.Value != lOutput.Value)) {
+            fmt.Println(oOutput.Value, lOutput.Value)
             return false
         }
         oOutputNodes := make(map[string]float64)
