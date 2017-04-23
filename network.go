@@ -22,7 +22,7 @@ type ConnInfo struct {
 
 type Connection struct {
     To map[*Node]*ConnInfo  `json:"to"`
-    HoldingVal int          `json:"holding"`
+    HoldingVal float64      `json:"holding"`
     Center [3]int           `json:"center"` // todo - maybe float and then round when generating?
 }
 
@@ -90,7 +90,9 @@ func (n *Node) Update() {
     // maybe as a fraction/percent of distance from some constant (0.5?  0.75)
     for from, conn := range n.IncomingConnections {
         // adjusting
-        if conn.HoldingVal == n.Value { // nodes worked in conjunction...
+        together := (conn.HoldingVal != 0 && n.Value != 0) ||
+                    (conn.HoldingVal == 0 && n.Value == 0)
+        if together { // nodes worked in conjunction...
             if n.Value == 1 { // and both fired (if neither fired, decay a little bit)
                 conn.To[n].Strength += CONN_WEIGHT_INCREASE
             } else {
@@ -190,7 +192,7 @@ func (net *Network) Cycle() {
         if node.Value != 0 {
             net.AddConnections(node)
         }
-        node.OutgoingConnection.HoldingVal = node.Value
+        node.OutgoingConnection.HoldingVal = float64(node.Value) * node.FiringRate
     })    
 
     // then set all the nodes based on connections

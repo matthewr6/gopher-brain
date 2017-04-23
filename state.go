@@ -34,7 +34,7 @@ type DisplayNode struct {
 
 type DisplayConnection struct {
     To map[string]*ConnInfo `json:"to"` // shouldn't need a display struct for this, also idk why it's *ConnInfo instead of ConnInfo but hey it works
-    HoldingVal int          `json:"holdingVal"`
+    HoldingVal float64      `json:"holdingVal"`
     Center [3]int           `json:"center"`
 }
 
