@@ -88,11 +88,8 @@ func (n *Node) Update() {
     // maybe as a fraction/percent of distance from some constant (0.5?  0.75)
     for from, conn := range n.IncomingConnections {
         // adjusting
-        together := false
-        if (conn.HoldingVal != 0 && n.Value != 0) ||
-           (conn.HoldingVal == 0 && n.Value == 0) {
-            together = true
-        }
+        together := (conn.HoldingVal != 0 && n.Value != 0) ||
+                    (conn.HoldingVal == 0 && n.Value == 0)
         if together { // nodes worked in conjunction...
             if n.Value == 1 { // and both fired (if neither fired, decay a little bit)
                 conn.To[n].Strength += CONN_WEIGHT_INCREASE
