@@ -59,13 +59,11 @@ func (n *Node) Update() {
     // first calculate sum
     for _, conn := range n.IncomingConnections {
         if conn.To[n].Excitatory {
-            sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
+            sum = sum + (conn.HoldingVal * conn.To[n].Strength)
         } else {
-            sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
+            sum = sum - (conn.HoldingVal * conn.To[n].Strength)
         }
     }
-
-    sum *= n.FiringRate // should I round this
 
     if sum >= FIRING_THRESHOLD {
         n.Value = 1
