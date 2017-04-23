@@ -141,7 +141,6 @@ func (net *Network) AddConnections(node *Node) {
         if potNode.Value != 0 && !exists {
             excitatory := false
             if rand.Intn(INVERSE_INHIBITORY_PROB) != 0 {
-                // https://www.quora.com/Are-there-more-excitatory-neurons-or-inhibitory-neurons-in-the-brain-Why
                 excitatory = true
             }
             node.OutgoingConnection.To[potNode] = &ConnInfo{
