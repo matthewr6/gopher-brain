@@ -88,12 +88,12 @@ func (n *Node) Update() {
                     (conn.HoldingVal == 0 && n.Value == 0)
         if together {
             if n.Value == 1 {
-                conn.To[n].Strength += CONN_WEIGHT_INCREASE
+                conn.To[n].Strength += CONN_WEIGHT_INCREASE * SYNAPSE_LEARNING_RATE
             } else {
-                conn.To[n].Strength -= CONN_WEIGHT_DECAY
+                conn.To[n].Strength -= CONN_WEIGHT_DECAY * SYNAPSE_LEARNING_RATE
             }
         } else {
-            conn.To[n].Strength -= CONN_WEIGHT_DECREASE
+            conn.To[n].Strength -= CONN_WEIGHT_DECREASE * SYNAPSE_LEARNING_RATE
         }
 
         if conn.To[n].Strength > MAX_CONN_WEIGHT {
