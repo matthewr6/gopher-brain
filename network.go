@@ -48,6 +48,20 @@ func (c Connection) String() string {
     return string(jsonRep)
 }
 
+type LearningRates struct {
+    MinPossibleConnections int
+    MaxPossibleConnections int
+    SynapseModificationRate float64
+    SynapseProbSphere float64
+}
+
+func SetLearningRates(rates LearningRates) {
+    MIN_CONNECTIONS = rates.MinPossibleConnections
+    MAX_CONNECTIONS = rates.MaxPossibleConnections
+    SYNAPSE_LEARNING_RATE = rates.SynapseModificationRate
+    DYNAMIC_SYNAPSE_PROB_SPHERE = rates.SynapseProbSphere
+}
+
 func (n *Node) Update() {
     sum := 0.0
 
