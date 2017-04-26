@@ -76,6 +76,8 @@ func (n *Node) Update() {
         }
     }
 
+    // synapse modification rates
+
     // then, based on whether it fired, prune/strengthen connections
     // magic numbers.
     // additive or multiplicative?
@@ -115,6 +117,7 @@ func RandFloat(min, max float64) float64 {
 func (net *Network) AddConnections(node *Node) {
     center := node.OutgoingConnection.Center
     possibleExtensions := []*Node{}
+    // synapse creation rates
     numPossible := rand.Intn(MIN_CONNECTIONS) + MAX_CONNECTIONS - MIN_CONNECTIONS
     stDev := DYNAMIC_SYNAPSE_PROB_SPHERE
     for i := 0; i < numPossible; i++ {
