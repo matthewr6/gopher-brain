@@ -20,7 +20,8 @@ type ConnInfo struct {
 
 type Connection struct {
     To map[*Node]*ConnInfo  `json:"to"`
-    HoldingVal float64      `json:"holding"`
+    // HoldingVal float64      `json:"holding"`
+    HoldingVal int          `json:"holding"`
     Center [3]int           `json:"center"` // todo - maybe float and then round when generating?
 }
 
@@ -53,9 +54,9 @@ func (n *Node) Update() {
 
     for _, conn := range n.IncomingConnections {
         if conn.To[n].Excitatory {
-            sum = sum + (conn.HoldingVal * conn.To[n].Strength)
+            sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
         } else {
-            sum = sum - (conn.HoldingVal * conn.To[n].Strength)
+            sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
         }
     }
 
@@ -177,7 +178,8 @@ func (net *Network) Cycle() {
         if node.Value != 0 {
             net.AddConnections(node)
         }
-        node.OutgoingConnection.HoldingVal = float64(node.Value) * node.FiringRate
+        // node.OutgoingConnection.HoldingVal = float64(node.Value) * node.FiringRate
+        node.OutgoingConnection.HoldingVal = node.Value
     })    
 
     net.ForEachNode(func(node *Node, pos [3]int) {
