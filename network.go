@@ -252,7 +252,7 @@ func (net *Network) ConnectHemispheres() {
                 excitatory = true
             }
             toNodes[node] = &ConnInfo{
-                Strength: RandFloat(0.25, 0.75), // magic numbers
+                Strength: RandFloat(0.75, 1.25), // magic numbers
                 Excitatory: excitatory,
             }
         }
