@@ -68,7 +68,7 @@ func (n *Node) Update() {
     if n.Value == 1 {
         n.FiringRate += RATE_INCREASE // should i factor these constants based on the sum
         if n.FiringRate > RATE_MAX {
-            n.FiringRate = RATE_MAX
+            n.FiringRate = RATE_MIN * 0.75
         }
     } else {
         n.FiringRate -= RATE_DECREASE
