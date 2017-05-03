@@ -66,18 +66,18 @@ func (n *Node) Update() {
         n.Value = 0
     }
 
-    if n.Value == 1 {
-        n.FiringRate += RATE_INCREASE // should i factor these constants based on the sum
-        if n.FiringRate > RATE_MAX {
-            n.FiringRate = RATE_MIN * 0.75
-        }
-    } else {
-        n.FiringRate -= RATE_DECREASE
-        if n.FiringRate < RATE_MIN {
-            // should I set this to something lower like 0.75 or something to somehow implement a refactory period
-            n.FiringRate = RATE_MIN
-        }
-    }
+    // if n.Value == 1 {
+    //     n.FiringRate += RATE_INCREASE // should i factor these constants based on the sum
+    //     if n.FiringRate > RATE_MAX {
+    //         n.FiringRate = RATE_MIN * 0.75
+    //     }
+    // } else {
+    //     n.FiringRate -= RATE_DECREASE
+    //     if n.FiringRate < RATE_MIN {
+    //         // should I set this to something lower like 0.75 or something to somehow implement a refactory period
+    //         n.FiringRate = RATE_MIN
+    //     }
+    // }
 
     // then, based on whether it fired, prune/strengthen connections
     // magic numbers.
