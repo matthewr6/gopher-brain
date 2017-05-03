@@ -141,6 +141,9 @@ func (net *Network) AddConnections(node *Node) {
     }
     for _, potNode := range possibleExtensions {
         _, exists := node.OutgoingConnection.To[potNode]
+        if len(node.OutgoingConnection.To) >= MAX_SYNAPSES {
+            return
+        }
         if potNode.Value != 0 && !exists {
             excitatory := false
             if rand.Intn(INVERSE_INHIBITORY_PROB) != 0 {

@@ -5,9 +5,10 @@ import (
     "testing"
 )
 
+var TEST_NETWORK_SIZE = [3]int{12, 25, 25}
+
 func TestState(t *testing.T) {
-    NETWORK_SIZE := [3]int{12, 25, 25}
-    testingNet := MakeNetwork(NETWORK_SIZE, false)
+    testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)
     testingNet.Connect()
     testingNet.Mirror()
     testingNet.ConnectHemispheres()
@@ -33,9 +34,8 @@ func TestState(t *testing.T) {
 }
 
 func BenchmarkBuildNet(b *testing.B) {
-    NETWORK_SIZE := [3]int{12, 25, 25}
     for i := 0; i < b.N; i++ {
-        testingNet := MakeNetwork(NETWORK_SIZE, false)
+        testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)
         testingNet.Connect()
         testingNet.Mirror()
         testingNet.ConnectHemispheres()
@@ -43,8 +43,7 @@ func BenchmarkBuildNet(b *testing.B) {
 }
 
 func BenchmarkCycleNet(b *testing.B) {
-    NETWORK_SIZE := [3]int{12, 25, 25}
-    testingNet := MakeNetwork(NETWORK_SIZE, false)
+    testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)
     testingNet.Connect()
     testingNet.Mirror()
     testingNet.ConnectHemispheres()
@@ -54,8 +53,7 @@ func BenchmarkCycleNet(b *testing.B) {
 }
 
 func BenchmarkInitialConnectionCount(b *testing.B) {
-    NETWORK_SIZE := [3]int{12, 25, 25}
-    testingNet := MakeNetwork(NETWORK_SIZE, true)
+    testingNet := MakeNetwork(TEST_NETWORK_SIZE, true)
     testingNet.Connect()
     testingNet.Mirror()
     testingNet.ConnectHemispheres()
@@ -66,8 +64,7 @@ func BenchmarkInitialConnectionCount(b *testing.B) {
 }
 
 func BenchmarkCycledConnectionCount(b *testing.B) {
-    NETWORK_SIZE := [3]int{12, 25, 25}
-    testingNet := MakeNetwork(NETWORK_SIZE, true)
+    testingNet := MakeNetwork(TEST_NETWORK_SIZE, true)
     testingNet.Connect()
     testingNet.Mirror()
     testingNet.ConnectHemispheres()
