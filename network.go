@@ -388,7 +388,7 @@ func (net Network) DumpJSON(name string, directory string) {
     f.Close()
 }
 
-func MakeNetwork(dimensions [3]int, blank bool) *Network {
+func MakeNetwork(dimensions [3]int, prime bool) *Network {
     nodes := [][][]*Node{}
     for i := 0; i < dimensions[0]; i++ {
         iDim := [][]*Node{}
@@ -397,7 +397,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
             for k := 0; k < dimensions[2]; k++ {
                 var newValue int
                 var randTest float32
-                if !blank {
+                if prime {
                     randTest = rand.Float32()
                     if randTest < PROB_INITIAL_ON {
                         newValue = 1
