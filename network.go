@@ -67,7 +67,6 @@ func (n *Node) Update() {
 
     if n.Value == 1 {
         n.FiringRate += RATE_INCREASE // should i factor these constants based on the sum
-        // should I have a max firing rate - YES DEFINITELY JESUS CHRIST
         if n.FiringRate > RATE_MAX {
             n.FiringRate = RATE_MAX
         }
@@ -147,7 +146,7 @@ func (net *Network) AddConnections(node *Node) {
                 excitatory = true
             }
             node.OutgoingConnection.To[potNode] = &ConnInfo{
-                Strength: RandFloat(0.25, 0.75),
+                Strength: RandFloat(0.5, 1.0),
                 Excitatory: excitatory,
             }
             potNode.IncomingConnections[node] = node.OutgoingConnection
