@@ -108,9 +108,9 @@ func (net *Network) MakeOutputs(sensorName string, outputCenters [][3]int, r int
             var sum float64
             for node, connInfo := range nodes {
                 if connInfo.Excitatory {
-                    sum += float64(node.Value) * connInfo.Strength
+                    sum += float64(node.Value) * connInfo.Strength * node.FiringRate
                 } else {
-                    sum -= float64(node.Value) * connInfo.Strength
+                    sum -= float64(node.Value) * connInfo.Strength * node.FiringRate
                 }
             }
             return sum
