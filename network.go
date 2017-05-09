@@ -21,6 +21,7 @@ type ConnInfo struct {
 type Connection struct {
     To map[*Node]*ConnInfo  `json:"to"`
     HoldingVal float64      `json:"holding"`
+    // HoldingVal int          `json:"holding"`
     Center [3]int           `json:"center"` // todo - maybe float and then round when generating?
 }
 
@@ -67,9 +68,9 @@ func (n *Node) Update() {
 
     for _, conn := range n.IncomingConnections {
         if conn.To[n].Excitatory {
-            sum = sum + (conn.HoldingVal * conn.To[n].Strength)
+            sum = sum + (float64(conn.HoldingVal) * conn.To[n].Strength)
         } else {
-            sum = sum - (conn.HoldingVal * conn.To[n].Strength)
+            sum = sum - (float64(conn.HoldingVal) * conn.To[n].Strength)
         }
     }
 
@@ -81,7 +82,9 @@ func (n *Node) Update() {
 
     if n.Value == 1 {
         n.FiringRate += FIRING_RATE_INCREASE // should i factor these constants based on the sum
-        // should I have a max firing rate
+        if n.FiringRate > FIRING_RATE_MAX {
+            n.FiringRate = FIRING_RATE_MIN * 0.75
+        }
     } else {
         n.FiringRate -= FIRING_RATE_DECREASE
         if n.FiringRate < FIRING_RATE_MIN {
@@ -155,13 +158,16 @@ func (net *Network) AddConnections(node *Node) {
     }
     for _, potNode := range possibleExtensions {
         _, exists := node.OutgoingConnection.To[potNode]
+        if len(node.OutgoingConnection.To) >= MAX_SYNAPSES {
+            return
+        }
         if potNode.Value != 0 && !exists {
             excitatory := false
             if rand.Intn(INVERSE_INHIBITORY_PROB) != 0 {
                 excitatory = true
             }
             node.OutgoingConnection.To[potNode] = &ConnInfo{
-                Strength: RandFloat(0.25, 0.75),
+                Strength: RandFloat(0.5, 1.0),
                 Excitatory: excitatory,
             }
             potNode.IncomingConnections[node] = node.OutgoingConnection
@@ -193,6 +199,7 @@ func (net *Network) Cycle() {
             net.AddConnections(node)
         }
         node.OutgoingConnection.HoldingVal = float64(node.Value) * node.FiringRate
+        // node.OutgoingConnection.HoldingVal = node.Value
     })    
 
     net.ForEachNode(func(node *Node, pos [3]int) {
@@ -267,7 +274,7 @@ func (net *Network) ConnectHemispheres() {
                 excitatory = true
             }
             toNodes[node] = &ConnInfo{
-                Strength: RandFloat(0.25, 0.75), // magic numbers
+                Strength: RandFloat(0.75, 1.25), // magic numbers
                 Excitatory: excitatory,
             }
         }
@@ -405,7 +412,7 @@ func (net Network) DumpJSON(name string, directory string) {
     f.Close()
 }
 
-func MakeNetwork(dimensions [3]int, blank bool) *Network {
+func MakeNetwork(dimensions [3]int, prime bool) *Network {
     nodes := [][][]*Node{}
     for i := 0; i < dimensions[0]; i++ {
         iDim := [][]*Node{}
@@ -414,7 +421,7 @@ func MakeNetwork(dimensions [3]int, blank bool) *Network {
             for k := 0; k < dimensions[2]; k++ {
                 var newValue int
                 var randTest float32
-                if !blank {
+                if prime {
                     randTest = rand.Float32()
                     if randTest < PROB_INITIAL_ON {
                         newValue = 1
