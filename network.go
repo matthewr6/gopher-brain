@@ -49,6 +49,20 @@ func (c Connection) String() string {
     return string(jsonRep)
 }
 
+type LearningRates struct {
+    MinPossibleConnections int
+    MaxPossibleConnections int
+    SynapseModificationRate float64
+    SynapseProbSphere float64
+}
+
+func SetLearningRates(rates LearningRates) {
+    MIN_CONNECTIONS = rates.MinPossibleConnections
+    MAX_CONNECTIONS = rates.MaxPossibleConnections
+    SYNAPSE_LEARNING_RATE = rates.SynapseModificationRate
+    DYNAMIC_SYNAPSE_PROB_SPHERE = rates.SynapseProbSphere
+}
+
 func (n *Node) Update() {
     sum := 0.0
 
@@ -67,17 +81,19 @@ func (n *Node) Update() {
     }
 
     if n.Value == 1 {
-        n.FiringRate += RATE_INCREASE // should i factor these constants based on the sum
-        if n.FiringRate > RATE_MAX {
-            n.FiringRate = RATE_MIN * 0.75
+        n.FiringRate += FIRING_RATE_INCREASE // should i factor these constants based on the sum
+        if n.FiringRate > FIRING_RATE_MAX {
+            n.FiringRate = FIRING_RATE_MIN * 0.75
         }
     } else {
-        n.FiringRate -= RATE_DECREASE
-        if n.FiringRate < RATE_MIN {
+        n.FiringRate -= FIRING_RATE_DECREASE
+        if n.FiringRate < FIRING_RATE_MIN {
             // should I set this to something lower like 0.75 or something to somehow implement a refactory period
-            n.FiringRate = RATE_MIN
+            n.FiringRate = FIRING_RATE_MIN
         }
     }
+
+    // synapse modification rates
 
     // then, based on whether it fired, prune/strengthen connections
     // magic numbers.
@@ -89,12 +105,12 @@ func (n *Node) Update() {
                     (conn.HoldingVal == 0 && n.Value == 0)
         if together {
             if n.Value == 1 {
-                conn.To[n].Strength += CONN_WEIGHT_INCREASE
+                conn.To[n].Strength += CONN_WEIGHT_INCREASE * SYNAPSE_LEARNING_RATE
             } else {
-                conn.To[n].Strength -= CONN_WEIGHT_DECAY
+                conn.To[n].Strength -= CONN_WEIGHT_DECAY * SYNAPSE_LEARNING_RATE
             }
         } else {
-            conn.To[n].Strength -= CONN_WEIGHT_DECREASE
+            conn.To[n].Strength -= CONN_WEIGHT_DECREASE * SYNAPSE_LEARNING_RATE
         }
 
         if conn.To[n].Strength > MAX_CONN_WEIGHT {
@@ -118,6 +134,7 @@ func RandFloat(min, max float64) float64 {
 func (net *Network) AddConnections(node *Node) {
     center := node.OutgoingConnection.Center
     possibleExtensions := []*Node{}
+    // synapse creation rates
     numPossible := rand.Intn(MIN_CONNECTIONS) + MAX_CONNECTIONS - MIN_CONNECTIONS
     stDev := DYNAMIC_SYNAPSE_PROB_SPHERE
     for i := 0; i < numPossible; i++ {
