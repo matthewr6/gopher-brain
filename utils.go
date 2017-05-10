@@ -61,18 +61,32 @@ func (net *Network) ForEachNode(handler func(*Node, [3]int)) {
     }
 }
 
-func (net *Network) CountConnections() (int, float64) {
+
+// returns (totalConnections, avgStrength, noInputs, noOutputs, isolatedNodes)
+func (net *Network) CountConnections() (int, float64, int, int, int) {
     total := 0
     avgStrength := 0.0
     avgCounter := 0
+    noInputs := 0
+    noOutputs := 0
+    isolated := 0
     net.ForEachNode(func(n *Node, pos [3]int) {
         total += len(n.OutgoingConnection.To)
         for _, info := range n.OutgoingConnection.To {
             avgStrength += info.Strength
             avgCounter += 1
         }
+        if len(n.IncomingConnections) == 0 {
+            noInputs += 1
+        }
+        if len(n.OutgoingConnection.To) == 0 {
+            noOutputs += 1
+        }
+        if (len(n.IncomingConnections) + len(n.OutgoingConnection.To)) == 0 {
+            isolated += 1
+        }
     })
-    return total, avgStrength/float64(avgCounter)
+    return total, avgStrength/float64(avgCounter), noInputs, noOutputs, isolated
 }
 
 func (net *Network) ForEachRightHemisphereNode(handler func(*Node, [3]int)) {
