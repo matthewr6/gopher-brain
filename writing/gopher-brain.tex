@@ -24,9 +24,9 @@
 
 \newpage
 
-\section*{Abstract} \label{abstract}
+\section{Abstract} \label{abstract}
 
-Yet to be written.
+We begin by developing an agent-based pseudo neural network, where each neuron in the network randomly connects to other neurons, influenced by a set of rules.  We discuss the implementation details of this network and then discuss the mathmatical definitions of this network.  In that discussion, an argument is made that this model is different from recurrent neural networks, where, similarly, neurons may feed back into themselves eventually.  We then create inputs and outputs from the network and investigate various information that we can extract from the network, including output values, connection counts, and average connection strengths, all as functions over time.  Finally, we discuss the drawbacks that the network has and potential routes to take for further exploration.
 
 \section{Introduction} \label{intro}
 
@@ -250,10 +250,10 @@ Previous research has explored multidimensional RNNs \cite{dimensionalrnn} (as o
             \path [->] (left) edge[bend right=20] node {} (right);
         \end{scope}
     \end{tikzpicture}
-    \caption{Initial} \label{fig:Initial}
+    \caption{Initial} \label{fig:initial-signal-loop}
 \end{figure}
 
-In Figure 1, in which $w_{ij}$ denotes the strength of the connection between nodes $i$ and $j$, we illustrate a simple system that exemplifies an instance of signal looping.  Nodes $a$ and $d$ are able to signal to each other in such a way that if one of the pair gets a signal, the other may be triggered, causing the initial node to signal again and resulting in a loop that continuously strengthens $w_{ad}$ and $w_{da}$ or, more generally, the weights between the initial and the secondary node. ($w_{ad}$ and $w_{da}$ not pictured due to space constraints)
+In Figure \ref{fig:initial-signal-loop}, in which $w_{ij}$ denotes the strength of the connection between nodes $i$ and $j$, we illustrate a simple system that exemplifies an instance of signal looping.  Nodes $a$ and $d$ are able to signal to each other in such a way that if one of the pair gets a signal, the other may be triggered, causing the initial node to signal again and resulting in a loop that continuously strengthens $w_{ad}$ and $w_{da}$ or, more generally, the weights between the initial and the secondary node. ($w_{ad}$ and $w_{da}$ not pictured due to space constraints)
 
 For instance, we can imagine a scenario in which nodes $i_0$ and $i_1$ are firing, causing nodes $b$, $c$, and by extension, $a$, $d$, and $o$ to fire.  If we consider $o$ an output node, we can view this output from the combination of nodes $i_0$ and $i_1$.  Once those two stimuli cease to fire, however, $a$ can continue firing in a loop with $d$.  In this case, $i_0$ and $i_1$ may not be enough individually to cause $d$ to fire back to $a$, but in combination, their effect pushes $d$ over the threshold.
 
@@ -270,7 +270,7 @@ For instance, we can imagine a scenario in which nodes $i_0$ and $i_1$ are firin
             \path [->] (left) edge[bend right=20] node {} (right);
         \end{scope}
     \end{tikzpicture}
-    \caption{Stuck in a loop} \label{fig:Stuck in a loop}
+    \caption{Stuck in a loop} \label{fig:looping}
 \end{figure}
 
 \begin{figure}[H]
@@ -293,16 +293,16 @@ For instance, we can imagine a scenario in which nodes $i_0$ and $i_1$ are firin
             \path [->] (left) edge[bend right=20] node {} (right);
         \end{scope}
     \end{tikzpicture}
-    \caption{Input} \label{fig:Input}
+    \caption{Input} \label{fig:altered-loop}
 \end{figure}
 
-Then, with this signal looping between neurons, we can cause a signal from either $i_0$ or $i_1$ to generate another output to $o$ (see Figure 3).  In this way, we have created a system which initially requires multiple inputs, yet after reaching a certain number of inputs, requires fewer inputs.  This can be generalized to include subsystems of nodes in place of the individual nodes illustrated, due to the previously described neuron firing definition. (describe more)
+Then, with this signal looping between neurons, we can cause a signal from either $i_0$ or $i_1$ to generate another output to $o$ (see Figure \ref{fig:initial-signal-loop}).  In this way, we have created a system which initially requires multiple inputs, yet after reaching a certain number of inputs, requires fewer inputs.  This can be generalized to include subsystems of nodes in place of the individual nodes illustrated, due to the previously described neuron firing definition. (describe more)
 
 Due to this generalization, we can argue that the network has a sort of "memory" - after receiving a set of inputs, the system may generate the same, or similar, output after receiving one (or part) of the same set of inputs; that is, once the input set $m$ is received and outputs $o$, $m_0$ can be received where $m_0 \subseteq m$ and the subsequent output is $o_0 \simeq o$.  As described previously, this is distinct from RNNs as it can combine distinct inputs.  This concept has previously been explored in a biological setting \cite{synapsememory}.
 
 \subsection{Priming} \label{priming}
 
-We provide a function, callable at any time, that randomizes the values of all nodes, with a 50\% chance of any given node being in an active state.  This randomization, or priming, does not take into account hemisphere symmetry.  However, it is still useful in that we may randomize initially to determine both the interplay of sensor inputs on a chaotic network and the lack of any inputs on a chaotic network.
+We provide a function, callable at any time, that randomizes the values of all nodes, with a 50\% chance of any given node being in an active state.  This randomization, or priming, does take into account hemisphere symmetry, and is useful in that we may randomize initially to determine both the interplay of sensor inputs on a chaotic network and the lack of any inputs on a chaotic network.
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{../visualizations/8knodes_stable_line.png}
@@ -312,7 +312,7 @@ We provide a function, callable at any time, that randomizes the values of all n
 
 This figure illustrates the values of various outputs without any sensory input, over 900 cycles (note that there are two pink lines).  Visually, we can see that the values of the outputs have high fluctuation within the first 100 frames, and then settle into repetitions  between two values.  Although originally chaotic, a stable point is eventually reached with a lack of any input.
 
-The drawback of randomizing the entire network is that it's random - there's no symmetry between hemispheres, much less any order.  We chose to randomize the entire network because we can allow the network to cycle until we feel that the output values have begun looping within a set range.  However, it's possible that we may not need to randomize this in the future if we decide to create numerous sensors, feeding to different areas in the network, allowing for much more input at any given time.
+The drawback of randomizing the entire network is that it's random - there's no order except for the hemisphere symmetry.  We chose to randomize the entire network because we can allow the network to cycle until we feel that the output values have begun looping within a set range.  However, it's possible that we may not need to randomize this in the future if we decide to create numerous sensors, feeding to different areas in the network, allowing for much more input at any given time.
 
 \subsection{Output Values} \label{outputvals}
 
@@ -330,18 +330,18 @@ Between any two nonadjacent cycle spans with the same sensors on, we can see tha
     \centering
     \includegraphics[width=\linewidth]{../visualizations/8knodes_quick_changes.png}
     \caption{Sensor and Output Graph (quick changes)}
-    % \label{fig:unprimed_sensoroutput_quick_graph}
+    \label{fig:unprimed_sensoroutput_quick_graph}
 \end{figure}
 
-In another exploration, we created another network with the same number of sensors and outputs, but we randomized all of the nodes before running any cycles.  In this case, we toggled sensor statuses every 50 cycles.  As illustrated, after the initial fifty cycles, the output values stabilized until a sensor was toggled on or off.  This result mirrors the result in Figure 5.  However, having less time to stabilize between two primary values in any given fifty-cycle chunk resuled in what seems to be more variation.  More rigorous analysis should be done over more generated networks to determine how significant this is.
+In another exploration, we created another network with the same number of sensors and outputs, but we randomized all of the nodes before running any cycles.  In this case, we toggled sensor statuses every 50 cycles.  As illustrated, after the initial fifty cycles, the output values stabilized until a sensor was toggled on or off.  This result mirrors the result in Figure \ref{fig:unprimed_sensoroutput_quick_graph}.  However, having less time to stabilize between two primary values in any given fifty-cycle chunk resuled in what seems to be more variation.  More rigorous analysis should be done over more generated networks to determine how significant this is.
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{../visualizations/8knodes_sensors_lineannotated.png}
     \caption{Randomized (with inputs)}
-    % \label{fig:unprimed_sensoroutput_graph}
+    \label{fig:unprimed_sensoroutput_graph}
 \end{figure}
 
-Another run, we randomized the network, with each space between the dotted lines indicating a set of input values was held constant (only changing at the dotted lines).  We can see that in the first 200 cycles, the output values lessened, until the inputs were initially activated.  This network, being different from the previous network, had less chaotic patterns in the graph.  However, we suspect that the major changes (deviating from the standard cycling) past cycle 200 are primarily due to the propagation of input data, as seen more clearly in Figures 5 and 6.  Once the input data were modified, it appeared as if the average output value also changed as long as the input data then remained constant, regardless of whether inputs were turned on or off.  Note that this change in output values occurred for both inputs that were turned on and inputs that were turned off.
+Another run, we randomized the network, with each space between the dotted lines indicating a set of input values was held constant (only changing at the dotted lines).  We can see that in the first 200 cycles, the output values lessened, until the inputs were initially activated.  This network, being different from the previous network, had less chaotic patterns in the graph.  However, we suspect that the major changes (deviating from the standard cycling) past cycle 200 are primarily due to the propagation of input data, as seen more clearly in Figures \ref{fig:unprimed_sensoroutput_quick_graph} and \ref{fig:unprimed_sensoroutput_graph}.  Once the input data were modified, it appeared as if the average output value also changed as long as the input data then remained constant, regardless of whether inputs were turned on or off.  Note that this change in output values occurred for both inputs that were turned on and inputs that were turned off.
 
 Given these graphs, we may see, purely visually, that sensors do not affect their outputs immediately; there is always a nonzero time between sensor toggling and outputs being changed.  We propose that is it possible to use Granger causality analysis to analyze this behavior, as it has been shown to be successful, in some cases, in neuroscience \cite{neurocausality, netcausality}.  It would then be possible to establish a link between input values and output behavior, especially useful in cases of a primed network where it may not be easy to visually determine when or how sensors affect outputs.
 
@@ -416,40 +416,7 @@ Furthermore, one drawback of the current model is that it has a heavy reliance o
 
 \section{Graphs and Data} \label{graphs}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textheight,angle=270,keepaspectratio]{../visualizations/8knodes_unrandomized.png}
-    \caption{Sensor and Output Graph (not primed)}
-    % \label{fig:unprimed_sensoroutput_graph}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textheight,angle=270,keepaspectratio]{../visualizations/8knodes_quick_changes.png}
-    \caption{Sensor and Output Graph (quick changes)}
-    % \label{fig:unprimed_sensoroutput_quick_graph}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textheight,angle=270,keepaspectratio]{../visualizations/8knodes_stable_line.png}
-    \caption{Randomized (no inputs)}
-    % \label{fig:unprimed_sensoroutput_graph}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textheight,angle=270,keepaspectratio]{../visualizations/8knodes_sensors_lineannotated.png}
-    \caption{Randomized (with inputs)}
-    % \label{fig:unprimed_sensoroutput_graph}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textheight,angle=270,keepaspectratio]{../visualizations/lowrate1000frames.png}
-    \caption{Lowered modification rate}
-    % \label{fig:unprimed_sensoroutput_graph}
-\end{figure}
+Please see the GitHub repository (\url{https://github.com/Firedrake969/gopher-brain/tree/master/visualizations}) for graphs.  Additional data can be generated by using the repository at \url{https://github.com/Firedrake969/brain-socket}.
 
 
 \newpage
