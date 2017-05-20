@@ -373,7 +373,7 @@ Interestingly, these graphs somewhat resemble "brain waves" (e.g. EEG graphs), o
 
 If a loop already exists between $n_0$ and $n_1$, and $i_1$ excites $n_2$, it is entirely possible that the value of the output $o$ remains zero.  However, if $i_0$ inhibits $n_0$ while $i_1$ excites $n_2$, it is also possible that the value of the output $o$ is nonzero.  This would be caused by the inhibition of $n_0$ breaking the loop with $n_1$, causing $n_2$ to lose its inhibitory influence and allowing it to fire when excited.
 
-\subsection{Connections Over Time}
+\subsection{Connections Over Time} \label{connectiongraphs}
 
 In addition to output value graphs, we created graphs of the connection count, average connection strength, and number of "dead" neurons over time (graphing values vs. frame count). We defined the connection count as the sum of the outgoing connections of each node, and the "dead" nodes in three separate ways: no inputs, no outputs, and no inputs or outputs.  Shown below are two sample graphs of connection count and average connection strength over time, along with their graph of output values over time.
 
@@ -391,13 +391,17 @@ In addition to output value graphs, we created graphs of the connection count, a
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{../visualizations/lowrate1000frames.png}
-    % \caption{Learning rate at 0.1, no inputs}
+    \caption{Output values for same network}
     % \label{fig:unprimed_sensoroutput_graph}
 \end{figure}
 
 Visually, we can see that the time at which the counts is maximal is roughly equivalent to the time at which the average connection strength is minimal.  Furthermore, we can see that the output values seem to stabilize, somewhat, after that time time.  This pattern has been observed in multiple other cases, with different "hyperparameters" (e.g. connection modification rate, min \& max connections).  The pattern of connection counts and average strengths even holds true when any pattern of inputs is given, the main difference being how quickly the "spike" in counts is achieved.  For instance, lower modification rates result in a longer time before the maximal connection count and the minimal average connection strength.  Essentially, the graphs of connection counts and connection average strengths could be considered inverses - one rises while the other falls, and vice versa.
 
 This mirrors the proposed general neurodevelopment model by Chalup \cite{neurodev}.  We define the creation of the network (after the method \texttt{brain.Brain()} is called in our Go package) to be "birth" on the timeline.  Then, the patterns of neuron decay and synapse growth/decay follow Chalup's description, transformed based on parameters such as connection modification rate and potential new connection count.
+
+\subsection{Summary} \label{discussion-summary}
+
+Our model, randomly generated and then somewhat randomly modified (both while following certain rules), is reasonably accurate in multiple respects when compared with the brain's low-level functionalities.  For instance, it demonstrates generation of the same types of neural circuits, and has synapse and neuron generation and pruning that mirror hypothesized patterns in biological brains.  This is visually evident from graphs that we created from multiple different networks and multiple parameter sets.  It should also be possible to perform a regression relating connection count maximas/average connection strength minimas to the parameters used.
 
 \subsection{Future Work} \label{future}
 
@@ -437,6 +441,13 @@ Furthermore, one drawback of the current model is that it has a heavy reliance o
     \centering
     \includegraphics[width=\textheight,angle=270,keepaspectratio]{../visualizations/8knodes_sensors_lineannotated.png}
     \caption{Randomized (with inputs)}
+    % \label{fig:unprimed_sensoroutput_graph}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textheight,angle=270,keepaspectratio]{../visualizations/lowrate1000frames.png}
+    \caption{Lowered modification rate}
     % \label{fig:unprimed_sensoroutput_graph}
 \end{figure}
 
