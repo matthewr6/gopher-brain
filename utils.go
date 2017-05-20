@@ -1,11 +1,11 @@
 package brain
 
 import (
-    "strconv"
-    "bufio"
-    "strings"
     "fmt"
     "math"
+    "bufio"
+    "strconv"
+    "strings"
 )
 
 func StrsToInts(strings []string) []int {
