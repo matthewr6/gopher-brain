@@ -33,6 +33,43 @@ func TestState(t *testing.T) {
     }
 }
 
+func TestDoubleHemisphere(t *testing.T) {
+    testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)
+    testingNet.Connect()
+    testingNet.Mirror()
+    testingNet.ConnectHemispheres()
+    for i := 0; i < 100; i++ {
+        testingNet.Cycle()
+    }
+    if len(testingNet.Nodes) != TEST_NETWORK_SIZE[0] * 2 {
+        t.Error("First dimension did not match.")
+    }
+    if len(testingNet.Nodes[0]) != TEST_NETWORK_SIZE[1] {
+        t.Error("Second dimension did not match.")
+    }
+    if len(testingNet.Nodes[0][0]) != TEST_NETWORK_SIZE[2] {
+        t.Error("Third dimension did not match.")
+    }
+}
+
+func TestNonHemisphere(t *testing.T) {
+    testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)
+    testingNet.Connect()
+    testingNet.SetupSingleHemisphere()
+    for i := 0; i < 100; i++ {
+        testingNet.Cycle()
+    }
+    if len(testingNet.Nodes) != TEST_NETWORK_SIZE[0] {
+        t.Error("First dimension did not match.")
+    }
+    if len(testingNet.Nodes[0]) != TEST_NETWORK_SIZE[1] {
+        t.Error("Second dimension did not match.")
+    }
+    if len(testingNet.Nodes[0][0]) != TEST_NETWORK_SIZE[2] {
+        t.Error("Third dimension did not match.")
+    }
+}
+
 func BenchmarkBuildNet(b *testing.B) {
     for i := 0; i < b.N; i++ {
         testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)

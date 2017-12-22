@@ -22,13 +22,17 @@ type SensorConstructor struct {
     InputFunc func([]*Node, map[string]*Output)
 }
 
-func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor, prime bool) *Network {
+func Brain(NETWORK_SIZE [3]int, CONSTRUCTORS []SensorConstructor, symmetric bool, prime bool) *Network {
     rand.Seed(time.Now().UTC().UnixNano())
 
     var myNet = MakeNetwork(NETWORK_SIZE, prime)
     myNet.Connect()
-    myNet.Mirror()
-    myNet.ConnectHemispheres()
+    if symmetric {
+        myNet.Mirror()
+        myNet.ConnectHemispheres()
+    } else {
+        myNet.SetupSingleHemisphere()
+    }
     tracker := make(map[string]bool)
     fmt.Printf("Currently has %v sensors and %v outputs.\n", len(myNet.Sensors), len(myNet.Outputs))
     if len(myNet.Sensors) > 0 {

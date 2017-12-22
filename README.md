@@ -28,9 +28,9 @@ that's three but whatever.
 synapse elimination --> decline in memory/skills?
 
 # stuff that's more important
-![CircleCI status](https://circleci.com/gh/Firedrake969/gopher-brain.svg?style=shield)
+![CircleCI status](https://circleci.com/gh/matthewr6/gopher-brain.svg?style=shield)
 
-[![Join the chat at https://gitter.im/Firedrake969/gopher-brain](https://badges.gitter.im/Firedrake969/gopher-brain.svg)](https://gitter.im/Firedrake969/gopher-brain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/matthewr6/gopher-brain](https://badges.gitter.im/matthewr6/gopher-brain.svg)](https://gitter.im/matthewr6/gopher-brain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ### Latest animation
 (that I've bothered to upload)

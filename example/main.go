@@ -2,7 +2,7 @@ package main
 
 // import ".."
 import (
-    "github.com/firedrake969/gopher-brain"
+    "github.com/matthewr6/gopher-brain"
 
     "os"
     "fmt"

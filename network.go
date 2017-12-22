@@ -286,6 +286,14 @@ func (net *Network) ConnectHemispheres() {
     })
 }
 
+func (net *Network) SetupSingleHemisphere() {
+    net.Nodes = net.RightHemisphere
+    net.ForEachNode(func(node *Node, pos [3]int) {
+        node.Position = pos
+        node.Id = fmt.Sprintf("%v|%v|%v", pos[0], pos[1], pos[2])
+    })
+}
+
 func (net *Network) Mirror() {
     leftHemisphere := [][][]*Node{}
     for i := len(net.RightHemisphere)-1; i >= 0; i-- {
