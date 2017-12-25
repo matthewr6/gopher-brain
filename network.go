@@ -137,17 +137,18 @@ func (net *Network) AddConnections(node *Node) {
     // synapse creation rates
     numPossible := rand.Intn(MIN_CONNECTIONS) + MAX_CONNECTIONS - MIN_CONNECTIONS
     stDev := DYNAMIC_SYNAPSE_PROB_SPHERE
+    skew := DYNAMIC_SYNAPSE_PROB_SPHERE
     for i := 0; i < numPossible; i++ {
         potCenter := node.Position
         for potCenter == node.Position {
             potX := int(rand.NormFloat64() * stDev) + center[0]
-            potY := int(rand.NormFloat64() * stDev) + center[1]
+            potY := int(randSkew(skew, stDev)) + center[1]
             potZ := int(rand.NormFloat64() * stDev) + center[2]
             for potX < 0 || potX >= (net.Dimensions[0] * 2) {
-                potX = int(rand.NormFloat64() * stDev) + center[0]
+                potX = int(rand.NormFloat64() * stDev)  + center[0]
             }
             for potY < 0 || potY >= net.Dimensions[1] {
-                potY = int(rand.NormFloat64() * stDev) + center[1]
+                potY = int(randSkew(skew, stDev)) + center[1]
             }
             for potZ < 0 || potZ >= net.Dimensions[2] {
                 potZ = int(rand.NormFloat64() * stDev) + center[2]
@@ -252,12 +253,13 @@ func (net *Network) ConnectHemispheres() {
             centralConnNode,
         }
         stDev := DYNAMIC_SYNAPSE_PROB_SPHERE
+        skew := DYNAMIC_SYNAPSE_PROB_SPHERE
         for i := 0; i < numAxonTerminals; i++ {
             potPos := [3]int{-1, -1, -1}
             for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0]*2 || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
                 potPos = [3]int{
                     int(rand.NormFloat64() * stDev) + centralConnNode.Position[0],
-                    int(rand.NormFloat64() * stDev) + centralConnNode.Position[1],
+                    int(randSkew(skew, stDev)) + centralConnNode.Position[1],
                     int(rand.NormFloat64() * stDev) + centralConnNode.Position[2],
                 }
             }
@@ -374,16 +376,17 @@ func (net *Network) Connect() {
 
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
         stDev := AXON_PROB_SPHERE
+        skew := AXON_PROB_SPHERE
         center := node.Position
         for center == node.Position {
             potX := int(rand.NormFloat64() * stDev) + node.Position[0]
-            potY := int(rand.NormFloat64() * stDev) + node.Position[1]
+            potY := int(randSkew(skew, stDev)) + node.Position[1]
             potZ := int(rand.NormFloat64() * stDev) + node.Position[2]
             for potX < 0 || potX >= net.Dimensions[0] {
-                potX = int(rand.NormFloat64() * stDev) + node.Position[0]
+                potX = int(rand.NormFloat64() * stDev)  + node.Position[0]
             }
             for potY < 0 || potY >= net.Dimensions[1] {
-                potY = int(rand.NormFloat64() * stDev) + node.Position[1]
+                potY = int(randSkew(skew, stDev)) + node.Position[1]
             }
             for potZ < 0 || potZ >= net.Dimensions[2] {
                 potZ = int(rand.NormFloat64() * stDev) + node.Position[2]

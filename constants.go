@@ -29,3 +29,7 @@ const FIRING_RATE_MAX = 1.5
 var MIN_CONNECTIONS = 5
 var MAX_CONNECTIONS = 10
 var SYNAPSE_LEARNING_RATE = 1.0
+var AXON_SKEW = 0.75
+var DYNAMIC_SYNAPSE_SKEW = 0.5
+
+// only in y direction - going "back"

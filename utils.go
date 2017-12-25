@@ -6,7 +6,21 @@ import (
     "bufio"
     "strconv"
     "strings"
+    "math/rand"
 )
+
+// skew > 0 shifts positive, skew = 0 is normal.
+func randSkew(skew float64, stdev float64) float64 {
+    sigma := skew / math.Sqrt(1.0 + math.Pow(skew, 2.0))
+    u0 := rand.NormFloat64()
+    v := rand.NormFloat64()
+    variance := math.Pow(sigma, 2)
+    u1 := ((sigma*u0) + (v*math.Sqrt(1.0 - variance))) * stdev
+    if u0 < 0 {
+        u1 *= -1.0
+    }
+    return u1
+}
 
 func StrsToInts(strings []string) []int {
     retval := []int{}
