@@ -97,7 +97,6 @@ func BenchmarkInitialConnectionCount(b *testing.B) {
     for i := 0; i < b.N; i++ {
         testingNet.CountConnections()
     }
-    fmt.Println(testingNet.CountConnections())
 }
 
 func BenchmarkCycledConnectionCount(b *testing.B) {
@@ -111,5 +110,4 @@ func BenchmarkCycledConnectionCount(b *testing.B) {
     for i := 0; i < b.N; i++ {
         testingNet.CountConnections()
     }
-    fmt.Println(testingNet.CountConnections())
 }

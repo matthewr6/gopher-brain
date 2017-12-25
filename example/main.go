@@ -16,13 +16,13 @@ var directory = ""
 func main() {
     reader := bufio.NewReader(os.Stdin)
 
-    myNet := brain.Brain([3]int{12, 25, 25}, []brain.SensorConstructor{
+    myNet := brain.Brain([3]int{12, 12, 12}, []brain.SensorConstructor{
         brain.SensorConstructor{
             Name:"eye",
             R: 1,
             Count: 9,
             Plane: "y",
-            Center: [3]int{8, 0, 12},
+            Center: [3]int{0, 0, 0},
             OutputCount: 2,
             InputFunc: func(nodes []*brain.Node, influences map[string]*brain.Output) {
                 for _, node := range nodes {
