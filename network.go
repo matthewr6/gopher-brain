@@ -63,6 +63,11 @@ func SetLearningRates(rates LearningRates) {
     DYNAMIC_SYNAPSE_PROB_SPHERE = rates.SynapseProbSphere
 }
 
+func SetSkews(axonSkew float64, minorSkew float64) {
+    AXON_SKEW = axonSkew
+    DYNAMIC_SYNAPSE_SKEW = minorSkew
+}
+
 func (n *Node) Update() {
     sum := 0.0
 
