@@ -137,7 +137,7 @@ func (net *Network) AddConnections(node *Node) {
     // synapse creation rates
     numPossible := rand.Intn(MIN_CONNECTIONS) + MAX_CONNECTIONS - MIN_CONNECTIONS
     stDev := DYNAMIC_SYNAPSE_PROB_SPHERE
-    skew := DYNAMIC_SYNAPSE_PROB_SPHERE
+    skew := DYNAMIC_SYNAPSE_SKEW
     for i := 0; i < numPossible; i++ {
         potCenter := node.Position
         for potCenter == node.Position {
@@ -253,7 +253,7 @@ func (net *Network) ConnectHemispheres() {
             centralConnNode,
         }
         stDev := DYNAMIC_SYNAPSE_PROB_SPHERE
-        skew := DYNAMIC_SYNAPSE_PROB_SPHERE
+        skew := DYNAMIC_SYNAPSE_SKEW
         for i := 0; i < numAxonTerminals; i++ {
             potPos := [3]int{-1, -1, -1}
             for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0]*2 || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
@@ -376,7 +376,7 @@ func (net *Network) Connect() {
 
     net.ForEachRightHemisphereNode(func(node *Node, pos [3]int) {
         stDev := AXON_PROB_SPHERE
-        skew := AXON_PROB_SPHERE
+        skew := AXON_SKEW
         center := node.Position
         for center == node.Position {
             potX := int(rand.NormFloat64() * stDev) + node.Position[0]
