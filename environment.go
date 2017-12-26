@@ -53,7 +53,7 @@ func (net *Network) RemoveOutput(name string) {
     delete(net.Outputs, name)
 }
 
-func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, outputCount int, inputFunc func([]*Node, map[string]*Output)) [2]*Sensor {
+func (net *Network) CreateSensor(name string, r int, count int, plane string, center [3]int, outputCount int, inputFunc func([]*Node, map[string]*Output)) {
     secondCenter := center
     secondCenter[0] = (net.Dimensions[0]*2) - center[0] - 1
     outputCenters := [][3]int{}
@@ -64,9 +64,12 @@ func (net *Network) CreateSensor(name string, r int, count int, plane string, ce
             rand.Intn(net.Dimensions[2]),
         })
     }
-    a := net.CreateIndividualSensor(fmt.Sprintf("%v-one", name), r, count, plane, center, true, outputCenters, inputFunc)
-    b := net.CreateIndividualSensor(fmt.Sprintf("%v-two", name), r, count, plane, secondCenter, false, outputCenters, inputFunc)
-    return [2]*Sensor{a, b}
+    if net.Hemispheres {
+        net.CreateIndividualSensor(fmt.Sprintf("%v-one", name), r, count, plane, center, true, outputCenters, inputFunc)
+        net.CreateIndividualSensor(fmt.Sprintf("%v-two", name), r, count, plane, secondCenter, false, outputCenters, inputFunc)
+    } else {
+        net.CreateIndividualSensor(name, r, count, plane, center, false, outputCenters, inputFunc)
+    }
 }
 
 func (net *Network) UpdateSensor(name string, inputFunc func([]*Node, map[string]*Output)) [2]*Sensor {

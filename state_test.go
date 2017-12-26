@@ -5,7 +5,7 @@ import (
     "testing"
 )
 
-var TEST_NETWORK_SIZE = [3]int{12, 25, 25}
+var TEST_NETWORK_SIZE = [3]int{12, 12, 12}
 
 func TestState(t *testing.T) {
     testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)
@@ -26,6 +26,32 @@ func TestState(t *testing.T) {
 
     testingNet.SaveState("test", ".")
     loadedNet := LoadState("test", ".")
+    fmt.Println("Finished loading state.")
+    same := Test(testingNet, loadedNet)
+    if !same {
+        t.Error("Loaded state did not match original state.")
+    }
+}
+
+func TestSingleHemisphereState(t *testing.T) {
+    testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)
+    testingNet.Connect()
+    testingNet.SetupSingleHemisphere()
+    testingNet.ConnectHemispheres() // need to rename this.
+
+    testingNet.CreateSensor("eye", 1, 9, "y", [3]int{0, 0, 0}, 2, func(nodes []*Node, influences map[string]*Output) {
+        for _, node := range nodes {
+            node.Value = 1
+        }
+    })
+
+    // this is to make sure adding/removing connections works
+    for i := 0; i < 100; i++ {
+        testingNet.Cycle()
+    }
+
+    testingNet.SaveState("test_single_hemisphere", ".")
+    loadedNet := LoadState("test_single_hemisphere", ".")
     fmt.Println("Finished loading state.")
     same := Test(testingNet, loadedNet)
     if !same {
@@ -55,7 +81,7 @@ func TestDoubleHemisphere(t *testing.T) {
 func TestNonHemisphere(t *testing.T) {
     testingNet := MakeNetwork(TEST_NETWORK_SIZE, false)
     testingNet.Connect()
-    testingNet.SetupSingleHemisphere()
+    testingNet.SetupSingleHemisphere() // potentially just connecthemispheres after?
     for i := 0; i < 100; i++ {
         testingNet.Cycle()
     }

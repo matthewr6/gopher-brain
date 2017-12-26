@@ -19,6 +19,7 @@ type DisplayNetwork struct {
     Sensors map[string]*DisplaySensor   `json:"sensors"`
     Outputs map[string]*DisplayOutput   `json:"outputs"`
     Frames int                          `json:"frames"`
+    Hemispheres bool                    `json:"hemispheres"`
 }
 
 type DisplayNode struct {
@@ -81,8 +82,13 @@ func LoadState(name string, directory string) *Network {
         Sensors: make(map[string]*Sensor),
         Outputs: make(map[string]*Output),
         Frames: importedNet.Frames,
+        Hemispheres: importedNet.Hemispheres,
     }
-    for i := 0; i < (net.Dimensions[0]*2); i++ {
+    maxX := net.Dimensions[0]
+    if net.Hemispheres {
+        maxX = maxX * 2
+    }
+    for i := 0; i < maxX; i++ {
         iDim := [][]*Node{}
         for j := 0; j < net.Dimensions[1]; j++ {
             jDim := []*Node{}
@@ -174,8 +180,13 @@ func (net Network) SaveState(name string, directory string) {
         Outputs: make(map[string]*DisplayOutput),
         Dimensions: net.Dimensions,
         Frames: net.Frames,
+        Hemispheres: net.Hemispheres,
     }
-    for i := 0; i < (net.Dimensions[0]*2); i++ {
+    maxX := net.Dimensions[0]
+    if net.Hemispheres {
+        maxX = maxX * 2
+    }
+    for i := 0; i < maxX; i++ {
         iDim := [][]*DisplayNode{}
         for j := 0; j < net.Dimensions[1]; j++ {
             jDim := []*DisplayNode{}

@@ -36,6 +36,7 @@ type Node struct {
 
 type Network struct {
     Nodes [][][]*Node             `json:"nodes"`
+    Hemispheres bool              `json:"-"`
     LeftHemisphere [][][]*Node    `json:"-"`
     RightHemisphere [][][]*Node   `json:"-"`
     Dimensions [3]int             `json:"-"`
@@ -149,7 +150,11 @@ func (net *Network) AddConnections(node *Node) {
             potX := int(rand.NormFloat64() * stDev) + center[0]
             potY := int(randSkew(skew, stDev)) + center[1]
             potZ := int(rand.NormFloat64() * stDev) + center[2]
-            for potX < 0 || potX >= (net.Dimensions[0] * 2) {
+            maxX := net.Dimensions[0]
+            if net.Hemispheres {
+                maxX = maxX * 2
+            }
+            for potX < 0 || potX >= maxX {                
                 potX = int(rand.NormFloat64() * stDev)  + center[0]
             }
             for potY < 0 || potY >= net.Dimensions[1] {
@@ -261,7 +266,11 @@ func (net *Network) ConnectHemispheres() {
         skew := DYNAMIC_SYNAPSE_SKEW
         for i := 0; i < numAxonTerminals; i++ {
             potPos := [3]int{-1, -1, -1}
-            for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= net.Dimensions[0]*2 || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
+            maxX := net.Dimensions[0]
+            if net.Hemispheres {
+                maxX = maxX * 2
+            }
+            for potPos[0] < 0 || potPos[1] < 0 || potPos[2] < 0 || potPos[0] >= maxX || potPos[1] >= net.Dimensions[1] || potPos[2] >= net.Dimensions[2] {
                 potPos = [3]int{
                     int(rand.NormFloat64() * stDev) + centralConnNode.Position[0],
                     int(randSkew(skew, stDev)) + centralConnNode.Position[1],
@@ -299,6 +308,7 @@ func (net *Network) SetupSingleHemisphere() {
         node.Position = pos
         node.Id = fmt.Sprintf("%v|%v|%v", pos[0], pos[1], pos[2])
     })
+    net.Hemispheres = false
 }
 
 func (net *Network) Mirror() {
@@ -335,6 +345,7 @@ func (net *Network) Mirror() {
         node.Position = pos
         node.Id = fmt.Sprintf("%v|%v|%v", pos[0], pos[1], pos[2])
     })
+    net.Hemispheres = true
 }
 
 func SumCenterVectors(centers [][3]int, node Node) [3]int {
