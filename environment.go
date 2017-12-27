@@ -133,6 +133,10 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
         Center: center,
     }
     stDev := float64(r)
+    maxX := net.Dimensions[0]
+    if net.Hemispheres {
+        maxX = maxX * 2
+    }
     if (plane != "") {
         if (plane == "x" || plane == "y" || plane == "z") {
             stDev = float64(r * 2)
@@ -155,7 +159,7 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
             for len(sensor.Nodes) < count {
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potZ := int(rand.NormFloat64() * stDev) + center[2]
-                if potX > 0 && potZ > 0 && potX < net.Dimensions[0]*2 && potZ < net.Dimensions[2] {
+                if potX > 0 && potZ > 0 && potX < maxX && potZ < net.Dimensions[2] {
                     potNode := net.FindNode([3]int{potX, potY, potZ})
                     if !NodeExistsIn(potNode, sensor.Nodes) {
                         sensor.Nodes = append(sensor.Nodes, potNode)
@@ -168,7 +172,7 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
             for len(sensor.Nodes) < count {
                 potX := int(rand.NormFloat64() * stDev) + center[0]
                 potY := int(rand.NormFloat64() * stDev) + center[1]
-                if potX > 0 && potY > 0 && potX < net.Dimensions[0]*2 && potY < net.Dimensions[1] {
+                if potX > 0 && potY > 0 && potX < maxX && potY < net.Dimensions[1] {
                     potNode := net.FindNode([3]int{potX, potY, potZ})
                     if !NodeExistsIn(potNode, sensor.Nodes) {
                         sensor.Nodes = append(sensor.Nodes, potNode)
@@ -181,7 +185,7 @@ func (net *Network) CreateIndividualSensor(name string, r int, count int, plane 
             potX := int(rand.NormFloat64() * stDev) + center[0]
             potY := int(rand.NormFloat64() * stDev) + center[1]
             potZ := int(rand.NormFloat64() * stDev) + center[2]
-            if potX >= 0 && potY >= 0 && potZ >= 0 && potX < (net.Dimensions[0]*2) && potY < net.Dimensions[1] && potZ < net.Dimensions[2] {
+            if potX >= 0 && potY >= 0 && potZ >= 0 && potX < maxX && potY < net.Dimensions[1] && potZ < net.Dimensions[2] {
                 potNode := net.FindNode([3]int{potX, potY, potZ})
                 if !NodeExistsIn(potNode, sensor.Nodes) {
                     sensor.Nodes = append(sensor.Nodes, potNode)
